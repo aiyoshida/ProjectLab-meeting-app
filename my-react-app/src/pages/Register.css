@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
+
+
+body{
+     textAlign: center;
+     marginTop: 40px
+}
+.brand-name{
+     font-family: italiana;
+}
+
+.icon{
+     width:40px;
+}
+
+.brand-row{
+     /*こうやって2つのものをまとめる*/
+     display:flex; 
+     align-items: center;
+}

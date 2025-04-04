@@ -1,0 +1,21 @@
+/* src/pages/Settings.css */
+@import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
+
+body{
+     textAlign: center;
+     marginTop: 40px
+}
+
+.brand-row{
+     display:flex;
+     align-items: center;
+}
+
+   .settings-brand {
+     font-family: Italiana;
+   }
+   
+   .icon{
+     width:40px
+   }
+   

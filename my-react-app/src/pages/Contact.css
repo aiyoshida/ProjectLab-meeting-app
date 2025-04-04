@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
+
+.brand{
+     font-family: Italiana;
+     font-size: 20px;
+}
+
+.plus{
+     width:30px;
+}
+
+.setting{
+     width:30px;
+}
