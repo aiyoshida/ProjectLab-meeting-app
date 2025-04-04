@@ -2,6 +2,37 @@
 .left-sidebar{
      width:300px;
      height: 100vh;
-     background-color: bisque;
-     
+     background-color: whitesmoke;
+     padding: 30px;
+     position: fixed;
+     left: 0;
+     top:0;              /* 中身をflexレイアウトにする */
+     flex-direction: column;      /* 子要素を縦に並べる（ロゴ→メニュー） */
+     padding: 24px;               /* 中身の余白を全体に24px追加 */
+     box-sizing: border-box;      /* paddingやborderを含めて width/height を制御 */
+     border-right: 1px solid #eee;
+}
+
+.menu{
+     display:flex;
+     flex-direction: column;
+     gap :50px;
+}
+.brand-row{
+     display:flex;
+     flex-direction: row;
+     gap : 5px;
+
+}
+
+.menu-item{
+     display:flex;
+     flex-direction: row;
+     align-items:center;
+     gap: 15px;
+}
+
+.menu-icon{
+     width:20px;
+     height:20px;
 }

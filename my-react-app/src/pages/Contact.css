@@ -1,14 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
+.title{
+     margin: 40px;
+}
+
 .brand{
      font-family: Italiana;
      font-size: 20px;
 }
 
-.plus{
-     width:30px;
-}
 
 .setting{
-     width:30px;
+     width:20px;
 }
+.search{
+     margin: 40px;
+}
+
+.contact-row{
+     display: flex;
+     flex-direction: row;
+     gap :100px;
+     padding: 15px;
+     background-color: #fdf6fb;
+     border-radius: 8px;
+}
+

@@ -1,9 +1,25 @@
-
+import LeftSidebar from "../components/LeftSidebar";
+import NavSetting from '../components/NavSetting';
+import MeetingCard from "../components/MeetingCard";
+import './Homepage.css';
 
 function Homepage(){
      return(
           <div>
-               <h1>homepage</h1>
+               <LeftSidebar />
+               <NavSetting/>
+
+               <div className="contact">
+               <h2>Meeting List</h2>
+               <div className="card-grid">
+                    <MeetingCard/>
+                    <MeetingCard/>
+                    <MeetingCard/>
+                    <MeetingCard/>
+               </div>
+               </div>
+
+     
           </div>
      );
 
