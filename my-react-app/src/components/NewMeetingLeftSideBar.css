@@ -1,0 +1,44 @@
+
+.left-sidebar{
+     width:300px;
+     height: 100vh;
+     background-color: white;
+     padding: 30px;
+     position: fixed;
+     left: 0;
+     top:0;              /* 中身をflexレイアウトにする */
+     flex-direction: column;      /* 子要素を縦に並べる（ロゴ→メニュー） */
+     padding: 24px;               /* 中身の余白を全体に24px追加 */
+     box-sizing: border-box;      /* paddingやborderを含めて width/height を制御 */
+     border-right: 1px solid #eee;
+}
+
+.menu{
+     display:flex;
+     flex-direction: column;
+     gap :50px;
+}
+.brand-row{
+     width: 50%;
+     margin-right: auto;
+     margin-left: auto;
+
+}
+
+.section {
+     margin-bottom: 24px;
+   }
+
+   .readonly-box {
+     padding: 10px 12px;
+     background-color: #fff;
+     border: 1px solid #ccc;
+     border-radius: 6px;
+     color: #333;
+     font-size: 14px;
+   }
+
+
+.invitees {
+     margin-top: 12px;
+   }
