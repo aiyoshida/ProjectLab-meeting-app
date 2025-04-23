@@ -13,9 +13,16 @@
   flex-direction: row;
 }
 
-   .settings-brand {
+.settings-brand {
      font-family: Italiana;
-   }
+}
+
+.search{
+  width: 200px;
+  padding: 10px;
+  border-radius:20px;
+  border-color: grey;
+}
 
    .settings-label{
     padding:20px;

@@ -1,8 +1,14 @@
 import './Setting.css';
 import icon from '../images/icon.png';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Setting() {
+     const navigate = useNavigate();
+     const goToHomePage =()=>{
+          navigate('/homepage');
+ }
+
      return (
           <div>
                <div className="brand-row">
@@ -25,7 +31,7 @@ export default function Setting() {
                               </select>
                          </label>
 
-                         <button type="submit" className="settings-button">Change</button>
+                         <button type="submit" className="settings-button" onClick={goToHomePage}>Change</button>
                     </form>
                </div>
 

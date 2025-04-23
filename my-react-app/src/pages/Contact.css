@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
+.contact{
+     position: fixed;
+     left:300px;
+     margin-left: 20px;
+}
+
 .title{
      margin: 40px;
 }

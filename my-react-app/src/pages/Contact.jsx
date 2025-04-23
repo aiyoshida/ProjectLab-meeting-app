@@ -5,6 +5,12 @@ import MeetingCard from '../components/MeetingCard';
 import {useState} from 'react';
 
 
+const mockData =[
+     {id:1, name:'Katreen', email:'example1@gmail.com'},
+     {id:2, name:'Tariq', email:'example2@gmail.com'},
+     {id:3, name:'Ramiz', email:'example3@gmail.com'},
+];
+
 function Contact(){
      return(
           <div>
