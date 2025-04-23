@@ -1,0 +1,8 @@
+.othertimezone-container{
+     background-color:aquamarine;
+     position: fixed;
+     top: 0;
+     left: 300px;
+     width: 300px;
+     height: 100vh;
+}

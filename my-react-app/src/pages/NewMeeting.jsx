@@ -1,11 +1,15 @@
-
+import React from "react";
+import './NewMeeting.css';
 import NewMeetingLeftSideBar from '../components/NewMeetingLeftSideBar';
+import NewMeetingOthersTime from '../components/NewMeetingOthersTime';
+import NewMeetingCalendar from '../components/NewMeetingCalendar';
 
 function NewMeeting(){
      return(
-          <div>
+          <div className="main-wrapper">
                 <NewMeetingLeftSideBar/>
-               <h1>New Meeting</h1>
+                <NewMeetingOthersTime/>
+                <NewMeetingCalendar/>
           </div>
      );
 }

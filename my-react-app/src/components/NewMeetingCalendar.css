@@ -1,0 +1,9 @@
+.calendar-container{
+     left: 600px;
+     position: fixed;
+     top: 0;
+     width: 850px;
+     height: 100vh;
+     background-color: white;
+     border-left: 2px solid grey;
+}

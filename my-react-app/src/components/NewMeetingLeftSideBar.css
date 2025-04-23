@@ -1,15 +1,13 @@
 
 .left-sidebar{
-     width:300px;
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 300px;
      height: 100vh;
      background-color: white;
-     padding: 30px;
-     position: fixed;
-     left: 0;
-     top:0;              /* 中身をflexレイアウトにする */
-     flex-direction: column;      /* 子要素を縦に並べる（ロゴ→メニュー） */
-     padding: 24px;               /* 中身の余白を全体に24px追加 */
-     box-sizing: border-box;      /* paddingやborderを含めて width/height を制御 */
+     /* 中身の余白を全体に24px追加 */
+     /*box-sizing: border-box;      /* paddingやborderを含めて width/height を制御 */
      border-right: 1px solid #eee;
 }
 

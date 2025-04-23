@@ -1,9 +1,6 @@
 import React from "react";
 import './NewMeetingLeftSideBar.css';
 import icon from '../images/icon.png';
-import plus from '../images/plus.svg'
-import home from '../images/home.svg'
-import contact from '../images/contact.svg'
 
 const mockInvitees = [
      { name: "Katreen", email: "example@gmail.com" },
