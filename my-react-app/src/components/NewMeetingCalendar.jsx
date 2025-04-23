@@ -5,7 +5,6 @@ export default function NewMeetingCalendar(){
 
      return(
           <div className="calendar-container">
-               waaaaaaa
 
           </div>
      );
