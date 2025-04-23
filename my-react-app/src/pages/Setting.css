@@ -1,23 +1,31 @@
 /* src/pages/Settings.css */
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
-body{
-  display: flex;
-  align-items: center;
-  flex-direction: column;  
-
-}
 
 .brand-row{
      display:flex;
-     flex-direction: column;
-     align-items: center;
+     flex-direction: column !important;
      gap:40px;
 
+}
+.settings-header{
+  display: flex;
+  flex-direction: row;
 }
 
    .settings-brand {
      font-family: Italiana;
+   }
+
+   .settings-label{
+    padding:20px;
+   }
+
+   .settings-input{
+    margin-left:20px;
+   }
+   .settings-select{
+    margin-left:20px;
    }
 
    .settings-form{
@@ -27,6 +35,19 @@ body{
    }
    
    .icon{
-     width:40px
+    padding-top: 20px;
+     width:40px;
+     height:40px;
+   }
+
+   .settings-button{
+    width:fit-content;
+    margin-left:100px;
    }
    
+   .settings-close{
+    margin-left:20px;
+    margin-top:20px;
+    width:40px;
+    height:40px;
+   }
