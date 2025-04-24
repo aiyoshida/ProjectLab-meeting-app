@@ -14,7 +14,7 @@ export default function Register(){
           <div>
                 <div>
                   <div className="brand-row">
-                    <img src={icon} alt="icon" className="icon"/>
+                    <img src={icon} alt="icon" className="register-icon"/>
                     <h1 className="brand-name">AcrossTime</h1>
                   </div>
                   <h2>Create an account</h2>

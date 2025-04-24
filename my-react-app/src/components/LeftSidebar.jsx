@@ -20,27 +20,27 @@ export default function LeftSidebar() {
 
      return(
                <div className="left-sidebar">
-                    <div className="brand-row">
-                         <img src={icon} alt='icon' className="icon"/>
-                         <h3 className="brand">AcrossTime</h3>
+                    <div className="leftside-brand-row">
+                         <img src={icon} alt='icon' className="leftside-icon"/>
+                         <h3 className="leftside-brand">AcrossTime</h3>
                     </div>
                
                     <div className="menu">
                          <div className = "menu-item">
-                         <button onClick={goToNewMeeting}>
+                         <button className="select-button" onClick={goToNewMeeting}>
                               <img src={plus} alt="plus" className="menu-icon"/>
                               Create</button>
                          </div>
 
                          <div className = "menu-item">
-                         <button onClick={goToHomePage}>
+                         <button className="select-button" onClick={goToHomePage}>
                               <img src={home} alt="plus" className="menu-icon"/>
                               Home</button>
                          </div>
 
                          <div className = "menu-item">
 
-                         <button onClick={goToContact}>
+                         <button className="select-button" onClick={goToContact}>
                               <img src={contact} alt="plus" className="menu-icon"/>
                               Contact
 

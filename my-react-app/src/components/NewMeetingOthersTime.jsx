@@ -17,17 +17,17 @@ export default function NewMeetingOthersTime() {
 
      return(
           <div className="othertimezone-container">
-          <div className="header-row">
+          <div className="othertimezone-header-row">
                {othertimezone.map((tz) =>(
-                    <div key={tz.zone} className="head-item"> {tz.label}</div>
+                    <div key={tz.zone} className="othertimezone-head-item"> {tz.label}</div>
                ))}
           </div>
 
           <div>
                {basetime.map((slot,idx)=>(
-                    <div className="time-row" key={idx}>
+                    <div className="othertimezone-time-row" key={idx}>
                          {othertimezone.map((tz)=>(
-                          <div key={tz.zone} className="time-item">
+                          <div key={tz.zone} className="othertimezone-time-item">
                          {slot.setZone(tz.zone).toFormat("H:mm")}
                          </div>
                          ))}

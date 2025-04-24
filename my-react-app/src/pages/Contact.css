@@ -1,34 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
-.contact{
+.contact-container{
      position: fixed;
      left:300px;
-     margin-left: 20px;
+     padding-left: 100px;
+     background-color: #fdeff2;
+     height: 100vh;
+     width:100%;
+     top:0px;
 }
 
-.title{
-     margin: 40px;
+.contact-container-title{
+     font-size: 40px;
 }
 
-.brand{
+.contact-container-brand{
      font-family: Italiana;
      font-size: 20px;
 }
 
 
-.setting{
-     width:20px;
-}
-.search{
-     margin: 40px;
+.contact-container-search{
+     padding: 10px;
+     margin-bottom: 30px;
+     border-radius: 10px;
+     border: 1px solid grey;
+     width: 300px;
 }
 
-.contact-row{
+.contact-container-contact-row{
      display: flex;
      flex-direction: row;
      gap :100px;
      padding: 15px;
      background-color: #fdf6fb;
-     border-radius: 8px;
+     width: 700px;
 }
 

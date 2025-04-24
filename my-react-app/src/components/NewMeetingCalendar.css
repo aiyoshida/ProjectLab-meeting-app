@@ -1,9 +1,36 @@
 .calendar-container{
-     left: 500px;
      position: fixed;
-     top: 0;
-     width: 850px;
+     left: 480px;
      height: 100vh;
+     width: 945px;
+     top: 0px;
+}
+
+.calendar-container-sharebutton{
+     background-color: black;
+     color: white;
+     padding: 8px;
+     width: 80px;
+     border-radius: 8px;
+     font-size: 15px;
+     position:fixed;
+     right:10px;
+     bottom:5px;
+}
+
+.calendar-container-sharebutton:hover{
+     background-color: #494a41;
+}
+.calendar-container-close{
+     position:fixed;
+     top:20px;
+     right:40px;
+     width:40px;
+     height: 40px;
+     font-size: 30px;
      background-color: white;
-     border-left: 2px solid grey;
+     border:none;
+}
+.calendar-container-close:hover{
+     color:grey;
 }
