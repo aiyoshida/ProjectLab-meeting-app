@@ -3,8 +3,9 @@
      position: fixed;
      top: 0;
      left: 280px;
-     width: 200px;
+     width: 190px;
      height: 100vh;
+
 }
 
 .othertimezone-header-row{
@@ -14,7 +15,12 @@
      justify-items: center;
      padding-left: 20px;
      gap :40px;
-     margin-top: 90px;
+     margin-top: 45px;
+     padding-top: 13px;
+     padding-bottom: 13px;
+     border-top-left-radius: 20px;
+     border-top-right-radius: 20px;
+
 }
 
 .othertimezone-time-row{
@@ -23,9 +29,10 @@
      flex-direction: row;
      gap: 50px;
      justify-items: center;
-     padding-top: 25px;
+     padding-top: 0px;
      padding-left: 20px;
      margin-bottom: 0px;
-     padding-bottom: 0px;
+     padding-bottom: 25px;
+     border-top: 1px solid #ddd;
 }
 

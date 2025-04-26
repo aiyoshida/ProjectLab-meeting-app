@@ -5,8 +5,6 @@
      width: 280px;
      height: 100vh;
      background-color: white;
-     /* 中身の余白を全体に24px追加 */
-     /*box-sizing: border-box;      /* paddingやborderを含めて width/height を制御 */
      padding: 30px;
      display: flex;
      flex-direction: column;

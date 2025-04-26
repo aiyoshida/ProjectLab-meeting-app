@@ -51,6 +51,9 @@
     width:fit-content;
     margin-left:100px;
    }
+   .settings-button:hover{
+    cursor:pointer;
+   }
    
    .settings-close{
     margin-left:20px;

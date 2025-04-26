@@ -11,15 +11,15 @@ export default function NewMeetingOthersTime() {
 
      //example data
      const othertimezone = [
-          {label:"Jordan", zone:"Asia/Amman"},
-          {label:"Japan", zone:"Asia/Tokyo"},
+          {country:"Jordan", zone:"Asia/Amman"},
+          {country:"Japan", zone:"Asia/Tokyo"},
      ];
 
      return(
           <div className="othertimezone-container">
           <div className="othertimezone-header-row">
                {othertimezone.map((tz) =>(
-                    <div key={tz.zone} className="othertimezone-head-item"> {tz.label}</div>
+                    <div key={tz.zone} className="othertimezone-head-item"> {tz.country}</div>
                ))}
           </div>
 
@@ -27,8 +27,9 @@ export default function NewMeetingOthersTime() {
                {basetime.map((slot,idx)=>(
                     <div className="othertimezone-time-row" key={idx}>
                          {othertimezone.map((tz)=>(
+
                           <div key={tz.zone} className="othertimezone-time-item">
-                         {slot.setZone(tz.zone).toFormat("H:mm")}
+                              {slot.setZone(tz.zone).toFormat("H:mm")}
                          </div>
                          ))}
                     </div>

@@ -9,9 +9,11 @@ export default function NavSetting(){
           }
      
      return(          
-               <div className="top-right">
-                    <img src={setting} alt="setting" className="setting"/>
-                    <button onClick={goToSetting}>Setting</button>
+               <div className="nav-setting-top-right">
+                    <button className="nav-setting-button" onClick={goToSetting}>
+                    <img src={setting} alt="setting" className="nav-setting-img"/>
+                         Setting
+                         </button>
                </div>
      );
 }
