@@ -3,9 +3,9 @@ import './NewMeetingLeftSideBar.css';
 import icon from '../images/icon.png';
 
 const mockInvitees = [
-     { name: "Katreen", email: "example@gmail.com" },
-     { name: "Tariq", email: "example2@gmail.com" },
-     { name: "Ramiz", email: "example3@gmail.com" },
+     { name: "Katreen", email: "example@gmail.com", country:"Jordan🇯🇴" },
+     { name: "Tariq", email: "example2@gmail.com", country:"Japan🇯🇵" },
+     { name: "Ramiz", email: "example3@gmail.com", country:"Hungary🇭🇺" },
 ];
 
 
@@ -47,7 +47,9 @@ export default function NewMeetingLeftSideBar() {
                                    <div className="new-leftsidebar-invite-first-row">
                                         <input className="new-leftsidebar-checkbox" type="checkbox" defaultChecked />
                                         <div>{user.name}</div>
+                                        <div className="new-leftsidebar-country">in {user.country}</div>
                                    </div>
+                                   
                                    <div className="new-leftsidebar-email">{user.email}</div>
 
                               </label>
