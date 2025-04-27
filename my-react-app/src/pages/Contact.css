@@ -12,6 +12,7 @@
 
 .contact-container-title{
      font-size: 40px;
+     color:#474a4d;
 }
 
 .contact-container-brand{
@@ -33,7 +34,24 @@
      flex-direction: row;
      gap :100px;
      padding: 15px;
-     background-color: #fdf6fb;
-     width: 700px;
+     width: 670px;
+     border-bottom: 0.5px solid grey;
 }
 
+.contact-container-contact-background{
+     background-color: #fdf6fb;
+     width: 700px;
+     border-radius: 20px;
+
+}
+
+.contact-container-contact-add{
+     background-color: grey;
+     border-radius: 3px;
+     border: 1px solid grey;
+     color: white;
+}
+.contact-container-contact-add:hover{
+     cursor:pointer;
+     background-color: black;
+}

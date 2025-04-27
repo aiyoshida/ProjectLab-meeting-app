@@ -26,6 +26,7 @@ function Contact(){
                {/*将来的に、データベースに繋げて、+を追加済みかそうでないかで*/}
                {/*gmailが存在するかのsearchはどうしたらいいんだろうか？*/}
                {/*⭐️ やること:あとで名前とemailの始まりを揃える*/}
+               <div className="contact-container-contact-background">
                {mockData.map((contact)=>(
                     <div className="contact-container-contact-row" key={contact.id}>
                          <div className="contact-container-contact-name"> {contact.name}</div>
@@ -33,6 +34,7 @@ function Contact(){
                          <button className="contact-container-contact-add">＋</button>
                     </div>
                ))}
+               </div>
 
              </div>
 

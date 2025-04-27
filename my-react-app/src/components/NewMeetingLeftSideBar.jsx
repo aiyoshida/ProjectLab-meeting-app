@@ -21,7 +21,7 @@ export default function NewMeetingLeftSideBar() {
                {/*title input - mandatory to write*/}
                <div className="new-leftsidebar-section">
                     <label className="new-leftsidebar-label">Meeting Title</label>
-                    <input type="text" className="new-leftsidebar-readonly-box" placeholder="Enter meeting title"/>
+                    <input type="text" className="new-leftsidebar-readonly-box" placeholder="*Enter meeting title"/>
                </div>
 
                {/*timezone - now Budapest only*/}
