@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
-
-body{
-     textAlign: center;
-     marginTop: 40px
+.register-all{
+     display:flex; 
+     align-items: center;
+     flex-direction: column;
 }
-.brand-name{
+
+.register-brand-name{
      font-family: italiana;
 }
 
@@ -13,8 +14,27 @@ body{
      width:40px;
 }
 
-.brand-row{
+.register-brand-row{
      /*こうやって2つのものをまとめる*/
      display:flex; 
      align-items: center;
+}
+
+.register-google-button{
+     width:350px;
+     height: 30px;
+     border-radius: 5px;
+}
+
+.register-login{
+     width:350px;
+     height: 30px;
+     border-radius: 5px;
+     background-color: black;    
+}
+
+.register-email{
+     width:350px;
+     height: 30px;
+     border-radius: 5px;
 }

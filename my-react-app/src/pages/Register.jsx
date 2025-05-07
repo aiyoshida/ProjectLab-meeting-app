@@ -12,28 +12,30 @@ export default function Register(){
       
      return(
           <div>
-                <div>
-                  <div className="brand-row">
+                <div className="register-all">
+                  <div className="register-brand-row">
                     <img src={icon} alt="icon" className="register-icon"/>
-                    <h1 className="brand-name">AcrossTime</h1>
+                    <h1 className="register-brand-name">AcrossTime</h1>
                   </div>
                   <h2>Create an account</h2>
                   <p>Enter your google account to login for this app</p>
-                  <button className="google-button">Google</button>
+                  <button className="register-google-button">Google</button>
+                  <p>-------------------------or login--------------------------</p>
           
                   <form onSubmit={handleSubmit}>
                     <input
+                      className="register-email"
                       type="text"
                       placeholder= "email@domain.com"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                     <br /><br />
-                    <button type="submit">Login</button>
+                    <button className="register-login" type="submit">Login</button>
                   </form>
-                  </div>
+                </div>
           
-              </div>
+          </div>
           
      )
 }

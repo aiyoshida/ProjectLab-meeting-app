@@ -2,10 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Italiana&display=swap');
 
 
-.brand-row{
+.setting-brand-row{
      display:flex;
-     flex-direction: column !important;
+     flex-direction: column;
      gap:40px;
+     align-items: center;
 
 }
 .settings-header{
