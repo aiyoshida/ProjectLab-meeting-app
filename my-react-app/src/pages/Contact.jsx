@@ -2,16 +2,24 @@ import './Contact.css';
 import LeftSidebar from '../components/LeftSidebar';
 import NavSetting from '../components/NavSetting';
 import MeetingCard from '../components/MeetingCard';
-import {useState} from 'react';
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 
-const mockData =[
-     {id:1, name:'Katreen', email:'example1@gmail.com'},
-     {id:2, name:'Tariq', email:'example2@gmail.com'},
-     {id:3, name:'Ramiz', email:'example3@gmail.com'},
-];
 
 function Contact(){
+     const [contacts, setContacts] = useState([])
+     const userId = 1 //later takethis id from login info
+     useEffect(()=>{
+          axios
+          .get(`http://localhost:8000/contact/${userId}`)
+          .then(response=>{
+               setContacts(response.data.contacts)
+          })
+          .catch(error=>{
+               console.error("error: ", error)
+          })
+     },[])
      return(
           <div>
                <LeftSidebar/>
@@ -27,17 +35,15 @@ function Contact(){
                {/*gmailが存在するかのsearchはどうしたらいいんだろうか？*/}
                {/*⭐️ やること:あとで名前とemailの始まりを揃える*/}
                <div className="contact-container-contact-background">
-               {mockData.map((contact)=>(
+               {contacts.map((contact)=>(
                     <div className="contact-container-contact-row" key={contact.id}>
                          <div className="contact-container-contact-name"> {contact.name}</div>
-                         <div className="contact-container-contact-email">{contact.email}</div>
+                         <div className="contact-container-contact-email">{contact.gmail}</div>
                          <button className="contact-container-contact-add">＋</button>
                     </div>
                ))}
                </div>
-
              </div>
-
           </div>
      );
 }

@@ -1,6 +1,8 @@
 import React from "react";
 import './NewMeetingLeftSideBar.css';
 import icon from '../images/icon.png';
+import { useState, useEffect } from "react"
+import axios from "axios"
 
 const mockInvitees = [
      { name: "Katreen", email: "example@gmail.com", country:"Jordan🇯🇴" },
@@ -9,8 +11,10 @@ const mockInvitees = [
      { name: "Rauf", email: "example4@gmail.com", country:"Azerbaijan🇦🇿" },
 ];
 
-
 export default function NewMeetingLeftSideBar() {
+     const [invitees, setInvitees] = useState("")
+     const userId = 1
+
      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
      return (
           <div className="new-leftsidebar-sidebar">
@@ -46,7 +50,7 @@ export default function NewMeetingLeftSideBar() {
                          {mockInvitees.map((user, index) => (
                               <label key={index} className="new-leftsidebar-invite-item">
                                    <div className="new-leftsidebar-invite-first-row">
-                                        <input className="new-leftsidebar-checkbox" type="checkbox" defaultChecked />
+                                        <input className="new-leftsidebar-checkbox" type="checkbox" defaultChecked={false} />
                                         <div>{user.name}</div>
                                         <div className="new-leftsidebar-country"> in {user.country}</div>
                                    </div>

@@ -4,72 +4,55 @@ import MeetingCard from "../components/MeetingCard";
 import bin from '../images/bin.svg';
 import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react"
+import axios from "axios"
 
 
-const mockData = [
-     {
-          id: 1,
-          date: '2025 Apr 13th',
-          title:'Regular meeting',
-          creator: 'Ai Yoshida',
-          participants:["Katreen", "Tariq"],
-          url:'www',
-     },
-     {
-          id: 2,
-          date: '2025 Apr 13th',
-          title:'Regular meeting',
-          creator: 'Ai Yoshida',
-          participants:["Katreen", "Tariq", "Ramiz"],
-          url:'www',
-     },
-     {
-          id: 3,
-          date: '2025 Apr 13th',
-          title:'Regular meeting',
-          creator: 'Ai Yoshida',
-          participants:["Katreen", "Tariq", "Ramiz"],
-          url:'www',
-     },
-     {
-          id: 4,
-          date: '2025 Apr 13th',
-          title:'Regular meeting',
-          creator: 'Ai Yoshida',
-          participants:["Katreen", "Tariq", "Ramiz"],
-          url:'www',
-     },
-];
+function Homepage() {
+     const [cards, setCards] = useState([])
+     //temporary
+     const userId = 1
+     const handleDelete = async (cardId) => {
+          try {
+               await axios.delete(`http://localhost:8000/homepage/${cardId}`)
+               setCards(prev => prev.filter(card => card.id !== cardId))} catch (err) {
+                    console.error("error", err)
+               }
+          }
+     
 
-function Homepage(){
-
-     return(
+     useEffect(() => {
+          axios
+               .get(`http://localhost:8000/homepage/${userId}`)
+               .then((res) => {
+                    setCards(res.data.cards)
+               })
+               .catch((err) => {
+                    console.error("fetch error", err)
+               })
+     })
+     return (
           <div>
                <LeftSidebar />
-
                <div className="meeting-card-container">
-               <NavSetting/>
+                    <NavSetting />
                     <h2 className="title">Meeting List</h2>
 
                     <div className="meeting-grid">
-                         {mockData.map((meeting)=>(
+                         {cards.map((meeting) => (
                               <div key={meeting.id} className="meeting-card">
                                    <h3>{meeting.date}</h3>
                                    <p className="meeting-title">{meeting.title}</p>
                                    <p className="meeting-participants">Participants: {meeting.participants.join(", ")}</p>
-                                   <button>delete</button>
+                                   <button onClick={()=> handleDelete(meeting.id)}>delete</button>
                               </div>
                          ))}
 
                     </div>
-
-
                </div>
-
-     
           </div>
      );
 
-}
 
+}
 export default Homepage;
