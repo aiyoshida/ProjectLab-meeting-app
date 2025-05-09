@@ -7,7 +7,16 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import { useNavigate } from 'react-router-dom';
 
-export default function NewMeetingCalendar() {
+
+export default function NewMeetingCalendar({checkedInvitees=[]}) {
+     const meetingTitle = "new-meeting"
+
+     const handleShare = () => {
+          navigate(`/meetinglink/${meetingTitle}`);
+          checkedInvitees.forEach((user)=>{
+                console.log(`Send to : ${user.gmail} meeting url : http://localhost:3000/meetinglink/${meetingTitle}`);
+          })
+     }
      const navigate = useNavigate();
      const goToHomePage = () => {
           navigate('/homepage');
@@ -36,7 +45,7 @@ export default function NewMeetingCalendar() {
      return (
           <div className="calendar-container">
 
-               <button className="calendar-container-sharebutton">Share</button>
+               <button onClick={handleShare} className="calendar-container-sharebutton">Share</button>
                <button onClick={goToHomePage} className="calendar-container-close">✕</button>
 
 
@@ -70,11 +79,6 @@ export default function NewMeetingCalendar() {
                          }
                     />
                </div>
-
-
-
-
-
           </div>
      );
 

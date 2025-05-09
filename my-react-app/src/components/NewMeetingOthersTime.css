@@ -8,13 +8,13 @@
 
 }
 
+
 .othertimezone-header-row{
      background-color: #f6bfbc;
      display: flex;
      flex-direction: row;
      justify-items: center;
-     padding-left: 20px;
-     gap :40px;
+     gap :10px;
      margin-top: 45px;
      padding-top: 13px;
      padding-bottom: 13px;

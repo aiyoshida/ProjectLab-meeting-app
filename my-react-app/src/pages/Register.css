@@ -30,7 +30,8 @@
      width:350px;
      height: 30px;
      border-radius: 5px;
-     background-color: black;    
+     background-color: black;  
+     color: white;  
 }
 
 .register-email{

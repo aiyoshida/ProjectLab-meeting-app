@@ -5,7 +5,7 @@
      width: 280px;
      height: 100vh;
      background-color: white;
-     padding: 30px;
+     padding: 25px;
      display: flex;
      flex-direction: column;
 }
@@ -54,7 +54,7 @@
 }
 
 .new-leftsidebar-email{
-     margin-left: 27px;
+     margin-left: 25px;
      color: grey;
      margin-bottom: 10px;
 }
@@ -63,5 +63,5 @@
 }
 
 .new-leftsidebar-checkbox{
-     margin-right: 10px;
+     margin-right: 8px;
 }

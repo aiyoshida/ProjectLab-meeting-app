@@ -32,31 +32,36 @@ mockContactDB = {
         "id": 1,
         "userId": 1,
         "name": "Katreen",
-        "gmail": "example@com",
+        "gmail": "aikawaiyoshida@gmail.com",
+        "timezone": "Asia/Tokyo",
     },
     2: {
         "id": 2,
         "userId": 1,
         "name": "Rauf",
-        "gmail": "example@com",
+        "gmail": "ai.yoshida@edu.bme.hu",
+        "timezone": "Asia/Amman",
     },
     3: {
         "id": 3,
         "userId": 1,
         "name": "Tariq",
         "gmail": "example@com",
+        "timezone": "Europe/Budapest",
     },
     4: {
         "id": 4,
         "userId": 1,
         "name": "Ramiz",
         "gmail": "example4@com",
+        "timezone": "Europe/Budapest",
     },
     5: {
         "id": 5,
         "userId": 3,
         "name": "Ramiz",
         "gmail": "example4@com",
+        "timezone": "Europe/Budapest",
     },
 }
 mockMeetingCardDB = {
@@ -144,7 +149,7 @@ async def delete_card(cardId: int):
 
 
 # GET /newmeeting/{userId}
-@app.get("/newmeeing/{userId}")
+@app.get("/newmeeting/{userId}")
 async def get_meetingcontactlist(userId: int):
     if userId not in mockUserDB:
         raise HTTPException(status_code=404, detail="User not found")
@@ -153,3 +158,11 @@ async def get_meetingcontactlist(userId: int):
         if contact["userId"] == userId:
             contacts.append(contact)
     return {"contacts": contacts}
+
+
+# POST /newmeeting
+@app.post("/newmeeting/{userId}")
+async def create_newmeetingcard(userId: int):
+    if userId not in mockUserDB:
+        raise HTTPException(status_code=404, detail="User not found")
+    return "meee"
