@@ -31,7 +31,7 @@ export default function Setting() {
                })
 
 
-               console.log("送るデータ：", {
+               console.log("Sending data：", {
                     id: userId,
                     username,
                     timezone,

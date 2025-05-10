@@ -25,7 +25,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees=[], setCheckedIn
      }
 
      useEffect(() => {
-  console.log("親にある checkedInvitees:", checkedInvitees)
+  console.log("checkedInvitees:", checkedInvitees)
 }, [checkedInvitees])
 
 

@@ -15,11 +15,12 @@ function Homepage() {
      const handleDelete = async (cardId) => {
           try {
                await axios.delete(`http://localhost:8000/homepage/${cardId}`)
-               setCards(prev => prev.filter(card => card.id !== cardId))} catch (err) {
-                    console.error("error", err)
-               }
+               setCards(prev => prev.filter(card => card.id !== cardId))
+          } catch (err) {
+               console.error("error", err)
           }
-     
+     }
+
 
      useEffect(() => {
           axios
@@ -30,7 +31,7 @@ function Homepage() {
                .catch((err) => {
                     console.error("fetch error", err)
                })
-     })
+     },[])
      return (
           <div>
                <LeftSidebar />
@@ -41,10 +42,11 @@ function Homepage() {
                     <div className="meeting-grid">
                          {cards.map((meeting) => (
                               <div key={meeting.id} className="meeting-card">
-                                   <h3>{meeting.date}</h3>
+                                   <h3>{meeting.created_at}</h3>
                                    <p className="meeting-title">{meeting.title}</p>
                                    <p className="meeting-participants">Participants: {meeting.participants.join(", ")}</p>
-                                   <button onClick={()=> handleDelete(meeting.id)}>delete</button>
+                                   <p className="meeting-url">{meeting.url}</p>
+                                   <button onClick={() => handleDelete(meeting.id)}>delete</button>
                               </div>
                          ))}
 

@@ -16,6 +16,10 @@
      color:#474a4d;
 }
 
+.meeting-url{
+     font-size: 10px;
+}
+
 .meeting-grid{
      display: grid;
      grid-template-columns: repeat(2, 1fr);

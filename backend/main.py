@@ -1,6 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from backend.models import Base
+from backend.database import engine
+from backend.database import SessionLocal
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from backend.models import Meeting, Participant, User, Contact
+
 
 # implement pydantic for type definition later
 
@@ -9,6 +16,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -94,6 +102,16 @@ mockMeetingCardDB = {
     },
 }
 
+Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 # PUT /setting/{user_id}
 class UserUpdate(BaseModel):
@@ -104,60 +122,111 @@ class UserUpdate(BaseModel):
 
 # PUT /setting/{user_id}
 @app.put("/setting/{userId}")
-async def update_user(userId: int, user_data: UserUpdate):
-    if userId not in mockUserDB:
+async def update_user(
+    userId: int, user_data: UserUpdate, db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    data = user_data
-    print("受け取ったデータ:", data)
-    mockUserDB[userId] = data
-    return {"message": "Success!", "data": mockUserDB[userId]}
+
+    user.username = user_data.username
+    user.timezone = user_data.timezone
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "Success!",
+        "data": {
+            "id": user.id,
+            "username": user.username,
+            "timezone": user.timezone,
+            "gmail": user.gmail,
+        },
+    }
 
 
 # http://localhost:3000/contact
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
-async def get_contactlist(userId: int):
-    if userId not in mockUserDB:
+async def get_contactlist(userId: int, db: Session = Depends(get_db)):
+    contacts = db.query(Contact).filter(Contact.user_id == userId).all()
+    if not contacts:
         raise HTTPException(status_code=404, detail="User not found")
-    contacts = []
-    for contact in mockContactDB.values():
-        if contact["userId"] == userId:
-            contacts.append(contact)
-    return {"contacts": contacts}
+
+    result = [
+        {
+            "id": c.id,
+            "name": c.name,
+            "gmail": c.gmail,
+            "timezone": c.timezone,
+        }
+        for c in contacts
+    ]
+
+    return {"contacts": result}
 
 
 # GET /homepage/{userId}
 @app.get("/homepage/{userId}")
-async def get_meeting_card(userId: int):
-    if userId not in mockUserDB:
-        raise HTTPException(status_code=404, detail="User not found")
-    cards = []
-    for card in mockMeetingCardDB.values():
-        if card["user_id"] == userId:
-            cards.append(card)
-    return {"cards": cards}
+async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
+    meetings = db.query(Meeting).filter(Meeting.creator_user_id == userId).all()
+
+    result = []
+    for meeting in meetings:
+        participants = (
+            db.query(Participant).filter(Participant.meeting_id == meeting.id).all()
+        )
+        participant_names = []
+
+        for p in participants:
+            contact = db.query(Contact).filter(Contact.id == p.contact_id).first()
+            if contact:
+                participant_names.append(contact.name)
+
+        result.append(
+            {
+                "id": meeting.id,
+                "title": meeting.title,
+                "date": meeting.created_at.strftime("%Y %b %d"),
+                "participants": participant_names,
+                "url": meeting.url,
+            }
+        )
+
+    return {"cards": result}
 
 
 # DELETE /homepage/{cardId}
 @app.delete("/homepage/{cardId}")
-async def delete_card(cardId: int):
-    if cardId not in mockMeetingCardDB:
-        raise HTTPException(status_code=404, detail="User not found")
+async def delete_card(cardId: int, db: Session = Depends(get_db)):
+    meeting = db.query(Meeting).filter(Meeting.id == cardId).first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
 
-    deleted = mockMeetingCardDB.pop(cardId)
-    return {"message": "deleted", "deleted card is ": deleted}
+    db.delete(meeting)
+    db.commit()
+
+    return {"message": "Meeting deleted", "id": cardId}
 
 
 # GET /newmeeting/{userId}
 @app.get("/newmeeting/{userId}")
-async def get_meetingcontactlist(userId: int):
-    if userId not in mockUserDB:
+async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
+    contacts = db.query(Contact).filter(Contact.user_id == userId).all()
+    if not contacts:
         raise HTTPException(status_code=404, detail="User not found")
-    contacts = []
-    for contact in mockContactDB.values():
-        if contact["userId"] == userId:
-            contacts.append(contact)
-    return {"contacts": contacts}
+
+    result = [
+        {
+            "id": c.id,
+            "name": c.name,
+            "gmail": c.gmail,
+            "timezone": c.timezone,
+        }
+        for c in contacts
+    ]
+
+    return {"contacts": result}
 
 
 # POST /newmeeting
