@@ -17,25 +17,30 @@ class User(Base):
 class Contact(Base):
     __tablename__ = "contacts"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    friend_of_this_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
     gmail = Column(String, nullable=False)
     timezone = Column(String, nullable=False)
+
+    actual_user = relationship(
+        "User", foreign_keys=[user_id], backref="contact_profiles"
+    )
+    owner_user = relationship(
+        "User", foreign_keys=[friend_of_this_user_id], backref="my_contacts"
+    )
 
 
 class Meeting(Base):
     __tablename__ = "meetings"
 
-    id = Column(Integer, primary_key=True, index=True)  # 主キー（自動で増えるID）
-    title = Column(String, nullable=False)  # タイトル（必須）
-    created_at = Column(
-        DateTime, default=datetime.utcnow
-    )  # 作成日時（デフォルトで今の時刻）
-    creator_user_id = Column(
-        Integer, ForeignKey("users.id")
-    )  # 作成者のUser ID（外部キー）
-    finalized = Column(Boolean, default=False)  # 日程が確定済みか（初期値False）
-    all_voted = Column(Boolean, default=False)  # 全員投票済みか（初期値False）
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    timezone = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    creator_user_id = Column(Integer, ForeignKey("users.id"))
+    finalized = Column(Boolean, default=False)
+    all_voted = Column(Boolean, default=False)
     url = Column(String, nullable=True)
     creator = relationship("User", backref="meetings")
 
@@ -43,21 +48,20 @@ class Meeting(Base):
 class Participant(Base):
     __tablename__ = "participants"
 
-    id = Column(Integer, primary_key=True, index=True)  # 主キー
-    meeting_id = Column(Integer, ForeignKey("meetings.id"))  # Meeting との外部キー
-    contact_id = Column(Integer, ForeignKey("contacts.id"))  # Contact との外部キー
-    voted = Column(Boolean, default=False)  # 投票済みか（初期値 False）
+    id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meetings.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    voted = Column(Boolean, default=False)
     meeting = relationship("Meeting", backref="participants")
-    contact = relationship("Contact", backref="participations")
+    user = relationship("User", backref="participations")
 
 
 class VotedDate(Base):
     __tablename__ = "voted_dates"
 
-    id = Column(Integer, primary_key=True, index=True)  # 主キー（自動で連番）
-    meeting_id = Column(Integer, ForeignKey("meetings.id"))  # 外部キー：どの会議か
-    starting_time = Column(DateTime, nullable=False)  # 開始時刻
-    ending_time = Column(DateTime, nullable=False)  # 終了時刻
+    id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meetings.id"))
+    starting_time = Column(DateTime, nullable=False)
+    ending_time = Column(DateTime, nullable=False)
 
-    # Optional：Meetingオブジェクトにアクセスする場合
     meeting = relationship("Meeting", backref="voted_dates")

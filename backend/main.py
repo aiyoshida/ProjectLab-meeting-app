@@ -6,7 +6,9 @@ from backend.database import engine
 from backend.database import SessionLocal
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from backend.models import Meeting, Participant, User, Contact
+from backend.models import Meeting, Participant, User, Contact, VotedDate
+from typing import List, Optional
+from datetime import datetime
 
 
 # implement pydantic for type definition later
@@ -102,6 +104,21 @@ mockMeetingCardDB = {
     },
 }
 
+
+class Slot(BaseModel):
+    start: datetime
+    end: datetime
+
+
+class NewMeetingData(BaseModel):
+    title: str
+    timezone: str
+    creator_user_id: int
+    invitees: List[int]
+    slots: List[Slot]
+    url: Optional[str] = None
+
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -149,7 +166,7 @@ async def update_user(
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
 async def get_contactlist(userId: int, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.user_id == userId).all()
+    contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
     if not contacts:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -179,9 +196,9 @@ async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
         participant_names = []
 
         for p in participants:
-            contact = db.query(Contact).filter(Contact.id == p.contact_id).first()
-            if contact:
-                participant_names.append(contact.name)
+            user = db.query(User).filter(User.id == p.user_id).first()
+            if user:
+                participant_names.append(user.username)
 
         result.append(
             {
@@ -203,6 +220,13 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
+    # to adjust child tables to deleted meeting table
+    db.query(VotedDate).filter(VotedDate.meeting_id.is_(None)).delete(
+        synchronize_session=False
+    )
+    db.query(Participant).filter(Participant.meeting_id.is_(None)).delete(
+        synchronize_session=False
+    )
     db.delete(meeting)
     db.commit()
 
@@ -212,7 +236,7 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
 # GET /newmeeting/{userId}
 @app.get("/newmeeting/{userId}")
 async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.user_id == userId).all()
+    contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
     if not contacts:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -231,7 +255,72 @@ async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
 
 # POST /newmeeting
 @app.post("/newmeeting/{userId}")
-async def create_newmeetingcard(userId: int):
-    if userId not in mockUserDB:
-        raise HTTPException(status_code=404, detail="User not found")
-    return "meee"
+async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
+    # Meeting
+    meeting = Meeting(
+        title=data.title,
+        creator_user_id=data.creator_user_id,
+        timezone=data.timezone,
+        url="",
+    )
+    db.add(meeting)
+    db.commit()
+    db.refresh(meeting)
+    # to add url with meeting id
+    meeting.url = f"{data.url}/{meeting.id}"
+    meeting.id = meeting.id
+    db.commit()
+
+    creator_participant = Participant(
+        meeting_id=meeting.id,
+        user_id=data.creator_user_id,
+        voted=True,
+    )
+    db.add(creator_participant)
+
+    #  add Participants
+    for contact_id in data.invitees:
+        contact = db.query(Contact).filter(Contact.id == contact_id).first()
+        if contact:
+            participant = Participant(
+                meeting_id=meeting.id,
+                user_id=contact.user_id,
+                voted=False,
+            )
+            db.add(participant)
+
+    # add VotedDate
+    for slot in data.slots:
+        voted_date = VotedDate(
+            meeting_id=meeting.id, starting_time=slot.start, ending_time=slot.end
+        )
+        db.add(voted_date)
+
+    db.commit()
+    return {"message": "Meeting created", "meeting_id": meeting.id}
+
+
+# GET /meetinglink/{meetingId}
+@app.get("/meetinglink/{meetingId}")
+async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
+    participants = (
+        db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    )
+    if not participants:
+        raise HTTPException(status_code=404, detail="Participants not found")
+
+    result = []
+    for p in participants:
+        user = db.query(User).filter(User.id == p.user_id).first()
+        if user:
+            result.append(
+                {
+                    "id": user.id,
+                    "name": user.username,
+                    "gmail": user.gmail,
+                    "timezone": user.timezone,
+                    "voted": p.voted,
+                }
+            )
+
+    return {"contacts": result}

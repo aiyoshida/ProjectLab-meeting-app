@@ -10,14 +10,19 @@ import  { useState, useEffect } from "react";
 function NewMeeting(){
      //hold invitess value in parent page, and share
      const [checkedInvitees, setCheckedInvitees] = useState([])
+     const [meetingTitle, setMeetingTitle] = useState("")
      return(
           <div className="main-wrapper">
                 <NewMeetingLeftSideBar
                 checkedInvitees={checkedInvitees}
                 setCheckedInvitees={setCheckedInvitees}
+                meetingTitle = {meetingTitle}
+                setMeetingTitle={setMeetingTitle}
                 />
                 <NewMeetingOthersTime checkedInvitees={checkedInvitees}/>
-                <NewMeetingCalendar checkedInvitees={checkedInvitees}/>
+                <NewMeetingCalendar checkedInvitees={checkedInvitees}
+                meetingTitle={meetingTitle}
+                />
           </div>
      );
 }

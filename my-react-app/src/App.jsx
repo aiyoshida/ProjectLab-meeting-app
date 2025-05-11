@@ -20,7 +20,7 @@ function App() {
       <Route path="/contact" element={<Contact />}/>
       <Route path="/newmeeting" element={<NewMeeting />}/>
       <Route path="/homepage" element={<Homepage />}/>
-      <Route path="/meetinglink/:meetingTitle" element={<MeetingLink />}/>
+      <Route path="/meetinglink/:meetingId" element={<MeetingLink />}/>
     </Routes>
   </Router>
 

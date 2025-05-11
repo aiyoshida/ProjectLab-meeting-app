@@ -4,7 +4,7 @@ import icon from '../images/icon.png';
 import { useState, useEffect } from "react"
 import axios from "axios"
 
-export default function NewMeetingLeftSideBar({ checkedInvitees=[], setCheckedInvitees }) {
+export default function NewMeetingLeftSideBar({ checkedInvitees = [], setCheckedInvitees, meetingTitle = "", setMeetingTitle }) {
      const [invitees, setInvitees] = useState([])
 
      const userId = 1
@@ -25,12 +25,12 @@ export default function NewMeetingLeftSideBar({ checkedInvitees=[], setCheckedIn
      }
 
      useEffect(() => {
-  console.log("checkedInvitees:", checkedInvitees)
-}, [checkedInvitees])
+          console.log("checkedInvitees:", checkedInvitees)
+     }, [checkedInvitees])
 
 
      useEffect(() => {
-          
+
           axios
                .get(`http://localhost:8000/newmeeting/${userId}`)
                .then((res) => {
@@ -52,7 +52,12 @@ export default function NewMeetingLeftSideBar({ checkedInvitees=[], setCheckedIn
                {/*title input - mandatory to write*/}
                <div className="new-leftsidebar-section">
                     <label className="new-leftsidebar-label">Meeting Title</label>
-                    <input type="text" className="new-leftsidebar-readonly-box" placeholder="*Enter meeting title" />
+                    <input
+                         type="text"
+                         className="new-leftsidebar-readonly-box"
+                         placeholder="*Enter meeting title"
+                         value={meetingTitle}
+                         onChange={(e) => setMeetingTitle(e.target.value)} />
                </div>
 
                {/*timezone - now Budapest only*/}
@@ -76,7 +81,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees=[], setCheckedIn
                          {invitees.map((user, index) => (
                               <label key={index} className="new-leftsidebar-invite-item">
                                    <div className="new-leftsidebar-invite-first-row">
-                                        <input className="new-leftsidebar-checkbox" type="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={()=> handleCheck(user)} />
+                                        <input className="new-leftsidebar-checkbox" type="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
                                         <div>{user.name}</div>
                                         <div className="new-leftsidebar-country">in {user.timezone}</div>
                                    </div>
