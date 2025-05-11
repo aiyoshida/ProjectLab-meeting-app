@@ -6,9 +6,10 @@ from backend.database import engine
 from backend.database import SessionLocal
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from backend.models import Meeting, Participant, User, Contact, VotedDate
+from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import and_
 
 
 # implement pydantic for type definition later
@@ -23,89 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-mockUserDB = {
-    1: {
-        "id": 1,
-        "username": "Ai Yoshida",
-        "timezone": "Asia/Tokyo",
-        "gmail": "ai2150sorairo@gmail.com",
-    },
-    2: {
-        "id": 2,
-        "username": "Rauf",
-        "timezone": "Europe/Budapest",
-        "gmail": "ai2150sorairo@gmail.com",
-    },
-}
-mockContactDB = {
-    1: {
-        "id": 1,
-        "userId": 1,
-        "name": "Katreen",
-        "gmail": "aikawaiyoshida@gmail.com",
-        "timezone": "Asia/Tokyo",
-    },
-    2: {
-        "id": 2,
-        "userId": 1,
-        "name": "Rauf",
-        "gmail": "ai.yoshida@edu.bme.hu",
-        "timezone": "Asia/Amman",
-    },
-    3: {
-        "id": 3,
-        "userId": 1,
-        "name": "Tariq",
-        "gmail": "example@com",
-        "timezone": "Europe/Budapest",
-    },
-    4: {
-        "id": 4,
-        "userId": 1,
-        "name": "Ramiz",
-        "gmail": "example4@com",
-        "timezone": "Europe/Budapest",
-    },
-    5: {
-        "id": 5,
-        "userId": 3,
-        "name": "Ramiz",
-        "gmail": "example4@com",
-        "timezone": "Europe/Budapest",
-    },
-}
-mockMeetingCardDB = {
-    1: {
-        "id": 1,
-        "user_id": 1,
-        "date": "2025 Apr 13th",
-        "title": "Regular meeting",
-        "creator": "Ai Yoshida",
-        "participants": ["Katreen", "Tariq"],
-        "url": "www",
-    },
-    2: {
-        "id": 2,
-        "user_id": 1,
-        "date": "2025 Apr 13th",
-        "title": "Regular meeting",
-        "creator": "Ai Yoshida",
-        "participants": ["Katreen", "Tariq"],
-        "url": "www",
-    },
-    3: {
-        "id": 3,
-        "user_id": 1,
-        "date": "2025 Apr 13th",
-        "title": "Regular meeting",
-        "creator": "Ai Yoshida",
-        "participants": ["Katreen", "Tariq"],
-        "url": "www",
-    },
-}
 
-
-class Slot(BaseModel):
+class SlotTime(BaseModel):
     start: datetime
     end: datetime
 
@@ -115,8 +35,13 @@ class NewMeetingData(BaseModel):
     timezone: str
     creator_user_id: int
     invitees: List[int]
-    slots: List[Slot]
+    slots: List[SlotTime]
     url: Optional[str] = None
+
+
+class VoteData(BaseModel):
+    user_id: int
+    slots: List[SlotTime]
 
 
 Base.metadata.create_all(bind=engine)
@@ -167,18 +92,21 @@ async def update_user(
 @app.get("/contact/{userId}")
 async def get_contactlist(userId: int, db: Session = Depends(get_db)):
     contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
-    if not contacts:
-        raise HTTPException(status_code=404, detail="User not found")
 
-    result = [
-        {
-            "id": c.id,
-            "name": c.name,
-            "gmail": c.gmail,
-            "timezone": c.timezone,
-        }
-        for c in contacts
-    ]
+    if not contacts:
+        raise HTTPException(status_code=404, detail="User not found or no contacts")
+
+    result = []
+    for c in contacts:
+        contact_user = c.actual_user
+        result.append(
+            {
+                "id": c.id,
+                "name": contact_user.username,
+                "gmail": contact_user.gmail,
+                "timezone": contact_user.timezone,
+            }
+        )
 
     return {"contacts": result}
 
@@ -238,14 +166,14 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
 async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
     contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
     if not contacts:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="User not found or no contacts")
 
     result = [
         {
             "id": c.id,
-            "name": c.name,
-            "gmail": c.gmail,
-            "timezone": c.timezone,
+            "name": c.actual_user.username,
+            "gmail": c.actual_user.gmail,
+            "timezone": c.actual_user.timezone,
         }
         for c in contacts
     ]
@@ -303,17 +231,18 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
 # GET /meetinglink/{meetingId}
 @app.get("/meetinglink/{meetingId}")
 async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
+    # participant
     participants = (
         db.query(Participant).filter(Participant.meeting_id == meetingId).all()
     )
     if not participants:
         raise HTTPException(status_code=404, detail="Participants not found")
 
-    result = []
+    contacts = []
     for p in participants:
         user = db.query(User).filter(User.id == p.user_id).first()
         if user:
-            result.append(
+            contacts.append(
                 {
                     "id": user.id,
                     "name": user.username,
@@ -323,4 +252,40 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
                 }
             )
 
-    return {"contacts": result}
+    # slots
+    slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
+    available_slots = [
+        {"start": slot.starting_time.isoformat(), "end": slot.ending_time.isoformat()}
+        for slot in slots
+    ]
+
+    return {"contacts": contacts, "available_slots": available_slots}
+
+
+# POST /meetinglink/{meetingId}/vote
+@app.post("/meetinglink/{meetingId}/vote")
+def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
+    for slot in data.slots:
+        voted_date = db.query(VotedDate).filter(
+            VotedDate.meeting_id == meetingId,
+            and_(
+                VotedDate.starting_time >= slot.start - timedelta(seconds=1),
+                VotedDate.starting_time <= slot.start + timedelta(seconds=1),
+                VotedDate.ending_time >= slot.end - timedelta(seconds=1),
+                VotedDate.ending_time <= slot.end + timedelta(seconds=1),
+            )
+        ).first()
+
+        if not voted_date:
+            raise HTTPException(status_code=400, detail=f"Invalid slot: {slot.start} - {slot.end}")
+
+        vote = Vote(user_id=data.user_id, voted_date_id=voted_date.id, meeting_id=meetingId)
+        db.add(vote)
+
+    # votedフラグを立てる（meetingIdも条件に含めるのが安全）
+    participant = db.query(Participant).filter_by(user_id=data.user_id, meeting_id=meetingId).first()
+    if participant:
+        participant.voted = True
+
+    db.commit()
+    return {"message": "Vote submitted!"}

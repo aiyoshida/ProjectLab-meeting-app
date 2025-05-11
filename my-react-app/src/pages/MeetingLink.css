@@ -1,5 +1,4 @@
 .meeting-link {
-     background-color: aqua;
      top: 0;
      left: 0;
      position: fixed;
@@ -38,4 +37,13 @@
 
 .new-leftsidebar-invite-item{
      padding:10px;
+}
+
+.fc-event.calendar-available-slot {
+  opacity: 0.6;
+}
+
+.fc-event.calendar-selected-slot {
+  opacity: 0.9;
+  box-shadow: 0 0 4px #c62828;
 }

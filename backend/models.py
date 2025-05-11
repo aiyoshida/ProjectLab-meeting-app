@@ -19,9 +19,6 @@ class Contact(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     friend_of_this_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    name = Column(String, nullable=False)
-    gmail = Column(String, nullable=False)
-    timezone = Column(String, nullable=False)
 
     actual_user = relationship(
         "User", foreign_keys=[user_id], backref="contact_profiles"
@@ -65,3 +62,16 @@ class VotedDate(Base):
     ending_time = Column(DateTime, nullable=False)
 
     meeting = relationship("Meeting", backref="voted_dates")
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    voted_date_id = Column(Integer, ForeignKey("voted_dates.id"))
+    meeting_id = Column(Integer, ForeignKey("meetings.id"))
+
+    user = relationship("User", backref="votes")
+    voted_date = relationship("VotedDate", backref="votes")
+    meeting = relationship("Meeting", backref="votes")
