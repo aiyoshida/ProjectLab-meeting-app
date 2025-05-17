@@ -47,3 +47,15 @@
   opacity: 0.9;
   box-shadow: 0 0 4px #c62828;
 }
+
+.meeting-link-vote-dates{
+     font-size: 20px;
+     padding-left: 30px;
+}
+
+.meeting-link-votes{
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     padding-left: 10px;
+}

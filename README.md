@@ -9,4 +9,5 @@ when I want to stop npm start  "Ctrl + C"
 
 backend -- fastAPI
 to run this, uvicorn main:app --reload
+uvicorn backend.main:app --reload
 access to http://localhost:8000

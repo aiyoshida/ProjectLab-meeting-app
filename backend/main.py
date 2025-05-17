@@ -10,6 +10,8 @@ from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime, timedelta
 from sqlalchemy import and_
+from sqlalchemy import func
+
 
 
 # implement pydantic for type definition later
@@ -41,7 +43,7 @@ class NewMeetingData(BaseModel):
 
 class VoteData(BaseModel):
     user_id: int
-    slots: List[SlotTime]
+    slots: List[int]
 
 
 Base.metadata.create_all(bind=engine)
@@ -181,7 +183,7 @@ async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
     return {"contacts": result}
 
 
-# POST /newmeeting
+# POST /newmeeting/{userId}
 @app.post("/newmeeting/{userId}")
 async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     # Meeting
@@ -253,9 +255,28 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
             )
 
     # slots
-    slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
+    #slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
+    slots = (
+        db.query(
+            VotedDate.id,
+            VotedDate.starting_time,
+            VotedDate.ending_time,
+            func.count(Vote.id).label("vote_count")
+        )
+        .outerjoin(Vote, VotedDate.id == Vote.voted_date_id)
+        .filter(VotedDate.meeting_id == meetingId)
+        .group_by(VotedDate.id, VotedDate.starting_time, VotedDate.ending_time)
+        .all()
+    )
+
+
     available_slots = [
-        {"start": slot.starting_time.isoformat(), "end": slot.ending_time.isoformat()}
+        {
+            "id": slot.id, 
+            "start": slot.starting_time.isoformat(), 
+            "end": slot.ending_time.isoformat(),
+            "vote_count": slot.vote_count
+        }
         for slot in slots
     ]
 
@@ -265,25 +286,15 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 # POST /meetinglink/{meetingId}/vote
 @app.post("/meetinglink/{meetingId}/vote")
 def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
-    for slot in data.slots:
-        voted_date = db.query(VotedDate).filter(
-            VotedDate.meeting_id == meetingId,
-            and_(
-                VotedDate.starting_time >= slot.start - timedelta(seconds=1),
-                VotedDate.starting_time <= slot.start + timedelta(seconds=1),
-                VotedDate.ending_time >= slot.end - timedelta(seconds=1),
-                VotedDate.ending_time <= slot.end + timedelta(seconds=1),
-            )
-        ).first()
-
-        if not voted_date:
-            raise HTTPException(status_code=400, detail=f"Invalid slot: {slot.start} - {slot.end}")
-
-        vote = Vote(user_id=data.user_id, voted_date_id=voted_date.id, meeting_id=meetingId)
+    for voted_date_id in data.slots:
+        vote = Vote(
+            user_id = data.user_id, 
+            voted_date_id = voted_date_id, 
+            meeting_id=meetingId
+        )
         db.add(vote)
 
-    # votedフラグを立てる（meetingIdも条件に含めるのが安全）
-    participant = db.query(Participant).filter_by(user_id=data.user_id, meeting_id=meetingId).first()
+    participant = db.query(Participant).filter_by(user_id = data.user_id, meeting_id=meetingId).first()
     if participant:
         participant.voted = True
 

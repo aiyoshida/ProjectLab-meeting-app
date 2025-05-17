@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function MeetingLink() {
-     const userId = 1; //change to login info later
+     const userId = 2; //change to login info later
      const { meetingId } = useParams();
      const [participants, setParticipants] = useState([])
      const [selectedSlots, setSelectedSlots] = useState([]);
@@ -47,19 +47,26 @@ export default function MeetingLink() {
      }
 
      try {
+          //since gettime is too precise, use +-1sec
           const voted_date_ids = selectedSlots.map(slot => {
-               const match = availableSlots.find(s =>
-                    s.start === slot.start.toISOString() &&
-                    s.end === slot.end.toISOString()
-               );
-               if (!match) throw new Error("Invalid selected slot.");
-               return match
-          });
-
-          await axios.post(`http://localhost:8000/meetinglink/${meetingId}/vote`, {
-               user_id: userId,
-               voted_date_ids: voted_date_ids
-          });
+            const match = availableSlots.find(s =>
+                Math.abs(new Date(s.start).getTime() - new Date(slot.start).getTime()) < 1000 &&
+                Math.abs(new Date(s.end).getTime() - new Date(slot.end).getTime()) < 1000
+            );
+            if (!match) {
+                throw new Error("Invalid selected slot.");
+            }
+            return match.id;
+        });
+          
+          
+          const payload = {
+            user_id: userId,
+            slots: voted_date_ids,
+          };
+          console.log(payload);
+          await axios.post(`http://localhost:8000/meetinglink/${meetingId}/vote`, payload);
+          
 
           alert("Vote submitted!");
           navigate('/homepage');
@@ -101,8 +108,6 @@ export default function MeetingLink() {
 
                          {participants.map((user) => (
                               <div key={user.id} className="new-leftsidebar-invite-item">
-                                   <label>
-
                                         <div className="new-leftsidebar-invite-first-row">
                                              <div>{user.name}</div>
                                              <div className="new-leftsidebar-country">in {user.timezone}</div>
@@ -110,9 +115,20 @@ export default function MeetingLink() {
                                         <div className="new-leftsidebar-status">
                                              {user.voted ? "✅ already voted" : "🕒 not voted yet"}
                                         </div>
-                                   </label>
                               </div>
                          ))}
+                    </div>
+
+                    <div>
+                         <p className="meeting-link-vote-dates" >Vote dates</p>
+                         
+                              {availableSlots.map((date)=>(
+                                        <div className = "meeting-link-votes" key={date.id}>
+                                                  {date.start}〜{date.end} votes: {date.vote_count}
+                                        </div>
+                              ))}
+                         
+
                     </div>
 
 
@@ -140,6 +156,7 @@ export default function MeetingLink() {
                                         start: slot.start,
                                         end: slot.end,
                                         display: 'background',
+                                        allDay: false,
                                         backgroundColor: '#a2d5f2',  
                                         className: 'calendar-available-slot',
                                    }))
@@ -157,6 +174,7 @@ export default function MeetingLink() {
                               initialView="timeGridWeek"
                               slotDuration="00:30:00"
                               timeZone="local"
+                              firstDay={new Date().getDay()}
                               nowIndicator={true}
                               allDaySlot={false}
                          />

@@ -21,8 +21,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                     timezone: "Europe/Budapest",
                     invitees: checkedInvitees.map(user => user.id), 
                     slots: selectedSlots.map(slot => ({
-                         start: slot.start,
-                         end: slot.end
+                         start: new Date(slot.start).toISOString(),
+                         end: new Date(slot.end).toISOString()
                     })),
                     url: "http://localhost:3000/meetinglink"
                };
@@ -34,6 +34,11 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                checkedInvitees.forEach((user) => {
                     console.log(`Send to: ${user.gmail}, meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id}`);
                });
+               
+               let message = checkedInvitees.map((invitee)=>{
+                    return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
+               }).join("\n")
+               alert(`meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id} \n ${message}`);
           } catch (error) {
                console.error("Failed to create meeting:", error);
           }
