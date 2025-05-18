@@ -13,7 +13,6 @@ from sqlalchemy import and_
 from sqlalchemy import func
 
 
-
 # implement pydantic for type definition later
 
 app = FastAPI()
@@ -31,7 +30,8 @@ class SlotTime(BaseModel):
     start: datetime
     end: datetime
 
-#POST register
+
+# POST register
 class RegisteredData(BaseModel):
     name: str
     gmail: str
@@ -52,6 +52,11 @@ class VoteData(BaseModel):
     slots: List[int]
 
 
+# GET register
+class RegsiteredUser(BaseModel):
+    gmail: str
+
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -63,11 +68,25 @@ def get_db():
         db.close()
 
 
-# PUT /setting/{user_id}
+# for PUT /setting/{user_id}
 class UserUpdate(BaseModel):
     id: int
     username: str
     timezone: str
+
+
+# GET /setting/{user_id}
+@app.get("/setting/{userId}")
+async def get_user_data(userId: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "username": user.username,
+        "timezone": user.timezone,
+        "gmail": user.gmail,
+    }
 
 
 # PUT /setting/{user_id}
@@ -94,14 +113,24 @@ async def update_user(
         },
     }
 
-#POST /register
+
+# POST /register/login
+@app.post("/register/login")
+async def login_user(req: RegsiteredUser, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.gmail == req.gmail).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"userId": user.id}
+
+
+# POST /register
 @app.post("/register")
 async def register_user(req: RegisteredData, db: Session = Depends(get_db)):
-    new_user = User(username=req.name, gmail= req.gmail, timezone=req.timezone)
+    new_user = User(username=req.name, gmail=req.gmail, timezone=req.timezone)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    #return auto created userId
+    # return auto created userId
     return {"userId": new_user.id}
 
 
@@ -246,6 +275,18 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     return {"message": "Meeting created", "meeting_id": meeting.id}
 
 
+# GET /meetinglink/{userId}
+@app.get("/meetinglink/timezone/{userId}")
+async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "timezone": user.timezone,
+    }
+
+
 # GET /meetinglink/{meetingId}
 @app.get("/meetinglink/{meetingId}")
 async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
@@ -271,13 +312,13 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
             )
 
     # slots
-    #slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
+    # slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
     slots = (
         db.query(
             VotedDate.id,
             VotedDate.starting_time,
             VotedDate.ending_time,
-            func.count(Vote.id).label("vote_count")
+            func.count(Vote.id).label("vote_count"),
         )
         .outerjoin(Vote, VotedDate.id == Vote.voted_date_id)
         .filter(VotedDate.meeting_id == meetingId)
@@ -285,13 +326,12 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
         .all()
     )
 
-
     available_slots = [
         {
-            "id": slot.id, 
-            "start": slot.starting_time.isoformat(), 
+            "id": slot.id,
+            "start": slot.starting_time.isoformat(),
             "end": slot.ending_time.isoformat(),
-            "vote_count": slot.vote_count
+            "vote_count": slot.vote_count,
         }
         for slot in slots
     ]
@@ -304,13 +344,15 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
     for voted_date_id in data.slots:
         vote = Vote(
-            user_id = data.user_id, 
-            voted_date_id = voted_date_id, 
-            meeting_id=meetingId
+            user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
         )
         db.add(vote)
 
-    participant = db.query(Participant).filter_by(user_id = data.user_id, meeting_id=meetingId).first()
+    participant = (
+        db.query(Participant)
+        .filter_by(user_id=data.user_id, meeting_id=meetingId)
+        .first()
+    )
     if participant:
         participant.voted = True
 

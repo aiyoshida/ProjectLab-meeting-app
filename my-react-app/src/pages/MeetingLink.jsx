@@ -14,15 +14,19 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function MeetingLink() {
-     const userId = 2; //change to login info later
+     const storedId = localStorage.getItem('userId');
+     const userId = storedId ? parseInt(storedId) : null;
      const { meetingId } = useParams();
      const [participants, setParticipants] = useState([])
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [availableSlots, setAvailableSlots] = useState([]);
+     const [timezone, setTimezone] = useState("Europe/London");
      const navigate = useNavigate();
      const goToHomePage = () => {
           navigate('/homepage');
      }
+
+
      const handleSelect = (info) => {
           if (selectedSlots.length >= 10) {
                alert("Only 10 timeslots are available!");
@@ -75,6 +79,17 @@ export default function MeetingLink() {
           alert("Failed to submit vote");
      }
 };
+
+
+     useEffect(()=>{
+          if(!userId) return;
+          axios.get(`http://localhost:8000/meetinglink/timezone/${userId}`).then(res=>{
+               setTimezone(res.timezone);
+          })
+          .catch(err=>{
+               console.error("Failed to get user's timezone", err);
+          });
+     },[userId]);
 
 
      useEffect(() => {
@@ -143,6 +158,7 @@ export default function MeetingLink() {
 
                     <div style={{ width: "95%" }}>
                          <FullCalendar
+                              timeZone={timezone}
                               selectable={true}
                               selectAllow={(selectInfo) => {
                                    return availableSlots.some(slot =>
@@ -156,6 +172,7 @@ export default function MeetingLink() {
                                         start: slot.start,
                                         end: slot.end,
                                         display: 'background',
+                                        timezone:timezone,
                                         allDay: false,
                                         backgroundColor: '#a2d5f2',  
                                         className: 'calendar-available-slot',
@@ -173,7 +190,6 @@ export default function MeetingLink() {
                               plugins={[timeGridPlugin, interactionPlugin]}
                               initialView="timeGridWeek"
                               slotDuration="00:30:00"
-                              timeZone="local"
                               firstDay={new Date().getDay()}
                               nowIndicator={true}
                               allDaySlot={false}

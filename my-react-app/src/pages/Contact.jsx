@@ -9,7 +9,8 @@ import axios from "axios"
 
 function Contact(){
      const [contacts, setContacts] = useState([])
-     const userId = 1 //later takethis id from login info
+     const storedId = localStorage.getItem('userId');
+     const userId = storedId ? parseInt(storedId) : null;
      useEffect(()=>{
           axios
           .get(`http://localhost:8000/contact/${userId}`)

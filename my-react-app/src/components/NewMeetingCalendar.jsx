@@ -10,7 +10,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle="" }) {
-     const userId = 1
+     const storedId = localStorage.getItem('userId');
+     const userId = storedId ? parseInt(storedId) : null;
      
 
      const handleShare = async () => {
@@ -26,6 +27,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                     })),
                     url: "http://localhost:3000/meetinglink"
                };
+               console.log(payload);
 
                const response = await axios.post(`http://localhost:8000/newmeeting/${userId}`, payload);
                console.log("Meeting created:", response.data);

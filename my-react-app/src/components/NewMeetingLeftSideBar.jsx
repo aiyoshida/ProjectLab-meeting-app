@@ -7,7 +7,8 @@ import axios from "axios"
 export default function NewMeetingLeftSideBar({ checkedInvitees = [], setCheckedInvitees, meetingTitle = "", setMeetingTitle }) {
      const [invitees, setInvitees] = useState([])
 
-     const userId = 1
+     const storedId = localStorage.getItem('userId');
+     const userId = storedId ? parseInt(storedId) : null;
 
      const handleCheck = (invitee) => {
           const alreadyChecked = checkedInvitees.some(i => i.id === invitee.id)
