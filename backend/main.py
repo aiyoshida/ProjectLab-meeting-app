@@ -31,6 +31,12 @@ class SlotTime(BaseModel):
     start: datetime
     end: datetime
 
+#POST register
+class RegisteredData(BaseModel):
+    name: str
+    gmail: str
+    timezone: str
+
 
 class NewMeetingData(BaseModel):
     title: str
@@ -87,6 +93,16 @@ async def update_user(
             "gmail": user.gmail,
         },
     }
+
+#POST /register
+@app.post("/register")
+async def register_user(req: RegisteredData, db: Session = Depends(get_db)):
+    new_user = User(username=req.name, gmail= req.gmail, timezone=req.timezone)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    #return auto created userId
+    return {"userId": new_user.id}
 
 
 # http://localhost:3000/contact
