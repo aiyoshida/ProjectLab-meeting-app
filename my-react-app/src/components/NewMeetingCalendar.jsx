@@ -1,10 +1,14 @@
 import { gapi } from 'gapi-script';
+import { Calendar } from '@fullcalendar/core';
+import momentPlugin from '@fullcalendar/moment';
 import React, { useState, useEffect } from "react";
 import './NewMeetingCalendar.css';
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
+import moment from "moment-timezone";
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -12,18 +16,35 @@ import { useNavigate } from 'react-router-dom';
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle="" }) {
      const storedId = localStorage.getItem('userId');
      const userId = storedId ? parseInt(storedId) : null;
+      const [selectedSlots, setSelectedSlots] = useState([]);
+      const [timezone, setTimezone] = useState("Europe/Budapest");
+
+     useEffect(()=>{
+          console.log(userId);
+          if(!userId) 
+               alert("There is no userId available!");
+          console.log("initial timezone: ", timezone);
+          axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`).then(res=>{
+               setTimezone(res.data.timezone);
+               console.log("Received timezone: ", res.data.timezone);
+          })
+          .catch(err=>{
+               console.error("Failed to get user's timezone", err);
+          });
      
+     },[userId]);
+
 
      const handleShare = async () => {
           try {
                const payload = {
                     title: meetingTitle,
                     creator_user_id: userId,
-                    timezone: "Europe/Budapest",
+                    timezone: timezone,
                     invitees: checkedInvitees.map(user => user.id), 
                     slots: selectedSlots.map(slot => ({
-                         start: new Date(slot.start).toISOString(),
-                         end: new Date(slot.end).toISOString()
+                         start: slot.start,
+                         end: slot.end
                     })),
                     url: "http://localhost:3000/meetinglink"
                };
@@ -49,23 +70,32 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
      const goToHomePage = () => {
           navigate('/homepage');
      }
-     const [selectedSlots, setSelectedSlots] = useState([]);
-     const handleSelect = (info) => {
+
+
+ const handleSelect = (info) => {
           if (selectedSlots.length >= 10) {
                alert("Only 10 timeslots are available!");
                return;
           }
-          const newStart = info.start.toISOString();
-          const alreadySelected = selectedSlots.some(slot => slot.start.toISOString() === newStart);
-          if (alreadySelected) {
+          console.log(info);
+               const newStart = moment.tz(info.start, "Europe/Budapest").utc().toISOString();
+               const newEnd = moment.tz(info.end, "Europe/Budapest").utc().toISOString();
+
+               const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
+
+               if (alreadySelected) {
                alert("This timeslot is already selected!");
                return;
-          }
-          setSelectedSlots([...selectedSlots, {
-               start: info.start,
-               end: info.end,
-          }]);
+               }
+
+               setSelectedSlots([...selectedSlots, {
+               start: newStart,
+               end: newEnd,
+               }]);
+          console.log("selectedslots: ", selectedSlots);
      };
+
+
 
 
 
@@ -77,11 +107,12 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                <button onClick={goToHomePage} className="calendar-container-close">✕</button>
 
 
-               <div style={{ width: "95%" }}>
+              <div style={{ width: "95%" }}>
                     <FullCalendar
+                         timeZone={timezone}
                          selectable={true}
                          select={handleSelect}
-                         plugins={[timeGridPlugin, interactionPlugin]}
+                         plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
                          initialView="timeGridWeek"
                          slotDuration="00:30:00"
                          slotMinTime="09:00:00"
@@ -92,10 +123,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                               hour12: false
                          }}
                          height="auto"
-                         nowIndicator={true}
                          allDaySlot={false}
                          firstDay={new Date().getDay()}
-                         timeZone="local"
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,

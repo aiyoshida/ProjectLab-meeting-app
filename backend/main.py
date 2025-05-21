@@ -8,8 +8,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
-from datetime import datetime, timedelta
-from sqlalchemy import and_
+from datetime import datetime
 from sqlalchemy import func
 
 
@@ -52,7 +51,7 @@ class VoteData(BaseModel):
     slots: List[int]
 
 
-# GET register
+# for GET register
 class RegsiteredUser(BaseModel):
     gmail: str
 
@@ -161,10 +160,11 @@ async def get_contactlist(userId: int, db: Session = Depends(get_db)):
 # GET /homepage/{userId}
 @app.get("/homepage/{userId}")
 async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
-    meetings = db.query(Meeting).filter(Meeting.creator_user_id == userId).all()
+    participating_meeting = db.query(Participant).filter(Participant.user_id == userId).all()
 
     result = []
-    for meeting in meetings:
+    # ⭐️ working on progress
+    for meeting in participating_meeting:
         participants = (
             db.query(Participant).filter(Participant.meeting_id == meeting.id).all()
         )
@@ -228,6 +228,18 @@ async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
     return {"contacts": result}
 
 
+#GET /newmeeting/timezone/{userId}
+@app.get("/newmeeting/timezone/{userId}")
+async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    print(user.timezone)
+    return {
+        "timezone": user.timezone,
+    }
+
+
 # POST /newmeeting/{userId}
 @app.post("/newmeeting/{userId}")
 async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
@@ -275,13 +287,13 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     return {"message": "Meeting created", "meeting_id": meeting.id}
 
 
-# GET /meetinglink/{userId}
+# GET /meetinglink/timezone/{userId}
 @app.get("/meetinglink/timezone/{userId}")
 async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
+    print(user.timezone)
     return {
         "timezone": user.timezone,
     }
