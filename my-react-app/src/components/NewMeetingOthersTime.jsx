@@ -2,13 +2,32 @@ import './NewMeetingOthersTime.css';
 import getBaseTime from '../utils/getBaseTime';
 import React from "react";
 import { DateTime } from 'luxon';
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 
 export default function NewMeetingOthersTime({checkedInvitees=[]}) {
+     const [timezone, setTimezone] = useState("Europe/Budapest");
 
      //basetime 
-     const basetime = getBaseTime();
+     const basetime = getBaseTime(timezone);
+     const storedId = localStorage.getItem('userId');
+     const userId = storedId ? parseInt(storedId) : null;
      console.log("checkedInvitees:", checkedInvitees)
+
+
+          //get userId's timezone
+     useEffect(() => {
+          axios
+               .get(`http://localhost:8000/newmeetingothers/timezone/${userId}`)
+               .then((res) => {
+               setTimezone(res.data.timezone)
+               console.log(res.data.timezone);
+          })
+               .catch ((err) => {
+               console.error("error: ", err)
+          })
+},[])
 
 
      return(

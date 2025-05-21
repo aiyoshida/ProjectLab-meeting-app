@@ -160,13 +160,15 @@ async def get_contactlist(userId: int, db: Session = Depends(get_db)):
 # GET /homepage/{userId}
 @app.get("/homepage/{userId}")
 async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
-    participating_meeting = db.query(Participant).filter(Participant.user_id == userId).all()
+    participating_meeting = db.query(Participant).filter(Participant.user_id == userId, Participant.meeting_id != None).all()
 
     result = []
     # ⭐️ working on progress
     for meeting in participating_meeting:
+        if not meeting:
+            continue 
         participants = (
-            db.query(Participant).filter(Participant.meeting_id == meeting.id).all()
+            db.query(Participant).filter(Participant.meeting_id == meeting.meeting_id).all()
         )
         participant_names = []
 
@@ -177,11 +179,11 @@ async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
 
         result.append(
             {
-                "id": meeting.id,
-                "title": meeting.title,
-                "date": meeting.created_at.strftime("%Y %b %d"),
+                "id": meeting.meeting_id,
+                "title": meeting.meeting.title,
+                "date": meeting.meeting.created_at.strftime("%Y %b %d"),
                 "participants": participant_names,
-                "url": meeting.url,
+                "url": meeting.meeting.url,
             }
         )
 
@@ -200,6 +202,9 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
         synchronize_session=False
     )
     db.query(Participant).filter(Participant.meeting_id.is_(None)).delete(
+        synchronize_session=False
+    )
+    db.query(Vote).filter(Vote.meeting_id.is_(None)).delete(
         synchronize_session=False
     )
     db.delete(meeting)
@@ -226,6 +231,18 @@ async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
     ]
 
     return {"contacts": result}
+
+
+# GET newmeeting/timezone/${useId}
+@app.get("newmeeting/timezone/{userId}")
+async def get_newmeeting_timezone(userId: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    print(user.timezone)
+    return {
+        "timezone": user.timezone,
+    }
 
 
 #GET /newmeeting/timezone/{userId}
@@ -353,7 +370,7 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 
 # POST /meetinglink/{meetingId}/vote
 @app.post("/meetinglink/{meetingId}/vote")
-def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
+async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
     for voted_date_id in data.slots:
         vote = Vote(
             user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
@@ -370,3 +387,15 @@ def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
 
     db.commit()
     return {"message": "Vote submitted!"}
+
+
+# GET newmeetingothers/timezone/${userId}
+@app.get("/newmeetingothers/timezone/{userId}")
+async def get_getbasetime_timezone(userId: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    print(user.timezone)
+    return {
+        "timezone": user.timezone,
+    }
