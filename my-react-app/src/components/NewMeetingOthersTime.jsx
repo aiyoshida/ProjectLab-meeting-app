@@ -35,7 +35,7 @@ export default function NewMeetingOthersTime({checkedInvitees=[]}) {
                
           <div className="othertimezone-header-row">
                {checkedInvitees.map((tz) =>(
-                    <div key={tz.id} className="othertimezone-head-item"> {tz.timezone}</div>
+                    <div key={tz.id} className="othertimezone-head-item"> {tz.timezone.split("/").pop()}</div>
                ))}
           </div>
 
@@ -43,9 +43,8 @@ export default function NewMeetingOthersTime({checkedInvitees=[]}) {
                {basetime.map((slot,idx)=>(
                     <div className="othertimezone-time-row" key={idx}>
                          {checkedInvitees.map((tz)=>(
-
                           <div key={tz.id} className="othertimezone-time-item">
-                              {slot.setZone(tz.timezone).toFormat("HH:mm")}
+                              <div>{slot.setZone(tz.timezone).toFormat("HH:mm")}</div>
                          </div>
                          ))}
                     </div>
