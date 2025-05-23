@@ -34,8 +34,8 @@ export default function MeetingLink() {
                return;
           }
           console.log("handleSelect: ", info);
-          const newStart = info.start.toISOString();
-          const alreadySelected = selectedSlots.some(slot => slot.start.toISOString() === newStart);
+          const newStart = moment(info.start).format("YYYY-MM-DDTHH:mm");
+          const alreadySelected = selectedSlots.some(slot => moment(slot.start).format("YYYY-MM-DDTHH:mm") === newStart);
           if (alreadySelected) {
                alert("This timeslot is already selected!");
                return;
