@@ -3,16 +3,17 @@ import icon from '../images/icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react"
 import axios from "axios"
-
+import moment from "moment-timezone";
 
 export default function Setting() {
      const navigate = useNavigate();
      const goToHomePage = () => {
           navigate('/homepage');
      }
-     const [username, setUsername] = useState("")
-     const [timezone, setTimezone] = useState("")
-     const [gmail, setGmail] = useState("");
+     const [username, setUsername] = useState("No user name")
+     const [timezone, setTimezone] = useState("UTC")
+     const timezones = moment.tz.names(); //list of all timezone with IANA
+     const [gmail, setGmail] = useState("example@gmail.com");
      const storedId = localStorage.getItem('userId');
      const userId = storedId ? parseInt(storedId) : null;
 
@@ -101,11 +102,12 @@ export default function Setting() {
                               Time Zone
                               <select className="settings-select" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
                                    <option>Choose your timezone</option>
-                                   <option value="Asia/Tokyo">Asia/Tokyo</option>
-                                   <option value="Europe/Budapest">Europe/Budapest</option>
-                                   <option value="Asia/Amman">Asia/Amman</option>
-                                   <option value="Asia/Baku">Asia/Baku</option>
-                                   <option value="America/Toronto">America/Toronto</option>
+                                   {timezones.map((tz)=>(
+                                        <option key={tz} value={tz}>
+                                             {tz}
+                                   </option>
+                                   ))}
+
                               </select>
                          </label>
 
