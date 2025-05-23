@@ -45,7 +45,7 @@ export default function NewMeetingOthersTime({checkedInvitees=[]}) {
                          {checkedInvitees.map((tz)=>(
 
                           <div key={tz.id} className="othertimezone-time-item">
-                              {slot.setZone(tz.timezone).toFormat("H:mm")}
+                              {slot.setZone(tz.timezone).toFormat("HH:mm")}
                          </div>
                          ))}
                     </div>
