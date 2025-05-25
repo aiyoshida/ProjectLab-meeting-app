@@ -1,4 +1,3 @@
-import { gapi } from 'gapi-script';
 import { Calendar } from '@fullcalendar/core';
 import momentPlugin from '@fullcalendar/moment';
 import React, { useState, useEffect } from "react";
@@ -13,26 +12,26 @@ import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { useNavigate } from 'react-router-dom';
 
 
-export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle="" }) {
+export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "" }) {
      const storedId = localStorage.getItem('userId');
      const userId = storedId ? parseInt(storedId) : null;
-      const [selectedSlots, setSelectedSlots] = useState([]);
-      const [timezone, setTimezone] = useState("Europe/Budapest");
+     const [selectedSlots, setSelectedSlots] = useState([]);
+     const [timezone, setTimezone] = useState("Europe/Budapest");
 
-     useEffect(()=>{
+     useEffect(() => {
           console.log(userId);
-          if(!userId) 
+          if (!userId)
                alert("There is no userId available!");
           console.log("initial timezone: ", timezone);
-          axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`).then(res=>{
+          axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`).then(res => {
                setTimezone(res.data.timezone);
                console.log("Received timezone: ", res.data.timezone);
           })
-          .catch(err=>{
-               console.error("Failed to get user's timezone", err);
-          });
-     
-     },[userId]);
+               .catch(err => {
+                    console.error("Failed to get user's timezone", err);
+               });
+
+     }, [userId]);
 
 
      const handleShare = async () => {
@@ -41,7 +40,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                     title: meetingTitle,
                     creator_user_id: userId,
                     timezone: timezone,
-                    invitees: checkedInvitees.map(user => user.id), 
+                    invitees: checkedInvitees.map(user => user.id),
                     slots: selectedSlots.map(slot => ({
                          start: slot.start,
                          end: slot.end
@@ -57,8 +56,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                checkedInvitees.forEach((user) => {
                     console.log(`Send to: ${user.gmail}, meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id}`);
                });
-               
-               let message = checkedInvitees.map((invitee)=>{
+
+               let message = checkedInvitees.map((invitee) => {
                     return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
                }).join("\n")
                alert(`meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id} \n ${message}`);
@@ -72,31 +71,30 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
      }
 
 
- const handleSelect = (info) => {
+     const handleSelect = (info) => {
           if (selectedSlots.length >= 10) {
                alert("Only 10 timeslots are available!");
                return;
           }
           console.log(info);
-               const newStart = moment.tz(info.start, "Europe/Budapest").utc().toISOString();
-               const newEnd = moment.tz(info.end, "Europe/Budapest").utc().toISOString();
+          //make the selected slot UTC time and save to selected timeslots.
+          const newStart = moment.parseZone(info.startStr).utc().toISOString();
+          const newEnd = moment.parseZone(info.endStr).utc().toISOString();
+          console.log("newStart", newStart);
 
-               const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
+          const alreadySelected = selectedSlots.some(slot => slot.start === newStart); 
 
-               if (alreadySelected) {
+          if (alreadySelected) {
                alert("This timeslot is already selected!");
                return;
-               }
+          }
 
-               setSelectedSlots([...selectedSlots, {
+          setSelectedSlots([...selectedSlots, {
                start: newStart,
                end: newEnd,
-               }]);
+          }]);
           console.log("selectedslots: ", selectedSlots);
      };
-
-
-
 
 
 
@@ -107,7 +105,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                <button onClick={goToHomePage} className="calendar-container-close">✕</button>
 
 
-              <div style={{ width: "95%" }}>
+               <div style={{ width: "95%" }}>
                     <FullCalendar
                          timeZone={timezone}
                          selectable={true}
@@ -124,7 +122,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle=
                          }}
                          height="auto"
                          allDaySlot={false}
-                         firstDay={new Date().getDay()}
+                         firstDay={new Date().getDay()} 
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,

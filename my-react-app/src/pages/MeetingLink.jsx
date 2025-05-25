@@ -11,6 +11,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios"
 import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 
 
 
@@ -34,15 +35,15 @@ export default function MeetingLink() {
                return;
           }
           console.log("handleSelect: ", info);
-          const newStart = moment(info.start).format("YYYY-MM-DDTHH:mm");
-          const alreadySelected = selectedSlots.some(slot => moment(slot.start).format("YYYY-MM-DDTHH:mm") === newStart);
+          const newStart = moment.utc(info.startStr);
+          const alreadySelected = selectedSlots.some(slot => moment.utc(slot.startStr).isSame(newStart, "munite"));
           if (alreadySelected) {
                alert("This timeslot is already selected!");
                return;
           }
           setSelectedSlots([...selectedSlots, {
-               start: info.start.toISOString(),//idk why but UTC is Japanese time (utc+9) is here.
-               end: info.end.toISOString(),
+               start: moment.parseZone(info.startStr).utc().toISOString(),
+               end: moment.parseZone(info.endStr).utc().toISOString(),
           }]);
      };
 
@@ -56,14 +57,15 @@ export default function MeetingLink() {
           //since gettime is too precise, use +-1sec
 const voted_date_ids = selectedSlots.map(slot => {
   const match = availableSlots.find(s => {
-    const startFormattedS = moment.utc(s.start).tz(timezone).format("YYYY-MM-DD-HH-mm");
-    const startFormattedSlot = moment.utc(slot.start).format("YYYY-MM-DD-HH-mm");
+     {/*compare with UTC time*/}
+    const startFormattedS = moment.utc(s.start);
+    const startFormattedSlot = moment.utc(slot.start);
 
-    const endFormattedS = moment.utc(s.end).tz(timezone).format("YYYY-MM-DD-HH-mm");
-    const endFormattedSlot = moment.utc(slot.end).format("YYYY-MM-DD-HH-mm");
+    const endFormattedS = moment.utc(s.end);
+    const endFormattedSlot = moment.utc(slot.end);
 
-    const startMatch = startFormattedS === startFormattedSlot;
-    const endMatch = endFormattedS === endFormattedSlot;
+    const startMatch = startFormattedS.isSame(startFormattedSlot, "minute");
+    const endMatch = endFormattedS.isSame(endFormattedSlot, "minute");
 
     return startMatch && endMatch;
   });
@@ -96,7 +98,7 @@ const voted_date_ids = selectedSlots.map(slot => {
      }
 };
 
-
+     //get main user's timezone
      useEffect(()=>{
           console.log(userId);
           if(!userId) 
@@ -112,7 +114,7 @@ const voted_date_ids = selectedSlots.map(slot => {
      
      },[userId]);
 
-
+     //get participants' info and available slots
      useEffect(() => {
           if (!meetingId) return;
           console.log(timezone);
@@ -165,6 +167,8 @@ const voted_date_ids = selectedSlots.map(slot => {
                                         <div className = "meeting-link-votes" key={date.id}>
                                              {moment.utc(date.start).tz(timezone).format("YYYY/MM/DD (ddd) HH:mm")}〜
                                              {moment.utc(date.end).tz(timezone).format("HH:mm")} #votes: {date.vote_count}
+                                             {console.log("date start: ", date.start)}
+                                             {console.log("date start: ", date.end)}
                                         </div>
 
                               ))}
@@ -188,19 +192,20 @@ const voted_date_ids = selectedSlots.map(slot => {
                               timeZone={timezone}
                               selectable={true}
                                    selectAllow={(selectInfo) => {
-                                   console.log(selectInfo);
-                                   const selectedStart = moment.utc(selectInfo.start).format("YYYY-MM-DDTHH:mm");
-                                   const selectedEnd = moment.utc(selectInfo.end).format("YYYY-MM-DDTHH:mm");
+                                   console.log("selectedInfo OBJ", selectInfo);
+                                   {/*since ISOString cannot directly compared.compare with UTC*/}
+                                   const selectedStart = moment.utc(selectInfo.startStr);
+                                   const selectedEnd = moment.utc(selectInfo.endStr);
                                    console.log(selectInfo.start);
                                    console.log(selectInfo.end);
-                                   console.log("waaaaa", selectedStart, selectedEnd);
+                                   console.log("selectInfo: ", selectedStart, selectedEnd);
 
                                    return availableSlots.some(slot => {
-                                   const slotStart = moment.utc(slot.start).tz(timezone).format("YYYY-MM-DDTHH:mm");
-                                   const slotEnd = moment.utc(slot.end).tz(timezone).format("YYYY-MM-DDTHH:mm");
-                                   console.log("wiiiiiii", slotStart, slotEnd);
+                                   const slotStart = moment.utc(slot.start);
+                                   const slotEnd = moment.utc(slot.end);
+                                   console.log("availableSlot", slotStart, slotEnd);
 
-                                   return slotStart === selectedStart && slotEnd === selectedEnd;
+                                   return selectedStart.isSame(slotStart, 'minute') && selectedEnd.isSame(slotEnd, 'minute');
                                    });
                                    }}
                               select={handleSelect}
@@ -224,7 +229,7 @@ const voted_date_ids = selectedSlots.map(slot => {
                                    ,
                               ]}
                               
-                              plugins={[timeGridPlugin, interactionPlugin]}
+                              plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
                               initialView="timeGridWeek"
                               slotDuration="00:30:00"
                               firstDay={new Date().getDay()}

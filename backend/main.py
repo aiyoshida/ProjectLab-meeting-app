@@ -257,7 +257,7 @@ async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
     }
 
 
-# POST /newmeeting/{userId}
+# POST /newmeeting/{userId}  create new meeting
 @app.post("/newmeeting/{userId}")
 async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     # Meeting
