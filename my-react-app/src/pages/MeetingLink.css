@@ -1,0 +1,61 @@
+.meeting-link {
+     top: 0;
+     left: 0;
+     position: fixed;
+     width: 450px;
+     height: 100vh;
+}
+
+.meeting-link-brand-row {
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     padding-left: 100px;
+}
+
+.meeting-link-icon {
+     width: 40px;
+}
+
+.meeting-link-brand{
+     font-size: 30px;
+     font-family: italiana;
+}
+
+
+.meeting-link-section{
+     padding-left: 40px;
+}
+
+.meeting-link-participants{
+     font-size: 20px;
+}
+
+.new-leftsidebar-status{
+     padding-left: 30px;
+}
+
+.new-leftsidebar-invite-item{
+     padding:10px;
+}
+
+.fc-event.calendar-available-slot {
+  opacity: 0.6;
+}
+
+.fc-event.calendar-selected-slot {
+  opacity: 0.9;
+  box-shadow: 0 0 4px #c62828;
+}
+
+.meeting-link-vote-dates{
+     font-size: 20px;
+     padding-left: 30px;
+}
+
+.meeting-link-votes{
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     padding-left: 10px;
+}
