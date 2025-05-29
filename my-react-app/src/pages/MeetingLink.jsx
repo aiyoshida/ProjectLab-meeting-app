@@ -169,6 +169,7 @@ const voted_date_ids = selectedSlots.map(slot => {
                                              {moment.utc(date.end).tz(timezone).format("HH:mm")} #votes: {date.vote_count}
                                              {console.log("date start: ", date.start)}
                                              {console.log("date start: ", date.end)}
+                                             {console.log("waAAAAA", moment("2025-05-25T03:00:00").tz(timezone).format("YYYY/MM/DD HH:mm"))}
                                         </div>
 
                               ))}
