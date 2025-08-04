@@ -3,6 +3,9 @@ import icon from '../images/icon.png';
 import plus from '../images/plus.svg'
 import home from '../images/home.svg'
 import contact from '../images/contact.svg'
+import account from '../images/account.svg'
+import logout from '../images/logout.svg'
+import setting from '../images/setting.svg'
 import { useNavigate } from 'react-router-dom';
 
 export default function LeftSidebar() {
@@ -22,7 +25,8 @@ export default function LeftSidebar() {
 
 
      return (
-          <div className="left-sidebar">
+ 
+          <div className="w-72 shrink-0 flex min-h-dvh flex-col justify-between border-e border-gray-100 bg-white">
                {/* <div className="leftside-brand-row">
                          <img src={icon} alt='icon' className="leftside-icon"/>
                          <h3 className="leftside-brand">AcrossTime</h3>
@@ -72,7 +76,7 @@ export default function LeftSidebar() {
                               <li>
                                    <a
                                         href="#"
-                                        className="flex  gap-2 block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                        className="flex items-center gap-2 block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         onClick={goToHomePage}
                                    >
                                         <img src={home} alt="home" className="w-4 h-4"/>
@@ -83,7 +87,7 @@ export default function LeftSidebar() {
                               <li>
                                    <a
                                         href="#"
-                                        className="flex gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                        className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         
                                         onClick={goToContact}
                                    >
@@ -93,11 +97,17 @@ export default function LeftSidebar() {
                               </li>
 
                               <li>
+                              
                                    <details className="group [&_summary::-webkit-details-marker]:hidden">
+                                        
                                         <summary
                                              className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         >
-                                             <span className="text-sm font-medium"> Account </span>
+                                             
+                                             <span className="flex items-center gap-2 text-sm font-medium"> 
+                                                  <img src={account} alt="account" className="w-4 h-4"/>
+                                                  Account </span>
+                                             
 
                                              <span className="shrink-0 transition duration-300 group-open:-rotate-180">
                                                   <svg
@@ -119,9 +129,10 @@ export default function LeftSidebar() {
                                              <li>
                                                   <a
                                                        href="#"
-                                                       className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                                       className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                                        onClick={goToSettingPage}
                                                   >
+                                                       <img src={setting} alt="setting" className="w-4 h-4"/>
                                                        Setting
                                                   </a>
                                              </li>
@@ -129,8 +140,9 @@ export default function LeftSidebar() {
                                              <li>
                                                   <a
                                                        href="#"
-                                                       className="w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                                       className="flex items-center gap-2 w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                                   >
+                                                       <img src={logout} alt="logout" className="w-4 h-4"/>
                                                        Logout
                                                   </a>
                                              </li>
@@ -142,6 +154,6 @@ export default function LeftSidebar() {
 
                </div>
           </div>
-
+           
      );
 }
