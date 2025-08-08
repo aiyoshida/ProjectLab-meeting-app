@@ -1,4 +1,3 @@
-import './Contact.css';
 import LeftSidebar from '../components/LeftSidebar';
 import NavSetting from '../components/NavSetting';
 import MeetingCard from '../components/MeetingCard';
@@ -26,12 +25,12 @@ function Contact(){
            <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
                 <LeftSidebar/>
 
-                <main className="min-h-dvh bg-[#f6e5e7] p-8">
-                    <section className="max-w-3xl mx-auto">
-                         <h1 className="text-left text-xl font-semibold text-gray-700 p-8">
+                <main className="min-h-dvh bg-[#f6e5e7] p-10">
+                    
+                         <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
                               Contact
                          </h1>
-
+                    <section className="max-w-3xl mx-auto">
                          
                     </section>
                

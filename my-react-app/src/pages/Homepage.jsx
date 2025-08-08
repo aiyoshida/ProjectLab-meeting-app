@@ -1,6 +1,8 @@
 import LeftSidebar from "../components/LeftSidebar";
 import MeetingCard from "../components/MeetingCard";
 import bin from '../images/bin.svg';
+import time from '../images/time.svg';
+import calendar from '../images/calendar.svg';
 import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react"
@@ -53,52 +55,50 @@ function Homepage() {
                     </div>
                </div> */}
 
-               <main className="min-h-dvh bg-[#f6e5e7] p-8">
-                    <section className="max-w-3xl mx-auto">
-                         <h1 className="text-left text-xl font-semibold text-gray-700 p-8">
-                              Meeting List
-                         </h1>
-
-                         <a href="#" className="block rounded-md border border-gray-300 bg-white p-4 shadow-sm sm:p-6 w-96 rounded-10">
-                              <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
-                                   <div className="mt-4 sm:mt-0">
-                                        <h3 className="text-lg font-medium text-pretty text-gray-900">
-                                             Thesis consulting meeting
-                                        </h3>
-
-                                        <p className="mt-1 text-sm text-gray-700">Created By Ai Yoshida</p>
-
-                                        <p className="mt-4 line-clamp-2 text-sm text-pretty text-gray-700">Participants :</p>
-                                   </div>
-                              </div>
-
-                              <dl className="mt-6 flex gap-4 lg:gap-6">
-                                   <div className="flex items-center gap-2">
-                                        <dd className="text-xs text-gray-700">Date : 31/06/2025</dd>
+               <main className="min-h-dvh bg-[#f6e5e7] p-10 ">
+                    <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11 ">
+                         Meeting List
+                    </h1>
+                    <div class="grid grid-cols-2 ml-20">
+                         {cards.map((meeting) => (
+                         <section key={meeting.id} className="max-w-3xl mb-10">
+                              <a href="#" className="block rounded-md border border-gray-300 bg-white shadow-sm sm:p-6 w-96">
+                                   <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
+                                        <div className="mt-4 sm:mt-0">
+                                             <h3 className="text-lg font-medium text-pretty text-gray-900">{meeting.title}</h3>
+                                             <p className="mt-1 text-sm text-gray-700">Created By {meeting.creator}</p>
+                                             <p className="mt-4 line-clamp-2 text-sm text-pretty text-gray-700">Participants :{meeting.participants}</p>
+                                        </div>
                                    </div>
 
-                                   <div className="flex items-center gap-2">
-                                        <dt className="text-gray-700">
-                                        </dt>
+                                   <dl className="mt-6 flex gap-4 lg:gap-6">
+                                        <div className="flex items-center gap-1">
+                                             <img src={calendar} alt="calendar" className="w-4 h-4" />
+                                             <dd className="text-xs text-gray-700">Date : 31/06/2025</dd>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                             <img src={time} alt="time" className="w-4 h-4" />
+                                             <dd className="text-xs text-gray-700">30 minutes</dd>
+                                        </div>
+                                        <img src={bin} alt="bin" className="w-6 h-6" />
+                                   </dl>
+                              </a>
+                         </section>
 
-                                        <dd className="text-xs text-gray-700">30 minutes</dd>
-                                   </div>
+                        
 
-                                    <img src={bin} alt="bin" className="w-4 h-4"/>
+                    ))}
 
-                              </dl>
+                        
 
-                              
-                         </a>
-
-                         {/*ここは後で自動で4つ以上になったら次のページに行くし、ボタンの自動生成も必要。 */}
-                         <div className="flex join mt-8 justify-center ">
-                              <button className="join-item btn btn-active">1</button>
-                              <button className="join-item btn ">2</button>
-                              <button className="join-item btn">3</button>
-                              <button className="join-item btn">4</button>
-                         </div>
-                    </section>
+                    </div>
+                    {/*ここは後で自動で4つ以上になったら次のページに行くし、ボタンの自動生成も必要。 */}
+                    <div className="flex join mt-8 justify-center ">
+                         <button className="join-item btn btn-active">1</button>
+                         <button className="join-item btn ">2</button>
+                         <button className="join-item btn">3</button>
+                         <button className="join-item btn">4</button>
+                    </div>
 
 
 
