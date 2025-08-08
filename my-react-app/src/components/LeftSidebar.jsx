@@ -19,13 +19,17 @@ export default function LeftSidebar() {
      const goToHomePage = () => {
           navigate('/homepage');
      }
-          const goToSettingPage = () => {
+     const goToSettingPage = () => {
           navigate('/setting');
      }
 
+     const handleLogout = () => {
+          localStorage.removeItem('userId');
+          navigate('/register');
+     };
 
      return (
- 
+
           <div className="w-72 shrink-0 flex min-h-dvh flex-col justify-between border-e border-gray-100 bg-white">
                {/* <div className="leftside-brand-row">
                          <img src={icon} alt='icon' className="leftside-icon"/>
@@ -68,7 +72,7 @@ export default function LeftSidebar() {
                                         className="flex items-center gap-2  rounded-lg  px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         onClick={goToNewMeeting}
                                    >
-                                         <img src={plus} alt="plus" className="w-4 h-4"/>
+                                        <img src={plus} alt="plus" className="w-4 h-4" />
                                         Create
                                    </a>
                               </li>
@@ -79,7 +83,7 @@ export default function LeftSidebar() {
                                         className="flex items-center gap-2 block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         onClick={goToHomePage}
                                    >
-                                        <img src={home} alt="home" className="w-4 h-4"/>
+                                        <img src={home} alt="home" className="w-4 h-4" />
                                         Home
                                    </a>
                               </li>
@@ -88,26 +92,26 @@ export default function LeftSidebar() {
                                    <a
                                         href="#"
                                         className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                                        
+
                                         onClick={goToContact}
                                    >
-                                        <img src={contact} alt="contact" className="w-4 h-4"/>
+                                        <img src={contact} alt="contact" className="w-4 h-4" />
                                         Contact
                                    </a>
                               </li>
 
                               <li>
-                              
+
                                    <details className="group [&_summary::-webkit-details-marker]:hidden">
-                                        
+
                                         <summary
                                              className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                         >
-                                             
-                                             <span className="flex items-center gap-2 text-sm font-medium"> 
-                                                  <img src={account} alt="account" className="w-4 h-4"/>
+
+                                             <span className="flex items-center gap-2 text-sm font-medium">
+                                                  <img src={account} alt="account" className="w-4 h-4" />
                                                   Account </span>
-                                             
+
 
                                              <span className="shrink-0 transition duration-300 group-open:-rotate-180">
                                                   <svg
@@ -132,7 +136,7 @@ export default function LeftSidebar() {
                                                        className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                                        onClick={goToSettingPage}
                                                   >
-                                                       <img src={setting} alt="setting" className="w-4 h-4"/>
+                                                       <img src={setting} alt="setting" className="w-4 h-4" />
                                                        Setting
                                                   </a>
                                              </li>
@@ -141,8 +145,9 @@ export default function LeftSidebar() {
                                                   <a
                                                        href="#"
                                                        className="flex items-center gap-2 w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                                       onClick={handleLogout}
                                                   >
-                                                       <img src={logout} alt="logout" className="w-4 h-4"/>
+                                                       <img src={logout} alt="logout" className="w-4 h-4" />
                                                        Logout
                                                   </a>
                                              </li>
@@ -154,6 +159,6 @@ export default function LeftSidebar() {
 
                </div>
           </div>
-           
+
      );
 }

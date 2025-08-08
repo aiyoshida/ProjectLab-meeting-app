@@ -22,30 +22,55 @@ function Contact(){
           })
      },[])
      return(
-          <div>
-               <LeftSidebar/>
+
+           <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
+                <LeftSidebar/>
+
+                <main className="min-h-dvh bg-[#f6e5e7] p-8">
+                    <section className="max-w-3xl mx-auto">
+                         <h1 className="text-left text-xl font-semibold text-gray-700 p-8">
+                              Contact
+                         </h1>
+
+                         
+                    </section>
                
-             <div className="contact-container">
-             <NavSetting/>
+               </main>      
 
-               <h2 className="contact-container-title">Contact</h2>
-               <input className="contact-container-search" placeholder="search contact"/>
+                
+           </div>
 
-               {/*mapを使って、mockdataにある情報を書き出す。*/}
-               {/*将来的に、データベースに繋げて、+を追加済みかそうでないかで*/}
-               {/*gmailが存在するかのsearchはどうしたらいいんだろうか？*/}
-               {/*⭐️ やること:あとで名前とemailの始まりを揃える*/}
-               <div className="contact-container-contact-background">
-               {contacts.map((contact)=>(
-                    <div className="contact-container-contact-row" key={contact.id}>
-                         <div className="contact-container-contact-name"> {contact.name}</div>
-                         <div className="contact-container-contact-email">{contact.gmail}</div>
-                         <button className="contact-container-contact-add">＋</button>
-                    </div>
-               ))}
-               </div>
-             </div>
-          </div>
+
+
+
+
+
+
+
+          // <div>
+          //      <LeftSidebar/>
+               
+          //    <div className="contact-container">
+          //    <NavSetting/>
+
+          //      <h2 className="contact-container-title">Contact</h2>
+          //      <input className="contact-container-search" placeholder="search contact"/>
+
+          //      {/*mapを使って、mockdataにある情報を書き出す。*/}
+          //      {/*将来的に、データベースに繋げて、+を追加済みかそうでないかで*/}
+          //      {/*gmailが存在するかのsearchはどうしたらいいんだろうか？*/}
+          //      {/*⭐️ やること:あとで名前とemailの始まりを揃える*/}
+          //      <div className="contact-container-contact-background">
+          //      {contacts.map((contact)=>(
+          //           <div className="contact-container-contact-row" key={contact.id}>
+          //                <div className="contact-container-contact-name"> {contact.name}</div>
+          //                <div className="contact-container-contact-email">{contact.gmail}</div>
+          //                <button className="contact-container-contact-add">＋</button>
+          //           </div>
+          //      ))}
+          //      </div>
+          //    </div>
+          // </div>
      );
 }
 

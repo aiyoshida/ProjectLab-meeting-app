@@ -1,4 +1,4 @@
-import './Setting.css';
+
 import icon from '../images/icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react"
@@ -68,39 +68,55 @@ export default function Setting() {
 
 
      }
-     
-     const handleLogout = () => {
-          localStorage.removeItem('userId');
-          navigate('/register');
-     };
 
      return (
-          <div>
-               
+          <div className="flex flex-col items-center">
+               <div className="flex items-center gap-5">
+                    <img src={icon} alt="icon" className="w-10 h-10" />
+                    <h1 className="text-lg">AcrossTime</h1>
+                    <button className="btn btn-square btn-outline" onClick={goToHomePage}>
+                         <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor">
+                              <path
+                                   strokeLinecap="round"
+                                   strokeLinejoin="round"
+                                   strokeWidth="2"
+                                   d="M6 18L18 6M6 6l12 12" />
+                         </svg>
+                    </button>
+               </div>
 
-               <div className="setting-brand-row">
-                    <div className="settings-header">
-                         <img src={icon} alt="icon" className="icon" />
-                         <h1 className="settings-brand">AcrossTime</h1>
-                         <button className="settings-close" onClick={goToHomePage}>✕</button>
-                    </div>
+
+               <div className="my-8 space-y-1">
+                    <div>userId: {userId}</div>
+                    <div>user name: {username}</div>
+                    <div>timezone: {timezone}</div>
+                    <div>gmail: {gmail}</div>
+               </div>
 
 
-                    <div>
-                         <div>userId: {userId}</div>
-                         <div>user name: {username}</div>
-                         <div>timezone: {timezone}</div>
-                         <div>gmail: {gmail}</div>
-                    </div>
-
-                    <form className="settings-form" onSubmit={handleSubmit}>
-                         <label className="settings-label">
+               <form className="flex flex-col gap-4 items-center" onSubmit={handleSubmit}>
+                    {/* <label className="settings-label">
                               User name
                               <input type="text" placeholder="Your name" className="settings-input" value={username} onChange={(e) => setUsername(e.target.value)} />
-                         </label>
+                         </label> */}
 
-                         {/*will implement all of timezone by using "moment-timezone" library in the future*/}
-                         <label className="settings-label">
+                    <label htmlFor="Username">
+                         <span className="text-sm font-medium text-gray-700 mx-2"> User name </span>
+
+                         <input
+                              type="username"
+                              id="Username"
+                              className="mt-0.5 w-60 rounded border-gray-300 shadow-sm sm:text-sm border"
+                         />
+                    </label>
+
+                    {/*will implement all of timezone by using "moment-timezone" library in the future*/}
+                    {/* <label className="settings-label">
                               Time Zone
                               <select className="settings-select" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
                                    <option>Choose your timezone</option>
@@ -111,12 +127,22 @@ export default function Setting() {
                                    ))}
 
                               </select>
-                         </label>
+                         </label> */}
+                    <label htmlFor="Timezone" className="flex">
+                         <span className="text-sm font-medium text-gray-700"> Time zone </span>
+                         <select className="select select-bordered w-full max-w-xs">
+                              <option disabled selected>Choose your timezone</option>
+                              {timezones.map((tz) => (
+                                   <option key={tz} value={tz}>
+                                        {tz}
+                                   </option>
+                              ))}
+                         </select>
+                    </label>
 
-                         <button type="submit" className="settings-button">Change</button>
-                         <button type="button" className="settings-button" onClick={handleLogout}>Log out</button>
-                    </form>
-               </div>
+                    <button className="btn m-2">Change</button>
+               </form>
+
 
           </div>
      );
