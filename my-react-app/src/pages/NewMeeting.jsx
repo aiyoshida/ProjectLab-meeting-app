@@ -14,6 +14,7 @@ function NewMeeting(){
      return(
           <div className="main-wrapper">
                 <NewMeetingLeftSideBar
+                
                 checkedInvitees={checkedInvitees}
                 setCheckedInvitees={setCheckedInvitees}
                 meetingTitle = {meetingTitle}

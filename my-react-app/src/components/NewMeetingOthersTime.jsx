@@ -12,7 +12,7 @@ export default function NewMeetingOthersTime({checkedInvitees=[]}) {
      //basetime 
      const basetime = getBaseTime(timezone);
      const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = storedId ? parseInt(storedId) : 1;
      console.log("checkedInvitees:", checkedInvitees)
 
 

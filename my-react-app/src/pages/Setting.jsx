@@ -15,7 +15,7 @@ export default function Setting() {
      const timezones = moment.tz.names(); //list of all timezone with IANA
      const [gmail, setGmail] = useState("example@gmail.com");
      const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = storedId ? parseInt(storedId) : 1;
 
      useEffect(() => {
           if (!userId) return;
@@ -70,7 +70,7 @@ export default function Setting() {
      }
 
      return (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center p-5">
                <div className="flex items-center gap-5">
                     <img src={icon} alt="icon" className="w-10 h-10" />
                     <h1 className="text-lg">AcrossTime</h1>
@@ -105,7 +105,7 @@ export default function Setting() {
                               <input type="text" placeholder="Your name" className="settings-input" value={username} onChange={(e) => setUsername(e.target.value)} />
                          </label> */}
 
-                    <label htmlFor="Username">
+                    <label htmlFor="Username" className = "justify-start">
                          <span className="text-sm font-medium text-gray-700 mx-2"> User name </span>
 
                          <input

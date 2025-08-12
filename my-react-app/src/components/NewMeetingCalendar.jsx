@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "" }) {
      const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = storedId ? parseInt(storedId) : 1;
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
 

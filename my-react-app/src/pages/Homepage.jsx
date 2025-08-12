@@ -12,7 +12,7 @@ import axios from "axios"
 function Homepage() {
      const [cards, setCards] = useState([])
      const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = storedId ? parseInt(storedId) : 1;
      const handleDelete = async (cardId) => {
           try {
                await axios.delete(`http://localhost:8000/homepage/${cardId}`)
