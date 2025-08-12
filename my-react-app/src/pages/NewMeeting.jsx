@@ -1,5 +1,4 @@
 import React from "react";
-import './NewMeeting.css';
 import NewMeetingLeftSideBar from '../components/NewMeetingLeftSideBar';
 import NewMeetingOthersTime from '../components/NewMeetingOthersTime';
 import NewMeetingCalendar from '../components/NewMeetingCalendar';
@@ -12,7 +11,7 @@ function NewMeeting(){
      const [checkedInvitees, setCheckedInvitees] = useState([])
      const [meetingTitle, setMeetingTitle] = useState("")
      return(
-          <div className="main-wrapper">
+          <div className="flex h-screen box-border">
                 <NewMeetingLeftSideBar
                 
                 checkedInvitees={checkedInvitees}

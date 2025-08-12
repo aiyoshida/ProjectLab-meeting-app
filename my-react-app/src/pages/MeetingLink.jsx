@@ -181,10 +181,10 @@ const voted_date_ids = selectedSlots.map(slot => {
                </div>
 
 
-               <div className="calendar-container">
+               <div className="fixed left-[480px] top-0 h-screen w-[945px]r">
 
-                    <button onClick={handleSubmit} className="calendar-container-sharebutton">Submit</button>
-                    <button onClick={goToHomePage} className="calendar-container-close">✕</button>
+                    <button onClick={handleSubmit} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Submit</button>
+                    <button onClick={goToHomePage} className="fixed top-0 right-0 w-[50px] h-[50px] text-[30px] bg-white border-none">✕</button>
 
 
                     <div style={{ width: "95%" }}>

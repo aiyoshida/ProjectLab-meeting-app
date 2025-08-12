@@ -1,7 +1,6 @@
 import { Calendar } from '@fullcalendar/core';
 import momentPlugin from '@fullcalendar/moment';
 import React, { useState, useEffect } from "react";
-import './NewMeetingCalendar.css';
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -99,10 +98,10 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
      return (
-          <div className="calendar-container">
+          <div className="fixed left-[480px] top-0 h-screen w-[945px]r">
 
-               <button onClick={handleShare} className="calendar-container-sharebutton">Share</button>
-               <button onClick={goToHomePage} className="calendar-container-close">✕</button>
+               <button onClick={handleShare} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Share</button>
+               <button onClick={goToHomePage} className="fixed top-0 right-0 w-[50px] h-[50px] text-[30px] bg-white border-none">✕</button>
 
 
                <div style={{ width: "95%" }}>
@@ -127,7 +126,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               start: slot.start,
                               end: slot.end,
                               display: 'background',
-                              backgroundColor: '#ee827c',
+                              backgroundColor: "red",
                               className: 'new-meeting-selectable-slot',
                          }))
 
