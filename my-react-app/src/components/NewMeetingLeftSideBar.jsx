@@ -69,8 +69,8 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                <div className="flex flex-col my-3">
                     <label className="">Meeting Title *</label>
                     <input type="text" placeholder="Enter meeting title" className="input input-bordered w-56"
-                    value={meetingTitle}
-                    onChange={(e) => setMeetingTitle(e.target.value)} />
+                         value={meetingTitle}
+                         onChange={(e) => setMeetingTitle(e.target.value)} />
                     {/* <input
                          type="text"
                          className="new-leftsidebar-readonly-box"
@@ -121,24 +121,37 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                                    clipRule="evenodd" />
                          </svg>
                     </label>
-                    </div>
+               </div>
 
 
-                    <div className="ml-2">
-                         {invitees.map((user, index) => (
-                              <label key={index} className="">
-                                   <div className="flex justify-start mb-4">
-                                        <input className="" type="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
-                                        <div className = "ml-1">{user.name}</div>
-                                        <div className="ml-1">in {user.timezone}</div>
-                                   </div>
+               <div className="ml-2">
+                    {invitees.map((user, index) => (
+                         <label key={index} className="">
+                              <div className="flex items-center mb-4">
+                                   <label>
+                                        <input type="checkbox" className="checkbox"  checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
+                                   </label>
+                              
+                                   <div className="flex items-center gap-3 ml-3">
+                                                       <div className="avatar">
+                                                            <div className="mask mask-squircle h-12 w-12">
+                                                                 <img
+                                                                      src="https://img.daisyui.com/images/profile/demo/5@94.webp"
+                                                                      alt="Avatar Tailwind CSS Component" />
+                                                            </div>
+                                                       </div>
+                                                       <div>
+                                                            <div className="font-bold">{user.name}</div>
+                                                            <div className="text-sm opacity-50">{user.timezone.split("/").pop()}</div>
+                                                       </div>
+                                                  </div>
+                              </div>
 
-                                   {/* <div className="mb-4">{user.gmail}</div> いらない気がする。*/}
 
-                              </label>
-                         ))}
-                    </div>
-               
+                         </label>
+                    ))}
+               </div>
+
 
 
 

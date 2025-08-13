@@ -3,7 +3,6 @@ import MeetingCard from "../components/MeetingCard";
 import bin from '../images/bin.svg';
 import time from '../images/time.svg';
 import calendar from '../images/calendar.svg';
-import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react"
 import axios from "axios"
@@ -80,7 +79,7 @@ function Homepage() {
                                              <img src={time} alt="time" className="w-4 h-4" />
                                              <dd className="text-xs text-gray-700">30 minutes</dd>
                                         </div>
-                                        <img src={bin} alt="bin" className="w-6 h-6" />
+                                        <img src={bin} alt="bin" className="w-5 h-5" />
                                    </dl>
                               </a>
                          </section>

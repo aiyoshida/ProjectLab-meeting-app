@@ -3,6 +3,8 @@ import NavSetting from '../components/NavSetting';
 import MeetingCard from '../components/MeetingCard';
 import { useEffect, useState } from "react"
 import axios from "axios"
+import bin from '../images/bin.svg';
+import edit from '../images/edit.svg';
 
 
 
@@ -24,37 +26,92 @@ function Contact() {
 
           <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
                <LeftSidebar />
+               <main className="min-h-dvh bg-[#f6e5e7] p-2">
+                    <div className="flex items-center">
+                         <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
+                              Contact
+                         </h1>
+                         <button className="btn ml-[550px]">
+                              <svg
+                                   xmlns="http://www.w3.org/2000/svg"
+                                   className="h-5 w-5"
+                                   fill="none"
+                                   viewBox="0 0 24 24"
+                                   stroke="currentColor"
+                              >
+                                   <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 4v16m8-8H4"
+                                   />
+                              </svg>
+                              Add Contact
+                         </button>
 
-               <main className="min-h-dvh bg-[#f6e5e7] p-10">
+                    </div>
 
-                    <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
-                         Contact
-                    </h1>
-                    <section className="max-w-3xl mx-auto">
+                    {/*contact table*/}
+                    <section className="max-w-2xl mx-auto">
                          <div className="overflow-x-auto">
                               <table className="table">
                                    {/* head */}
                                    <thead>
                                         <tr>
-                                             <th>
-                                                  <label>
-                                                       <input type="checkbox" className="checkbox" />
-                                                  </label>
-                                             </th>
+
                                              <th>Name</th>
-                                             <th>Job</th>
-                                             <th>Favorite Color</th>
+                                             <th>Email</th>
+                                             <th>Time difference</th>
                                              <th></th>
                                         </tr>
                                    </thead>
+
                                    <tbody>
-                                        {/* row 1 */}
+        {contacts.map((contact) => (
+          <tr key={contact.id}>
+            <td>
+              <div className="flex items-center gap-3">
+                <div className="avatar">
+                  <div className="mask mask-squircle h-12 w-12">
+                    <img
+                      src={contact.avatarUrl || "https://img.daisyui.com/images/profile/demo/2@94.webp"}
+                      alt={`${contact.name} avatar`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-bold">{contact.name}</div>
+                  <div className="text-sm opacity-50">{contact.timezone.split("/").pop()}</div>
+                </div>
+              </div>
+            </td>
+            <td>{contact.gmail}</td>
+            <td>{contact.timeDiff}</td>
+            <td>
+              <button
+                onClick={() => {
+                  // edit function
+                }}
+                className="p-1 hover:rounded"
+              >
+                <img src={edit} alt="edit" className="w-5 h-5" />
+              </button>
+                            <button
+                onClick={() => {
+                  // discard function
+                }}
+                className="p-1 hover:rounded"
+              >
+                <img src={bin} alt="bin" className="w-5 h-5" />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+                                   {/* <tbody>
+                                      
                                         <tr>
-                                             <th>
-                                                  <label>
-                                                       <input type="checkbox" className="checkbox" />
-                                                  </label>
-                                             </th>
+
                                              <td>
                                                   <div className="flex items-center gap-3">
                                                        <div className="avatar">
@@ -65,28 +122,32 @@ function Contact() {
                                                             </div>
                                                        </div>
                                                        <div>
-                                                            <div className="font-bold">Hart Hagerty</div>
-                                                            <div className="text-sm opacity-50">United States</div>
+                                                            <div className="font-bold">Tariq</div>
+                                                            <div className="text-sm opacity-50">Jordan</div>
                                                        </div>
                                                   </div>
                                              </td>
                                              <td>
-                                                  Zemlak, Daniel and Leannon
+                                                  example@google.com
                                                   <br />
-                                                  <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
+                                                
                                              </td>
                                              <td>Purple</td>
                                              <th>
-                                                  <button className="btn btn-ghost btn-xs">details</button>
+
+                                                  <button
+                                                       onClick={() => {
+                                                            
+                                                       }}
+                                                       className="p-1 hover:rounded"
+                                                  >
+                                                       <img src={bin} alt="bin" className="w-5 h-5" />
+                                                  </button>
+
                                              </th>
                                         </tr>
-                                        {/* row 2 */}
+                                       
                                         <tr>
-                                             <th>
-                                                  <label>
-                                                       <input type="checkbox" className="checkbox" />
-                                                  </label>
-                                             </th>
                                              <td>
                                                   <div className="flex items-center gap-3">
                                                        <div className="avatar">
@@ -112,13 +173,8 @@ function Contact() {
                                                   <button className="btn btn-ghost btn-xs">details</button>
                                              </th>
                                         </tr>
-                                        {/* row 3 */}
+                                     
                                         <tr>
-                                             <th>
-                                                  <label>
-                                                       <input type="checkbox" className="checkbox" />
-                                                  </label>
-                                             </th>
                                              <td>
                                                   <div className="flex items-center gap-3">
                                                        <div className="avatar">
@@ -144,13 +200,8 @@ function Contact() {
                                                   <button className="btn btn-ghost btn-xs">details</button>
                                              </th>
                                         </tr>
-                                        {/* row 4 */}
+                                        
                                         <tr>
-                                             <th>
-                                                  <label>
-                                                       <input type="checkbox" className="checkbox" />
-                                                  </label>
-                                             </th>
                                              <td>
                                                   <div className="flex items-center gap-3">
                                                        <div className="avatar">
@@ -176,17 +227,8 @@ function Contact() {
                                                   <button className="btn btn-ghost btn-xs">details</button>
                                              </th>
                                         </tr>
-                                   </tbody>
-                                   {/* foot */}
-                                   <tfoot>
-                                        <tr>
-                                             <th></th>
-                                             <th>Name</th>
-                                             <th>Job</th>
-                                             <th>Favorite Color</th>
-                                             <th></th>
-                                        </tr>
-                                   </tfoot>
+                                   </tbody> */}
+
                               </table>
                          </div>
                     </section>
