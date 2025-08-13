@@ -5,6 +5,9 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import bin from '../images/bin.svg';
 import edit from '../images/edit.svg';
+import Drawer from '../components/Drawer';
+import FileUpload from '../components/FileUpload';
+
 
 
 
@@ -31,7 +34,8 @@ function Contact() {
                          <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
                               Contact
                          </h1>
-                         <button className="btn ml-[550px]">
+                         
+                         {/* <button className="btn ml-[550px]">
                               <svg
                                    xmlns="http://www.w3.org/2000/svg"
                                    className="h-5 w-5"
@@ -47,7 +51,7 @@ function Contact() {
                                    />
                               </svg>
                               Add Contact
-                         </button>
+                         </button> */}
 
                     </div>
 
@@ -232,6 +236,9 @@ function Contact() {
                               </table>
                          </div>
                     </section>
+                    <Drawer/>
+
+                    
 
                </main>
 
