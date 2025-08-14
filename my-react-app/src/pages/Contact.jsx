@@ -1,5 +1,4 @@
 import LeftSidebar from '../components/LeftSidebar';
-import NavSetting from '../components/NavSetting';
 import MeetingCard from '../components/MeetingCard';
 import { useEffect, useState } from "react"
 import axios from "axios"
@@ -34,7 +33,20 @@ function Contact() {
                          <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
                               Contact
                          </h1>
-                         
+                         <label className="input input-bordered flex items-center gap-2 w-72">
+                              <input type="text" className="grow" placeholder="Search new contact by email" />
+                              <svg
+                                   xmlns="http://www.w3.org/2000/svg"
+                                   viewBox="0 0 16 16"
+                                   fill="currentColor"
+                                   className="h-4 w-4 opacity-70">
+                                   <path
+                                        fillRule="evenodd"
+                                        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                                        clipRule="evenodd" />
+                              </svg>
+                         </label>
+
                          {/* <button className="btn ml-[550px]">
                               <svg
                                    xmlns="http://www.w3.org/2000/svg"
@@ -71,47 +83,47 @@ function Contact() {
                                    </thead>
 
                                    <tbody>
-        {contacts.map((contact) => (
-          <tr key={contact.id}>
-            <td>
-              <div className="flex items-center gap-3">
-                <div className="avatar">
-                  <div className="mask mask-squircle h-12 w-12">
-                    <img
-                      src={contact.avatarUrl || "https://img.daisyui.com/images/profile/demo/2@94.webp"}
-                      alt={`${contact.name} avatar`}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-bold">{contact.name}</div>
-                  <div className="text-sm opacity-50">{contact.timezone.split("/").pop()}</div>
-                </div>
-              </div>
-            </td>
-            <td>{contact.gmail}</td>
-            <td>{contact.timeDiff}</td>
-            <td>
-              <button
-                onClick={() => {
-                  // edit function
-                }}
-                className="p-1 hover:rounded"
-              >
-                <img src={edit} alt="edit" className="w-5 h-5" />
-              </button>
-                            <button
-                onClick={() => {
-                  // discard function
-                }}
-                className="p-1 hover:rounded"
-              >
-                <img src={bin} alt="bin" className="w-5 h-5" />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
+                                        {contacts.map((contact) => (
+                                             <tr key={contact.id}>
+                                                  <td>
+                                                       <div className="flex items-center gap-3">
+                                                            <div className="avatar">
+                                                                 <div className="mask mask-squircle h-12 w-12">
+                                                                      <img
+                                                                           src={contact.avatarUrl || "https://img.daisyui.com/images/profile/demo/2@94.webp"}
+                                                                           alt={`${contact.name} avatar`}
+                                                                      />
+                                                                 </div>
+                                                            </div>
+                                                            <div>
+                                                                 <div className="font-bold">{contact.name}</div>
+                                                                 <div className="text-sm opacity-50">{contact.timezone.split("/").pop()}</div>
+                                                            </div>
+                                                       </div>
+                                                  </td>
+                                                  <td>{contact.gmail}</td>
+                                                  <td>{contact.timeDiff}</td>
+                                                  <td>
+                                                       <button
+                                                            onClick={() => {
+                                                                 // edit function
+                                                            }}
+                                                            className="p-1 hover:rounded"
+                                                       >
+                                                            <img src={edit} alt="edit" className="w-5 h-5" />
+                                                       </button>
+                                                       <button
+                                                            onClick={() => {
+                                                                 // discard function
+                                                            }}
+                                                            className="p-1 hover:rounded"
+                                                       >
+                                                            <img src={bin} alt="bin" className="w-5 h-5" />
+                                                       </button>
+                                                  </td>
+                                             </tr>
+                                        ))}
+                                   </tbody>
                                    {/* <tbody>
                                       
                                         <tr>
@@ -236,9 +248,9 @@ function Contact() {
                               </table>
                          </div>
                     </section>
-                    <Drawer/>
+                    <Drawer />
 
-                    
+
 
                </main>
 

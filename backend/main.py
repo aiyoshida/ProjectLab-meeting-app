@@ -399,3 +399,24 @@ async def get_getbasetime_timezone(userId: int, db: Session = Depends(get_db)):
     return {
         "timezone": user.timezone,
     }
+
+
+# POST /contact/add/{userId}
+@app.post("/contact/add/{userId}")
+async def contact_add(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
+    for voted_date_id in data.slots:
+        vote = Vote(
+            user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
+        )
+        db.add(vote)
+
+    participant = (
+        db.query(Participant)
+        .filter_by(user_id=data.user_id, meeting_id=meetingId)
+        .first()
+    )
+    if participant:
+        participant.voted = True
+
+    db.commit()
+    return {"message": "new contact added!"}

@@ -124,6 +124,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                </div>
 
 
+               {/* あとでscrollableにする */}
                <div className="ml-2">
                     {invitees.map((user, index) => (
                          <label key={index} className="">
@@ -132,7 +133,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                                         <input type="checkbox" className="checkbox"  checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
                                    </label>
                               
-                                   <div className="flex items-center gap-3 ml-3">
+                                   <div className="flex items-center gap-3 ml-3 ">
                                                        <div className="avatar">
                                                             <div className="mask mask-squircle h-12 w-12">
                                                                  <img

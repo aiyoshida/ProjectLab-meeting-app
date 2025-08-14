@@ -52,8 +52,8 @@ export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
           // </div>
 
           // </div>
-          <div className=" overflow-hidden mt-[48px] mb-9">
-               <table className="w-fit">
+          <div className="w-1/3 max-w-full overflow-x-auto overflow-y-hidden mt-12 mb-9 ">
+               <table className="min-w-max ">
                     <thead className="border rounded-lg">
                          <tr >
                               {/* 左上の空セル（時刻見出し用） */}
@@ -82,7 +82,7 @@ export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
                                         return (
                                              <td
                                                   key={tz.id}
-                                                  className={`${bgClass} text-base px-6 py-[12.5px]`}
+                                                  className={`${bgClass} text-base justify-center px-5 py-[12.5px]`}
                                              >
                                                   {slot.setZone(tz.timezone).toFormat("HH:mm")}
                                              </td>

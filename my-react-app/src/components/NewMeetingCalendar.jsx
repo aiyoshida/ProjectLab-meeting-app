@@ -7,7 +7,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
-
 import { useNavigate } from 'react-router-dom';
 
 
@@ -81,7 +80,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           const newEnd = moment.parseZone(info.endStr).utc().toISOString();
           console.log("newStart", newStart);
 
-          const alreadySelected = selectedSlots.some(slot => slot.start === newStart); 
+          const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
 
           if (alreadySelected) {
                alert("This timeslot is already selected!");
@@ -97,16 +96,21 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
 
+
      return (
-          <div className="fixed left-[480px] top-0 h-screen w-[945px]r">
-
-               <button onClick={handleShare} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Share</button>
-               <button onClick={goToHomePage} className="fixed top-0 right-0 w-[50px] h-[50px] text-[30px] bg-white border-none">✕</button>
+          <div className="relative w-full max-w-4xl ml-auto px-4">
+               {/* <button onClick={goToHomePage} className="">✕</button> */}
 
 
-               <div style={{ width: "95%" }}>
+               <section className="flex-1 w-full min-w-0 overflow-hidden">
                     <FullCalendar
                          timeZone={timezone}
+                         headerToolbar=  {    {                      
+                              left: '',
+                              center: '',
+                              right: 'prev,next today'
+                         }}// 上部ツールバーをなくす
+
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
@@ -120,8 +124,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               hour12: false
                          }}
                          height="auto"
+                         handleWindowResize={true}
                          allDaySlot={false}
-                         firstDay={new Date().getDay()} 
+                         firstDay={new Date().getDay()}
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,
@@ -132,7 +137,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
                          }
                     />
-               </div>
+               </section>
+               <button onClick={handleShare} className="btn btn-sm flex ml-auto gap-2">Share</button>
           </div>
      );
 

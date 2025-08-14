@@ -184,8 +184,10 @@ export default function Drawer() {
 
                                    </div>
 
-
-                                <FileUpload onFile={(file) => console.log("got file:", file)} />
+                                   <label class="block mb-2 text-sm text-slate-600">
+                                        Profile picture
+                                   </label>
+                                   <FileUpload onFile={(file) => console.log("got file:", file)} />
 
 
                                    <button class="mt-4 w-full rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" type="button">
