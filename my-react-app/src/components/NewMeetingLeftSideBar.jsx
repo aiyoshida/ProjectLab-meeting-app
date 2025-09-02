@@ -5,7 +5,7 @@ import axios from "axios"
 import moment from "moment-timezone";
 const timezones = moment.tz.names(); //list of all timezone with IANA
 
-export default function NewMeetingLeftSideBar({ checkedInvitees = [], setCheckedInvitees, meetingTitle = "", setMeetingTitle }) {
+export default function NewMeetingLeftSideBar({ checkedInvitees = [], setCheckedInvitees, meetingTitle = "", setMeetingTitle, value, onChange }) {
      const [invitees, setInvitees] = useState([]);
      const [timezone, setTimezone] = useState("UTC");
 
@@ -59,7 +59,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
      return (
-          <div className=" items-baseline p-5">
+          <div className="items-baseline p-5">
 
                <div className="flex items-center">
                     <img src={icon} alt='icon' className="w-10 h-10" />
@@ -94,13 +94,11 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
                <div className="flex flex-col my-4">
                     <label className="new-leftsidebar-label">Duration</label>
-                    <select className="select select-bordered w-56">
-                         <option disabled selected>30 min</option>
-                         <option>15 min</option>
-                         <option>30min</option>
-                         <option>45min</option>
-                         <option>60min</option>
-                         <option>90min</option>
+                    <select className="select select-bordered w-56" value={value} onChange={(e) => onChange(e.target.value)}>
+                         <option disabled selected  value="00:30:00">30 min</option>
+                         <option value="00:30:00">30min</option>
+                         <option value="01:00:00">60min</option>
+                         <option value="01:30:00">90min</option>
                     </select>
                </div>
 

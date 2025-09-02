@@ -10,19 +10,26 @@ function NewMeeting(){
      //hold invitess value in parent page, and share
      const [checkedInvitees, setCheckedInvitees] = useState([])
      const [meetingTitle, setMeetingTitle] = useState("")
+     const [slotDuration, setSlotDuration] = useState("00:30:00")
+
      return(
           <div className="flex h-screen box-border">
                 <NewMeetingLeftSideBar
-                
-                checkedInvitees={checkedInvitees}
-                setCheckedInvitees={setCheckedInvitees}
-                meetingTitle = {meetingTitle}
-                setMeetingTitle={setMeetingTitle}
-                />
-                <NewMeetingOthersTime checkedInvitees={checkedInvitees}/>
-                <NewMeetingCalendar checkedInvitees={checkedInvitees}
-                meetingTitle={meetingTitle}
-                />
+                    value={slotDuration} 
+                    onChange={setSlotDuration}
+                    checkedInvitees={checkedInvitees}
+                    setCheckedInvitees={setCheckedInvitees}
+                    meetingTitle = {meetingTitle}
+                    setMeetingTitle={setMeetingTitle}
+               />
+                <NewMeetingOthersTime 
+                    checkedInvitees={checkedInvitees}
+               />
+                <NewMeetingCalendar 
+                    slotDuration={slotDuration}
+                    checkedInvitees={checkedInvitees}
+                    meetingTitle={meetingTitle}
+               />
           </div>
      );
 }

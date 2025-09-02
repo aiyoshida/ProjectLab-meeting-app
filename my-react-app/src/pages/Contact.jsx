@@ -104,14 +104,7 @@ function Contact() {
                                                   <td>{contact.gmail}</td>
                                                   <td>{contact.timeDiff}</td>
                                                   <td>
-                                                       <button
-                                                            onClick={() => {
-                                                                 // edit function
-                                                            }}
-                                                            className="p-1 hover:rounded"
-                                                       >
-                                                            <img src={edit} alt="edit" className="w-5 h-5" />
-                                                       </button>
+
                                                        <button
                                                             onClick={() => {
                                                                  // discard function

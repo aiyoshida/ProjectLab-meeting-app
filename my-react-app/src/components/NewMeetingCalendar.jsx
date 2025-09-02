@@ -1,6 +1,6 @@
 import { Calendar } from '@fullcalendar/core';
 import momentPlugin from '@fullcalendar/moment';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -10,11 +10,12 @@ import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { useNavigate } from 'react-router-dom';
 
 
-export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "" }) {
+export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
      const storedId = localStorage.getItem('userId');
      const userId = storedId ? parseInt(storedId) : 1;
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
+     const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
 
      useEffect(() => {
           console.log(userId);
@@ -30,6 +31,11 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                });
 
      }, [userId]);
+     //to force fullcalendar to re-render.
+     useEffect(() => {
+          const api = calendarRef.current?.getApi?.();
+          if (api) api.setOption("slotDuration", slotDuration);
+     }, [slotDuration]);
 
 
      const handleShare = async () => {
@@ -105,17 +111,16 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                <section className="flex-1 w-full min-w-0 overflow-hidden">
                     <FullCalendar
                          timeZone={timezone}
-                         headerToolbar=  {    {                      
+                         headerToolbar={{
                               left: '',
                               center: '',
                               right: 'prev,next today'
-                         }}// 上部ツールバーをなくす
-
+                         }}
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
                          initialView="timeGridWeek"
-                         slotDuration="00:30:00"
+                         slotDuration={slotDuration}
                          slotMinTime="09:00:00"
                          slotMaxTime="22:00:00"
                          slotLabelFormat={{
@@ -123,8 +128,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
-                         height="auto"
-                         handleWindowResize={true}
+                         contentHeight={690}   // make this to fixed height
+                         expandRows={true}
+                         handleWindowResize={false}
                          allDaySlot={false}
                          firstDay={new Date().getDay()}
                          events={selectedSlots.map(slot => ({
@@ -132,7 +138,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               end: slot.end,
                               display: 'background',
                               backgroundColor: "red",
-                              className: 'new-meeting-selectable-slot',
                          }))
 
                          }
