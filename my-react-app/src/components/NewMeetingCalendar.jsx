@@ -35,6 +35,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      useEffect(() => {
           const api = calendarRef.current?.getApi?.();
           if (api) api.setOption("slotDuration", slotDuration);
+     setSelectedSlots([]); //to reset selected timeslots
      }, [slotDuration]);
 
 
