@@ -2,7 +2,7 @@
 import icon from '../images/icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react"
-import axios from "axios"
+import axios from "axios";
 import moment from "moment-timezone";
 
 export default function Setting() {
@@ -37,6 +37,7 @@ export default function Setting() {
 
      }, [userId]);
 
+     // arrow func, so async locates here.
      const handleSubmit = async (e) => {
           //stop default reload
           e.preventDefault()

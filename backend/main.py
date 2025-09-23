@@ -55,9 +55,8 @@ class VoteData(BaseModel):
 class RegsiteredUser(BaseModel):
     gmail: str
 
-
+# for create DB when app.db does not exist
 Base.metadata.create_all(bind=engine)
-
 
 def get_db():
     db = SessionLocal()

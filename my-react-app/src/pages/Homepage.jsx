@@ -10,8 +10,8 @@ import axios from "axios"
 
 function Homepage() {
      const [cards, setCards] = useState([])
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : 1;
+     const storedId = localStorage.getItem('userId');//これなんだっけ？
+     const userId = storedId ? parseInt(storedId) : 1;//こっちが共有だっけ？
      const handleDelete = async (cardId) => {
           try {
                await axios.delete(`http://localhost:8000/homepage/${cardId}`)

@@ -8,10 +8,11 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True)
     username = Column(String, nullable=False)
     gmail = Column(String, nullable=False)
     timezone = Column(String, nullable=False)
+    picture = Column(String, nullable=True)
 
 
 class Contact(Base):
