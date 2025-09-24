@@ -1,4 +1,3 @@
-import './MeetingLink.css';
 import { useParams, useLocation } from "react-router-dom";
 // useParams is to tamle element from url, uselocation is to pass data
 //uselocation is for temporary, will use db soon.
@@ -16,8 +15,7 @@ import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 
 
 export default function MeetingLink() {
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = localStorage.getItem('userId');
      const { meetingId } = useParams();
      const [participants, setParticipants] = useState([])
      const [selectedSlots, setSelectedSlots] = useState([]);

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
 import axios from "axios";
+import {useUser} from "../contexts/UserContext";
 
 
 export default function Register() {
@@ -11,10 +12,16 @@ export default function Register() {
   const [timezone, setTimezone] = useState('');
   const timezones = moment.tz.names(); //list of all timezone with IANA
   const [gmail, setGmail] = useState('');
+  const { setUserId } = useUser(); //to call 
 
   const navigate = useNavigate();
   const divRef = useRef(null);
   //for holding DOM, value. give this to Google SDK later.
+
+
+  const goToHomePage = () => {
+    navigate('/homepage');
+  }
 
   //will delete here later
   const handleSubmit = async (e) => {
@@ -55,26 +62,34 @@ export default function Register() {
     google.accounts.id.initialize({
       client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
       callback: async (resp) => {
-        
+
         const payload = decodeJwt(resp.credential);
         console.log("Devoded payload:", payload);
         const sub = payload.sub;
-        const email = payload.email;
+        const gmail = payload.email;
         const name = payload.name;
         const picture = payload.picture;
 
-        //POST
-        try{
-        const response = await axios.post(`http://localhost:8000/register/${sub}` ,
-          {email : email, 
-           name : name, 
-           pic : picture})
-           console.log("Response from server : ", response.data);
+        console.log("AAAAA!!! user info: ", sub, gmail, name, picture);
 
-          }catch (err){
-            console.error("Error happened : " ,err);
-          }
-        
+        //POST
+        try {
+          const response = await axios.post(`http://localhost:8000/register/${sub}`,
+            {
+              "gmail": gmail,
+              "name": name,
+              "pic": picture
+            })
+          console.log("Response from server : ", response.data);
+          localStorage.setItem("userId", sub);
+          setUserId(sub);
+          goToHomePage();
+
+  
+        } catch (err) {
+          console.error("Error happened : ", err);
+        }
+
         // ID token in resp.credential
         // fetch("/api/auth/google", {
         //   method: "POST",
