@@ -34,6 +34,7 @@ export default function Setting() {
                     setTimezone(data.timezone);
                     setGmail(data.gmail);
                     setPicture(data.picture);
+                    console.log("timezone: ", timezone);
                } catch (err) {
                     console.error("failed to load user data", err);
                }

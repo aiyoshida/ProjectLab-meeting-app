@@ -10,7 +10,7 @@ import {useUser} from "../contexts/UserContext";
 export default function Register() {
   const [name, setName] = useState('');
   const [timezone, setTimezone] = useState('');
-  const timezones = moment.tz.names(); //list of all timezone with IANA
+  //const timezones = moment.tz.names(); //list of all timezone with IANA
   const [gmail, setGmail] = useState('');
   const { setUserId } = useUser(); //to call 
 

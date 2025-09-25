@@ -8,7 +8,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(String, primary_key=True, index=True)
+    sub = Column(String, primary_key=True, index=True)
     username = Column(String, nullable=False)
     gmail = Column(String, nullable=False)
     timezone = Column(String, nullable=False)
@@ -17,15 +17,25 @@ class User(Base):
 
 class Contact(Base):
     __tablename__ = "contacts"
+    # id of the contact itself. just for index.
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    friend_of_this_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-
+    # this user's sub FK from user
+    user_sub = Column(String, ForeignKey("users.sub"), nullable=False)
+    # user_sub's friend's sub
+    friend_of_this_user_sub = Column(String, ForeignKey("users.sub"), nullable=False)
+    # Connects contact and user tables.
     actual_user = relationship(
-        "User", foreign_keys=[user_id], backref="contact_profiles"
+        # Connect to User table
+        "User", 
+        # show which FK to connect inside contact table. 
+        foreign_keys=[user_sub], 
+        # from User.contact_profiles, can access to 
+        backref="contact_profiles"
     )
     owner_user = relationship(
-        "User", foreign_keys=[friend_of_this_user_id], backref="my_contacts"
+        "User", 
+        foreign_keys=[friend_of_this_user_sub], 
+        backref="my_contacts"
     )
 
 
@@ -36,7 +46,7 @@ class Meeting(Base):
     title = Column(String, nullable=False)
     timezone = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    creator_user_id = Column(Integer, ForeignKey("users.id"))
+    creator_user_sub = Column(String, ForeignKey("users.sub"))
     finalized = Column(Boolean, default=False)
     all_voted = Column(Boolean, default=False)
     url = Column(String, nullable=True)
@@ -48,7 +58,7 @@ class Participant(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     meeting_id = Column(Integer, ForeignKey("meetings.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.sub"))
     voted = Column(Boolean, default=False)
     meeting = relationship("Meeting", backref="participants")
     user = relationship("User", backref="participations")
@@ -69,7 +79,7 @@ class Vote(Base):
     __tablename__ = "votes"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.sub"))
     voted_date_id = Column(Integer, ForeignKey("voted_dates.id"))
     meeting_id = Column(Integer, ForeignKey("meetings.id"))
 

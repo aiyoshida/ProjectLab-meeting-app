@@ -12,13 +12,13 @@ import FileUpload from '../components/FileUpload';
 
 function Contact() {
      const [contacts, setContacts] = useState([])
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : 1;
+     const userId = localStorage.getItem('userId');
      useEffect(() => {
           axios
                .get(`http://localhost:8000/contact/${userId}`)
                .then(response => {
-                    setContacts(response.data.contacts)
+                    setContacts(response.data.contacts);
+                    console.log("user_id: ", userId);
                })
                .catch(error => {
                     console.error("error: ", error)
@@ -90,7 +90,7 @@ function Contact() {
                                                             <div className="avatar">
                                                                  <div className="mask mask-squircle h-12 w-12">
                                                                       <img
-                                                                           src={contact.avatarUrl || "https://img.daisyui.com/images/profile/demo/2@94.webp"}
+                                                                           src={contact.picture || null}
                                                                            alt={`${contact.name} avatar`}
                                                                       />
                                                                  </div>

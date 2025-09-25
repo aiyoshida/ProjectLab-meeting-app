@@ -8,9 +8,9 @@ const timezones = moment.tz.names(); //list of all timezone with IANA
 export default function NewMeetingLeftSideBar({ checkedInvitees = [], setCheckedInvitees, meetingTitle = "", setMeetingTitle, value, onChange }) {
      const [invitees, setInvitees] = useState([]);
      const [timezone, setTimezone] = useState("UTC");
-
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : 1;
+     //userId stored in the local storage. Saved in the login time.
+     const userId = localStorage.getItem('userId');
+     
 
      const handleCheck = (invitee) => {
           const alreadyChecked = checkedInvitees.some(i => i.id === invitee.id)
@@ -33,27 +33,31 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
      //get contacts
      useEffect(() => {
-          axios
-               .get(`http://localhost:8000/newmeeting/${userId}`)
-               .then((res) => {
-                    setInvitees(res.data.contacts)
-               })
-               .catch((err) => {
-                    console.error("error: ", err)
-               })
+          async function fetchContact(){
+          try{
+               console.log("user_id: ", userId);
+               const res = await axios.get(`http://localhost:8000/newmeeting/${userId}`);
+                    setInvitees(res.data.contacts);
+                    
+          }catch(err){ 
+                    console.error("error: ", err);
+          }
+          }
+          fetchContact();
      }, [])
 
      //get userId's timezone
      useEffect(() => {
-          axios
-               .get(`http://localhost:8000/newmeeting/timezone/${userId}`)
-               .then((res) => {
-                    setTimezone(res.data.timezone)
+          async function fetchTimezone() {
+               try {
+                    const res = await axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`);
+                    setTimezone(res.data.timezone);
                     console.log(res.data.timezone);
-               })
-               .catch((err) => {
-                    console.error("error: ", err)
-               })
+               } catch (err) {
+                    console.error("useEffect timezone! error happened: ", err);
+               }
+          }
+          fetchTimezone();
      }, [])
 
 
@@ -71,15 +75,9 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                     <input type="text" placeholder="Enter meeting title" className="input input-bordered w-56"
                          value={meetingTitle}
                          onChange={(e) => setMeetingTitle(e.target.value)} />
-                    {/* <input
-                         type="text"
-                         className="new-leftsidebar-readonly-box"
-                         placeholder="*Enter meeting title"
-                         value={meetingTitle}
-                         onChange={(e) => setMeetingTitle(e.target.value)} /> */}
                </div>
 
-               {/*timezone - now Budapest only*/}
+               {/* timezone */}
                <div className="flex flex-col my-4">
                     <label className="">Your Timezone</label>
                     <select className="select select-bordered w-56">
@@ -95,7 +93,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                <div className="flex flex-col my-4">
                     <label className="new-leftsidebar-label">Duration</label>
                     <select className="select select-bordered w-56" value={value} onChange={(e) => onChange(e.target.value)}>
-                         <option disabled selected  value="00:30:00">30 min</option>
+                         <option disabled selected value="00:30:00">30 min</option>
                          <option value="00:30:00">30min</option>
                          <option value="01:00:00">60min</option>
                          <option value="01:30:00">90min</option>
@@ -128,22 +126,22 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                          <label key={index} className="">
                               <div className="flex items-center mb-4">
                                    <label>
-                                        <input type="checkbox" className="checkbox"  checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
+                                        <input type="checkbox" className="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
                                    </label>
-                              
+
                                    <div className="flex items-center gap-3 ml-3 ">
-                                                       <div className="avatar">
-                                                            <div className="mask mask-squircle h-12 w-12">
-                                                                 <img
-                                                                      src="https://img.daisyui.com/images/profile/demo/5@94.webp"
-                                                                      alt="Avatar Tailwind CSS Component" />
-                                                            </div>
-                                                       </div>
-                                                       <div>
-                                                            <div className="font-bold">{user.name}</div>
-                                                            <div className="text-sm opacity-50">{user.timezone.split("/").pop()}</div>
-                                                       </div>
-                                                  </div>
+                                        <div className="avatar">
+                                             <div className="mask mask-squircle h-12 w-12">
+                                                  <img
+                                                       src="https://img.daisyui.com/images/profile/demo/5@94.webp"
+                                                       alt="Avatar Tailwind CSS Component" />
+                                             </div>
+                                        </div>
+                                        <div>
+                                             <div className="font-bold">{user.name}</div>
+                                             <div className="text-sm opacity-50">{user.timezone.split("/").pop()}</div>
+                                        </div>
+                                   </div>
                               </div>
 
 
