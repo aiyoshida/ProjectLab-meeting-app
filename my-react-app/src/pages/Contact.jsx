@@ -1,11 +1,11 @@
 import LeftSidebar from '../components/LeftSidebar';
-import MeetingCard from '../components/MeetingCard';
+// import MeetingCard from '../components/MeetingCard';
 import { useEffect, useState } from "react"
 import axios from "axios"
 import bin from '../images/bin.svg';
-import edit from '../images/edit.svg';
+// import edit from '../images/edit.svg';
 import Drawer from '../components/Drawer';
-import FileUpload from '../components/FileUpload';
+// import FileUpload from '../components/FileUpload';
 
 
 
@@ -33,39 +33,68 @@ function Contact() {
                          <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
                               Contact
                          </h1>
-                         <label className="input input-bordered flex items-center gap-2 w-72">
+
+                         
+                         <label className="input input-bordered flex items-center gap-2 w-64">
                               <input type="text" className="grow" placeholder="Search new contact by email" />
+
+                         </label>
+
+                         {/* search button https://v4.daisyui.com/components/button/ */}
+                         <button className="btn btn-square btn-outline ml-3"  >
                               <svg
                                    xmlns="http://www.w3.org/2000/svg"
+                                   className="h-6 w-6"
+                                   fill="none"
                                    viewBox="0 0 16 16"
-                                   fill="currentColor"
-                                   className="h-4 w-4 opacity-70">
+                                   stroke="currentColor">
                                    <path
                                         fillRule="evenodd"
                                         d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
                                         clipRule="evenodd" />
                               </svg>
-                         </label>
-
-                         {/* <button className="btn ml-[550px]">
-                              <svg
-                                   xmlns="http://www.w3.org/2000/svg"
-                                   className="h-5 w-5"
-                                   fill="none"
-                                   viewBox="0 0 24 24"
-                                   stroke="currentColor"
-                              >
-                                   <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 4v16m8-8H4"
-                                   />
-                              </svg>
-                              Add Contact
-                         </button> */}
+                         </button>
 
                     </div>
+
+                    {/* contact search */}
+                    <table className="ml-52 bg-white ">
+                         <tr>
+                              <td>
+                                   <div className="flex items-center gap-3">
+                                        <div className="avatar">
+                                             <div className="mask mask-squircle h-12 w-12">
+                                                  <img
+                                                       src="https://img.daisyui.com/images/profile/demo/2@94.webp"
+                                                       alt="Avatar Tailwind CSS Component" />
+                                             </div>
+                                        </div>
+                                        <div>
+                                             <div className="font-bold">Tariq</div>
+                                             <div className="text-sm opacity-50">Jordan</div>
+                                        </div>
+                                   </div>
+                              </td>
+                              <td>
+                                   example@google.com
+                                   <br />
+
+                              </td>
+                              <td>Purple</td>
+                              <th>
+
+                                   <button
+                                        onClick={() => {
+
+                                        }}
+                                        className="p-1 hover:rounded"
+                                   >
+                                        <img src={bin} alt="bin" className="w-5 h-5" />
+                                   </button>
+
+                              </th>
+                         </tr>
+                    </table>
 
                     {/*contact table*/}
                     <section className="max-w-2xl mx-auto">
@@ -241,7 +270,8 @@ function Contact() {
                               </table>
                          </div>
                     </section>
-                    <Drawer />
+                    {/* Drawer is for adding new contact manually*/}
+                    {/* <Drawer /> */}
 
 
 

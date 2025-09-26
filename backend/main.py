@@ -167,6 +167,21 @@ async def get_contactlist(userId: str, db: Session = Depends(get_db)):
     return {"contacts": result}
 
 
+# GET /contact/search?gmail={gmail}
+@app.get("/contact/search?gmail={gmail}")
+async def get_search_contact(gmail: str, db: Session = Depends(get_db)):
+    contact = db.query(User).filter(gmail == User.gmail).first()
+    if not contact:
+        return {"message": "The contact does not exist in this app."}
+    return {
+        "sub": contact.sub,
+        "username": contact.username,
+        "gmail": contact.gmail,
+        "timezone": contact.gmail,
+        "picture": contact.picture
+    }
+
+
 # POST /contact/add/{userId}
 @app.post("/contact/add/{userId}")
 async def add_new_contact(

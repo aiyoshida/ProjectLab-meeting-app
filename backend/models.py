@@ -26,16 +26,14 @@ class Contact(Base):
     # Connects contact and user tables.
     actual_user = relationship(
         # Connect to User table
-        "User", 
-        # show which FK to connect inside contact table. 
-        foreign_keys=[user_sub], 
-        # from User.contact_profiles, can access to 
-        backref="contact_profiles"
+        "User",
+        # show which FK to connect inside contact table.
+        foreign_keys=[user_sub],
+        # from User.contact_profiles, can access to
+        backref="contact_profiles",
     )
     owner_user = relationship(
-        "User", 
-        foreign_keys=[friend_of_this_user_sub], 
-        backref="my_contacts"
+        "User", foreign_keys=[friend_of_this_user_sub], backref="my_contacts"
     )
 
 
