@@ -18,7 +18,7 @@ export default function Register() {
   const divRef = useRef(null);
   //for holding DOM, value. give this to Google SDK later.
 
-
+//only arrow func is accepted??
   const goToHomePage = () => {
     navigate('/homepage');
   }
@@ -44,7 +44,7 @@ export default function Register() {
   };
 
   //Google SDK initialzation, renderButton, callback registration
-  //useEffect = 
+  //FIX NEEDED : third gmail become garbled text + could not take pic info correctly.
   useEffect(() => {
     const google = window.google; // obj from Google's SDK
     if (!google || !divRef.current) return; //if no SDK load, do nothing

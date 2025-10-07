@@ -61,10 +61,6 @@ export default function Setting() {
                     username,
                     timezone,
                })
-
-
-
-
           } catch (err) {
                console.error("error", err)
           }
@@ -108,26 +104,6 @@ export default function Setting() {
 
 
                <form className="flex flex-col gap-4 items-center" onSubmit={handleSubmit}>
-                    {/* <label className="settings-label">
-                              User name
-                              <input type="text" placeholder="Your name" className="settings-input" value={username} onChange={(e) => setUsername(e.target.value)} />
-                         </label> */}
-
-
-
-                    {/*will implement all of timezone by using "moment-timezone" library in the future*/}
-                    {/* <label className="settings-label">
-                              Time Zone
-                              <select className="settings-select" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-                                   <option>Choose your timezone</option>
-                                   {timezones.map((tz)=>(
-                                        <option key={tz} value={tz}>
-                                             {tz}
-                                   </option>
-                                   ))}
-
-                              </select>
-                         </label> */}
                     <label htmlFor="Timezone" className="flex">
                          <span className="text-sm font-medium text-gray-700"> Time zone </span>
                          <select className="select select-bordered w-full max-w-xs" value={timezone} onChange={e => setTimezone(e.target.value)}>
@@ -140,7 +116,7 @@ export default function Setting() {
                          </select>
                     </label>
 
-                    <button className="btn m-2">Change</button>
+                    <button className="btn m-2" onClick={goToHomePage}>Change</button>
                </form>
 
 

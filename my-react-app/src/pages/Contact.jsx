@@ -2,28 +2,107 @@ import LeftSidebar from '../components/LeftSidebar';
 // import MeetingCard from '../components/MeetingCard';
 import { useEffect, useState } from "react"
 import axios from "axios"
+import plus from '../images/plus.svg';
 import bin from '../images/bin.svg';
+import search from '../images/search.svg';
 // import edit from '../images/edit.svg';
-import Drawer from '../components/Drawer';
+//import Drawer from '../components/Drawer';
 // import FileUpload from '../components/FileUpload';
 
 
 
-
 function Contact() {
-     const [contacts, setContacts] = useState([])
+     const [contacts, setContacts] = useState([]);
      const userId = localStorage.getItem('userId');
+     const [searchEmail, setSearchEmail] = useState("");
+     const [friendInfo, setFriendInfo] = useState({
+          sub: "0",
+          username: "Tariq!!",
+          gmail: "example@com",
+          timezone: "Jordan",
+          picture: "https://img.daisyui.com/images/profile/demo/2@94.webp"
+     });
+
+     //decides display contact search result or not
+     const [showResult, setShowResult] = useState(false);
+     //decides display modal
+     const [showModal, setShowModal] = useState(false);
+
+
      useEffect(() => {
+          // in the useEffect, to define HTTP req, either .then or define func with axios.
           axios
                .get(`http://localhost:8000/contact/${userId}`)
                .then(response => {
+                    console.log("contacts: ", response.data.contacts);
                     setContacts(response.data.contacts);
                     console.log("user_id: ", userId);
                })
                .catch(error => {
                     console.error("error: ", error)
                })
-     }, [])
+     }, [userId])
+
+     //finding new friend contact from DB by email
+     const handleSearch = async (e) => {
+          //stopping JS default reload to utelize React function
+          e.preventDefault();
+
+          if (!searchEmail)
+               return;
+          try {
+               console.log("This is email to process: ", { searchEmail });
+               const res = await axios.get(`http://localhost:8000/contact/search/${searchEmail}`);
+               if (res.data.sub == null) {
+                    console.log("Email has searched in the user table but no result");
+                    setShowModal(true);
+                    return;
+               }
+               console.log("This is data", res.data);
+               setFriendInfo({
+                    sub: res.data.sub,
+                    username: res.data.username,
+                    gmail: res.data.gmail,
+                    timezone: res.data.timezone,
+                    picture: res.data.picture
+               });
+          } catch (err) {
+               console.error("Error happend during search email", err);
+               console.error(err.response.status);
+          }
+          setShowResult(true);
+     }
+     // TODO: needs reload to reflect change now
+     const handleAdd = async (e) => {
+          try {
+               console.log("This is friend info to add:", friendInfo);
+               const res = await axios.post(`http://localhost:8000/contact/add/${userId}`,
+                    {
+                         sub: friendInfo.sub
+                    }
+               );
+          } catch (err) {
+               console.error("This is error: ", err);
+          }
+          setShowResult(false);
+     }
+     // official Axios document :
+     // https://axios-http.com/docs/api_intro 
+     // for axios.delete, data should be explicitly written
+     // axios.delete(url, config)
+     // TODO: needs reload to reflect change now
+     const handleDelete = async (contact) => {
+          try {
+               console.log("contact:", contact);
+               const res = await axios.delete(`http://localhost:8000/contact/delete/${userId}`,
+                    { data: { sub: contact.sub } }
+               );
+          } catch (err) {
+               console.error("This is error: ", err);
+          }
+     }
+
+
      return (
 
           <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
@@ -34,66 +113,68 @@ function Contact() {
                               Contact
                          </h1>
 
-                         
                          <label className="input input-bordered flex items-center gap-2 w-64">
-                              <input type="text" className="grow" placeholder="Search new contact by email" />
+                              <input type="text" value={searchEmail} onChange={(e) => setSearchEmail(e.target.value)} className="grow" placeholder="Search new contact by gmail" />
 
                          </label>
 
-                         {/* search button https://v4.daisyui.com/components/button/ */}
-                         <button className="btn btn-square btn-outline ml-3"  >
-                              <svg
-                                   xmlns="http://www.w3.org/2000/svg"
-                                   className="h-6 w-6"
-                                   fill="none"
-                                   viewBox="0 0 16 16"
-                                   stroke="currentColor">
-                                   <path
-                                        fillRule="evenodd"
-                                        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-                                        clipRule="evenodd" />
-                              </svg>
+                         {/* search button: https://v4.daisyui.com/components/button/ */}
+                         <button className="btn btn-square btn-outline ml-3" onClick={handleSearch}>
+                              <img src={search} alt="search" className="w-5 h-5" />
                          </button>
-
                     </div>
+               {/*Tailwind template: https://v4.daisyui.com/components/modal/ "Dialog modal with a close button at corner" jsx with some modification. */}
+                    {showModal && 
+               <dialog id="my_modal_3" className="modal modal-top" open>
+                    <div className="modal-box">
+                         <form method="dialog">
+                              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={()=>setShowModal(false)}>✕</button>
+                         </form>
+                         <h3 className="font-bold text-lg">No result in this app ;(</h3>
+                         <p className="py-4">The email you searched in not registered in this app. Pls ask your friend to join!</p>
+                    </div>
+               </dialog>
+               }
 
                     {/* contact search */}
-                    <table className="ml-52 bg-white ">
-                         <tr>
-                              <td>
-                                   <div className="flex items-center gap-3">
-                                        <div className="avatar">
-                                             <div className="mask mask-squircle h-12 w-12">
-                                                  <img
-                                                       src="https://img.daisyui.com/images/profile/demo/2@94.webp"
-                                                       alt="Avatar Tailwind CSS Component" />
+                    {/*maybe better to on/off with dom, not css...? */}
+                    <table className={` fixed top-24 left-300px ml-52 bg-white rounded-md z-50 ${showResult ? "block" : "hidden"}`}>
+                         <tbody >
+                              <tr>
+                                   <td className="p-1.5">
+                                        <div className="flex items-center gap-3">
+                                             <div className="avatar">
+                                                  <div className="mask mask-squircle h-12 w-12">
+                                                       <img
+                                                            src={friendInfo.picture}
+                                                            alt="Avatar Tailwind CSS Component" />
+                                                  </div>
+                                             </div>
+                                             <div>
+                                                  <div className="font-bold ">{friendInfo.username}</div>
+                                                  <div className="text-sm opacity-50">{friendInfo.timezone}</div>
                                              </div>
                                         </div>
-                                        <div>
-                                             <div className="font-bold">Tariq</div>
-                                             <div className="text-sm opacity-50">Jordan</div>
-                                        </div>
-                                   </div>
-                              </td>
-                              <td>
-                                   example@google.com
-                                   <br />
+                                   </td>
 
-                              </td>
-                              <td>Purple</td>
-                              <th>
+                                   <td className="pl-5">
+                                        {friendInfo.gmail}
+                                        <br />
+                                   </td>
 
-                                   <button
-                                        onClick={() => {
+                                   <td className="pl-5">-6h</td>
+                                   <th>
+                                        {/*add button: https://icon-rainbow.com/?s=%E5%8F%8B%E9%81%94*/}
+                                        <button
+                                             onClick={handleAdd}
+                                             className="p-1 hover:rounded"
+                                        >
+                                             <img src={plus} alt="plus" className="w-6 h-6 ml-5 mr-5" />
+                                        </button>
 
-                                        }}
-                                        className="p-1 hover:rounded"
-                                   >
-                                        <img src={bin} alt="bin" className="w-5 h-5" />
-                                   </button>
-
-                              </th>
-                         </tr>
+                                   </th>
+                              </tr>
+                         </tbody>
                     </table>
 
                     {/*contact table*/}
@@ -135,9 +216,7 @@ function Contact() {
                                                   <td>
 
                                                        <button
-                                                            onClick={() => {
-                                                                 // discard function
-                                                            }}
+                                                            onClick={() => handleDelete(contact)}
                                                             className="p-1 hover:rounded"
                                                        >
                                                             <img src={bin} alt="bin" className="w-5 h-5" />
@@ -278,7 +357,7 @@ function Contact() {
                </main>
 
 
-          </div>
+          </div >
 
 
 

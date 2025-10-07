@@ -11,12 +11,12 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : 1;
+     const userId = localStorage.getItem('userId');
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
 
+     //TODO: take user's timezone from upper parents, not both from components. doubled now.
      useEffect(() => {
           console.log(userId);
           if (!userId)
@@ -71,9 +71,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           }
      }
      const navigate = useNavigate();
-     const goToHomePage = () => {
-          navigate('/homepage');
-     }
 
 
      const handleSelect = (info) => {

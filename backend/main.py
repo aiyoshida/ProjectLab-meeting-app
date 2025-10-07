@@ -10,6 +10,7 @@ from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import func
+import logging
 
 
 app = FastAPI()
@@ -21,6 +22,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# level setting of the log
+logging.basicConfig(level=logging.DEBUG)
 
 
 # pydantic class definitions
@@ -54,7 +59,7 @@ class GoogleLogin(BaseModel):
 
 # for adding/deleting new contact
 class ManageContact(BaseModel):
-    friend_sub: str
+    sub: str
 
 
 # for create DB when app.db does not exist
@@ -123,7 +128,7 @@ async def update_user(
 # first find sub in the DB? yes then, home, no then, add to the DB.
 @app.post("/register/{sub}")
 async def login_user(sub: str, req: GoogleLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(sub == User.sub).first()
+    user = db.query(User).filter(User.sub == sub).first()
     if user:
         return user
     if not user:
@@ -146,59 +151,60 @@ async def login_user(sub: str, req: GoogleLogin, db: Session = Depends(get_db)):
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
 async def get_contactlist(userId: str, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
-
+    contacts = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).all()
     if not contacts:
-        raise HTTPException(status_code=404, detail="User not found or no contacts")
+        return {"contacts", []}
 
-    result = []
-    for c in contacts:
-        friend_user = c.owner_user
-        result.append(
+    result = [
             {
                 "id": c.id,
-                "name": friend_user.username,
-                "gmail": friend_user.gmail,
-                "timezone": friend_user.timezone,
-                "picture": friend_user.picture,
+                "sub": c.friend_of_this_user_sub,
+                "name": c.actual_user.username,
+                "gmail": c.actual_user.gmail,
+                "timezone": c.actual_user.timezone,
+                "picture": c.actual_user.picture
             }
-        )
+            for c in contacts
+        ]
 
     return {"contacts": result}
 
 
+# searching contact
 # GET /contact/search?gmail={gmail}
-@app.get("/contact/search?gmail={gmail}")
+@app.get("/contact/search/{gmail}")
 async def get_search_contact(gmail: str, db: Session = Depends(get_db)):
-    contact = db.query(User).filter(gmail == User.gmail).first()
+    logging.info(
+        "gmail is: ",
+    )
+    contact = db.query(User).filter(User.gmail == gmail).first()
     if not contact:
-        return {"message": "The contact does not exist in this app."}
+        return {"sub": None}
     return {
         "sub": contact.sub,
         "username": contact.username,
         "gmail": contact.gmail,
-        "timezone": contact.gmail,
-        "picture": contact.picture
+        "timezone": contact.timezone,
+        "picture": contact.picture,
     }
 
 
 # POST /contact/add/{userId}
+# automatically rejects same contacts to add. good for this app but why...?
 @app.post("/contact/add/{userId}")
 async def add_new_contact(
     userId: str, req: ManageContact, db: Session = Depends(get_db)
 ):
     friend = (
         db.query(Contact)
-        .filter(
-            Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.friend_sub
-        )
+        .filter(Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.sub)
         .first()
     )
 
     if friend:
         return {"message": "This contact already exists in your contact"}
     if not friend:
-        new_friend = Contact(user_sub=userId, friend_of_this_user_sub=req.friend_sub)
+        new_friend = Contact(user_sub=userId, friend_of_this_user_sub=req.sub)
         db.add(new_friend)
         db.commit()
         db.refresh(new_friend)
@@ -207,12 +213,12 @@ async def add_new_contact(
 
 # DELETE /contact/delete/{userId}
 @app.delete("/contact/delete/{userId}")
-async def delete_contact(userId: str, req: ManageContact, db: Session = Depends(get_db)):
+async def delete_contact(
+    userId: str, req: ManageContact, db: Session = Depends(get_db)
+):
     friend = (
         db.query(Contact)
-        .filter(
-            Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.friend_sub
-        )
+        .filter(Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.sub)
         .first()
     )
 
@@ -305,30 +311,41 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
 
     return {"message": "Meeting deleted", "id": cardId}
 
+# to get contact llist from user to create the new meeting
+# GET /newmeeting/{userId}
+@app.get("/newmeeting/{userId}")
+async def get_meetingcontact(userId: str, db: Session = Depends(get_db)):
+    contacts = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).all()
+    if not contacts:
+        return {"contacts", []}
 
-# # GET /newmeeting/{userId}
-# @app.get("/newmeeting/{userId}")
-# async def get_meetingcontact(userId: str, db: Session = Depends(get_db)):
-#     contacts = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).all()
-#     if not contacts:
-#         raise HTTPException(status_code=404, detail="User not found or no contacts")
+    result = [
+        {
+            "id": c.id,
+            "sub": c.friend_of_this_user_sub,
+            "name": c.actual_user.username,
+            "gmail": c.actual_user.gmail,
+            "timezone": c.actual_user.timezone,
+            "picture": c.actual_user.picture
+        }
+        for c in contacts
+    ]
 
-#     result = [
-#         {
-#             "id": c.id,
-#             "name": c.actual_user.username,
-#             "gmail": c.actual_user.gmail,
-#             "timezone": c.actual_user.timezone,
-#         }
-#         for c in contacts
-#     ]
-
-#     return {"contacts": result}
-
+    return {"contacts": result}
 
 # GET newmeeting/timezone/${useId}
 @app.get("/newmeeting/timezone/{userId}")
 async def get_newmeeting_timezone(userId: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    print("User's timezone is ", user.timezone)
+    return {"timezone": user.timezone}
+
+
+# GET newmeeting/timezone/${useId}
+@app.get("/newmeetingother/timezone/{userId}")
+async def get_newmeetingother_timezone(userId: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
