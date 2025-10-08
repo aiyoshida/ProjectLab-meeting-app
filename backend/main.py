@@ -40,7 +40,7 @@ class NewMeetingData(BaseModel):
     title: str
     timezone: str
     creator_user_sub: str
-    invitees: List[int]
+    invitees: List[str]
     slots: List[SlotTime]
     url: Optional[str] = None
 
@@ -255,7 +255,8 @@ async def delete_contact(
 # GET /homepage/{userId}
 @app.get("/homepage/{userId}")
 async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
-    participating_meeting = (
+    # get list of the meeting that this user participates
+    user_in_the_meeting = (
         db.query(Participant)
         .filter(Participant.user_id == userId, Participant.meeting_id != None)
         .all()
@@ -263,18 +264,16 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
 
     result = []
     # ⭐️ working on progress
-    for meeting in participating_meeting:
-        if not meeting:
-            continue
+    for meeting in user_in_the_meeting:
         participants = (
             db.query(Participant)
             .filter(Participant.meeting_id == meeting.meeting_id)
             .all()
         )
-        participant_names = []
 
+        participant_names = []
         for p in participants:
-            user = db.query(User).filter(User.id == p.user_id).first()
+            user = db.query(User).filter(User.sub == p.user_id).first()
             if user:
                 participant_names.append(user.username)
 
@@ -379,15 +378,13 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     db.add(creator_participant)
 
     #  add Participants
-    for contact_id in data.invitees:
-        contact = db.query(Contact).filter(Contact.id == contact_id).first()
-        if contact:
-            participant = Participant(
+    for invitee_sub in data.invitees:
+        participant = Participant(
                 meeting_id=meeting.id,
-                user_id=contact.user_id,
+                user_id=invitee_sub,
                 voted=False,
             )
-            db.add(participant)
+        db.add(participant)
 
     # add VotedDate
     for slot in data.slots:

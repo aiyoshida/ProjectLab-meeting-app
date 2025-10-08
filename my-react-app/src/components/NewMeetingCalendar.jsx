@@ -31,6 +31,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                });
 
      }, [userId]);
+
+
      //to force fullcalendar to re-render.
      useEffect(() => {
           const api = calendarRef.current?.getApi?.();
@@ -43,9 +45,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           try {
                const payload = {
                     title: meetingTitle,
-                    creator_user_id: userId,
                     timezone: timezone,
-                    invitees: checkedInvitees.map(user => user.id),
+                    creator_user_sub: userId,
+                    invitees: checkedInvitees.map(invitee => invitee.sub),
                     slots: selectedSlots.map(slot => ({
                          start: slot.start,
                          end: slot.end
@@ -103,8 +105,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
      return (
           <div className="relative w-full max-w-4xl ml-auto px-4">
-               {/* <button onClick={goToHomePage} className="">✕</button> */}
-
 
                <section className="flex-1 w-full min-w-0 overflow-hidden">
                     <FullCalendar

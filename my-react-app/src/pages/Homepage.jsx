@@ -10,8 +10,7 @@ import axios from "axios"
 
 function Homepage() {
      const [cards, setCards] = useState([])
-     const storedId = localStorage.getItem('userId');//これなんだっけ？
-     const userId = storedId ? parseInt(storedId) : 1;//こっちが共有だっけ？
+     const userId = localStorage.getItem('userId');//これなんだっけ？
      const handleDelete = async (cardId) => {
           try {
                await axios.delete(`http://localhost:8000/homepage/${cardId}`)
@@ -24,8 +23,7 @@ function Homepage() {
 
      useEffect(() => {
           axios
-               //仮にここを1とする。後で変える。
-               .get(`http://localhost:8000/homepage/${1}`)
+               .get(`http://localhost:8000/homepage/${userId}`)
                .then((res) => {
                     setCards(res.data.cards)
                })
@@ -37,28 +35,15 @@ function Homepage() {
      return (
           <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
                <LeftSidebar />
-               {/* <div className="meeting-card-container">
-                    <h2 className="title">Meeting List</h2>
-
-                    <div className="meeting-grid">
-                         {cards.map((meeting) => (
-                              <div key={meeting.id} className="meeting-card">
-                                   <h3>{meeting.created_at}</h3>
-                                   <p className="meeting-title">{meeting.title}</p>
-                                   <p className="meeting-participants">Participants: {meeting.participants.join(", ")}</p>
-                                   <p className="meeting-url">{meeting.url}</p>
-                                   <button onClick={() => handleDelete(meeting.id)}>delete</button>
-                              </div>
-                         ))}
-
-                    </div>
-               </div> */}
 
                <main className="min-h-dvh bg-[#f6e5e7] p-10 ">
                     <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11 ">
                          Meeting List
                     </h1>
-                    <div class="grid grid-cols-2 ml-20">
+
+                    
+
+                    {/* <div class="grid grid-cols-2 ml-20">
                          {cards.map((meeting) => (
                          <section key={meeting.id} className="max-w-3xl mb-10">
                               <a href="#" className="block rounded-md border border-gray-300 bg-white shadow-sm sm:p-6 w-96">
@@ -90,14 +75,8 @@ function Homepage() {
 
                         
 
-                    </div>
-                    {/*ここは後で自動で4つ以上になったら次のページに行くし、ボタンの自動生成も必要。 */}
-                    <div className="flex join mt-8 justify-center ">
-                         <button className="join-item btn btn-active">1</button>
-                         <button className="join-item btn ">2</button>
-                         <button className="join-item btn">3</button>
-                         <button className="join-item btn">4</button>
-                    </div>
+                    </div> */}
+
 
 
 

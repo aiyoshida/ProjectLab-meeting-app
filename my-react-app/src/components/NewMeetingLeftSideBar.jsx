@@ -25,11 +25,11 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                //uncheck
                setCheckedInvitees(checkedInvitees.filter(i => i.id !== invitee.id))
           } else {
-               if (checkedInvitees.length < 2) {
+               if (checkedInvitees.length < 3) {
                     setCheckedInvitees([...checkedInvitees, invitee])
                }
                else {
-                    alert("It is only up to 2 people")
+                    alert("It is only up to 3 people")
                }
           }
      }
