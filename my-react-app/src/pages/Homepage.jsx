@@ -10,7 +10,13 @@ import axios from "axios"
 
 function Homepage() {
      const [cards, setCards] = useState([])
-     const userId = localStorage.getItem('userId');//これなんだっけ？
+     const userId = localStorage.getItem('userId');
+     const navigate = useNavigate();
+     const goToMeetingPage = () => {
+          navigate('/homepage');
+     }
+
+
      const handleDelete = async (cardId) => {
           try {
                await axios.delete(`http://localhost:8000/homepage/${cardId}`)
@@ -26,6 +32,7 @@ function Homepage() {
                .get(`http://localhost:8000/homepage/${userId}`)
                .then((res) => {
                     setCards(res.data.cards)
+                    console.log("The cards!!!: ", res.data.cards);
                })
                .catch((err) => {
                     console.error("fetch error", err)
@@ -41,49 +48,39 @@ function Homepage() {
                          Meeting List
                     </h1>
 
-                    
-
-                    {/* <div class="grid grid-cols-2 ml-20">
+                    <div class="grid grid-cols-2 ml-20">
                          {cards.map((meeting) => (
-                         <section key={meeting.id} className="max-w-3xl mb-10">
-                              <a href="#" className="block rounded-md border border-gray-300 bg-white shadow-sm sm:p-6 w-96">
-                                   <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
-                                        <div className="mt-4 sm:mt-0">
-                                             <h3 className="text-lg font-medium text-pretty text-gray-900">{meeting.title}</h3>
-                                             <p className="mt-1 text-sm text-gray-700">Created By {meeting.creator}</p>
-                                             <p className="mt-4 line-clamp-2 text-sm text-pretty text-gray-700">Participants :{meeting.participants}</p>
+                              <section key={meeting.id} className="max-w-3xl mb-10">
+                                   <a  className="block rounded-md border border-gray-300 bg-white shadow-sm sm:p-6 w-96">
+                                        <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
+                                             <div onClick={() => navigate(`/meetinglink/${meeting.id}`)} className="mt-4 sm:mt-0 hover:cursor-pointer">
+                                                  <h3 className="text-xl font-medium text-pretty text-gray-900">{meeting.title}</h3>
+                                                  <p className="mt-1 text-sm text-gray-700">Created By : {meeting.creator}</p>
+                                                  <p className="mt-4 line-clamp-2 text-sm text-pretty text-gray-700">Participants : {meeting.participants}</p>
+                                             </div>
                                         </div>
-                                   </div>
 
-                                   <dl className="mt-6 flex gap-4 lg:gap-6">
-                                        <div className="flex items-center gap-1">
-                                             <img src={calendar} alt="calendar" className="w-4 h-4" />
-                                             <dd className="text-xs text-gray-700">Date : 31/06/2025</dd>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                             <img src={time} alt="time" className="w-4 h-4" />
-                                             <dd className="text-xs text-gray-700">30 minutes</dd>
-                                        </div>
-                                        <img src={bin} alt="bin" className="w-5 h-5" />
-                                   </dl>
-                              </a>
-                         </section>
-
-                        
-
-                    ))}
-
-                        
-
-                    </div> */}
+                                        <dl className="mt-6 flex gap-4 lg:gap-6">
+                                             <div className="flex items-center gap-1">
+                                                  <img src={calendar} alt="calendar" className="w-4 h-4" />
+                                                  <dd className="text-xs text-gray-700">Date : {meeting.date}</dd>
+                                             </div>
+                                             <div className="flex items-center gap-1">
+                                                  <img src={time} alt="time" className="w-4 h-4" />
+                                                  <dd className="text-xs text-gray-700">{meeting.slot_duration} minutes</dd>
+                                             </div>
+                                             <img src={bin} alt="bin" className="w-5 h-5 cursor-pointer hover:bg-gray-300 rounded" onClick={() => { handleDelete(meeting.id) }} />
+                                        </dl>
+                                   </a>
+                              </section>
 
 
 
+                         ))}
+
+                    </div>
 
                </main>
-
-
-
           </div>
      );
 

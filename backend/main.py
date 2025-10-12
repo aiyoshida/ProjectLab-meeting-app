@@ -42,6 +42,7 @@ class NewMeetingData(BaseModel):
     creator_user_sub: str
     invitees: List[str]
     slots: List[SlotTime]
+    slot_duration: str
     url: Optional[str] = None
 
 
@@ -151,24 +152,54 @@ async def login_user(sub: str, req: GoogleLogin, db: Session = Depends(get_db)):
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
 async def get_contactlist(userId: str, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).all()
-    if not contacts:
-        return {"contacts", []}
+    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
+    # if not contacts:
+    #     return {"contacts": []}
 
     result = [
             {
                 "id": c.id,
                 "sub": c.friend_of_this_user_sub,
-                "name": c.actual_user.username,
-                "gmail": c.actual_user.gmail,
-                "timezone": c.actual_user.timezone,
-                "picture": c.actual_user.picture
+                "name": c.owner_user.username,
+                "gmail": c.owner_user.gmail,
+                "timezone": c.owner_user.timezone,
+                "picture": c.owner_user.picture
             }
             for c in contacts
         ]
 
     return {"contacts": result}
 
+# logger = logging.getLogger("uvicorn.error")
+
+# @app.get("/contact/{userId}")
+# async def get_contactlist(userId: str, db: Session = Depends(get_db)):
+#     logger.info("userId=%r DB=%s", userId, db.bind.url)
+
+#     total = db.query(Contact).count()
+#     owners = [c.friend_of_this_user_sub for c in db.query(Contact).all()]
+#     hits_owner  = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).count()
+#     hits_friend = db.query(Contact).filter(Contact.user_sub == userId).count()
+#     logger.info("Contact total=%s owners=%s hits(owner)=%s hits(friend)=%s",
+#                 total, owners, hits_owner, hits_friend)
+
+#     rows = (
+#         db.query(Contact, User)
+#           .join(User, Contact.user_sub == User.sub)   # 友だち本人をJOIN
+#           .filter(Contact.friend_of_this_user_sub == userId)
+#           .all()
+#     )
+#     logger.info("join rows=%s", len(rows))
+
+#     result = [{
+#         "id": c.id,
+#         "sub": u.sub,
+#         "name": u.username,
+#         "gmail": u.gmail,
+#         "timezone": u.timezone,
+#         "picture": u.picture,
+#     } for c, u in rows]
+#     return {"contacts": result}
 
 # searching contact
 # GET /contact/search?gmail={gmail}
@@ -277,9 +308,15 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
             if user:
                 participant_names.append(user.username)
 
+        creator_name = (
+            meeting.meeting.creator.username if meeting.meeting.creator else "Unknown"
+        )
+
         result.append(
             {
                 "id": meeting.meeting_id,
+                "creator": creator_name,
+                "slot_duration": meeting.meeting.slot_duration,
                 "title": meeting.meeting.title,
                 "date": meeting.meeting.created_at.strftime("%Y %b %d"),
                 "participants": participant_names,
@@ -314,18 +351,18 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
 # GET /newmeeting/{userId}
 @app.get("/newmeeting/{userId}")
 async def get_meetingcontact(userId: str, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).all()
+    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
     if not contacts:
-        return {"contacts", []}
+        return {"contacts": []}
 
     result = [
         {
             "id": c.id,
             "sub": c.friend_of_this_user_sub,
-            "name": c.actual_user.username,
-            "gmail": c.actual_user.gmail,
-            "timezone": c.actual_user.timezone,
-            "picture": c.actual_user.picture
+            "name": c.owner_user.username,
+            "gmail": c.owner_user.gmail,
+            "timezone": c.owner_user.timezone,
+            "picture": c.owner_user.picture
         }
         for c in contacts
     ]
@@ -360,6 +397,7 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
         title=data.title,
         creator_user_sub=data.creator_user_sub,
         timezone=data.timezone,
+        slot_duration=data.slot_duration,
         url="",
     )
     db.add(meeting)

@@ -137,12 +137,12 @@ const voted_date_ids = selectedSlots.map(slot => {
           <div className="meeting-link-section">
                <div className="meeting-link" >
 
-                    <div className="meeting-link-brand-row">
-                         <img src={icon} alt='icon' className="meeting-link-icon" />
-                         <h3 className="meeting-link-brand">AcrossTime</h3>
+                    <div className="flex justify-start items-center">
+                         <img src={icon} alt='icon' className="h-16 w-16" />
+                         <h3 className="text-3xl">AcrossTime</h3>
                     </div>
 
-                    <div className="meeting-link-section">
+                    <div className="">
                          <p className="meeting-link-participants" >Participants</p>
 
                          {participants.map((user) => (

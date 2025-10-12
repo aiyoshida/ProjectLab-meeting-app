@@ -43,6 +43,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
      const handleShare = async () => {
           try {
+               console.log("This is invitee:", checkedInvitees );
                const payload = {
                     title: meetingTitle,
                     timezone: timezone,
@@ -52,6 +53,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          start: slot.start,
                          end: slot.end
                     })),
+                    slot_duration: slotDuration,
                     url: "http://localhost:3000/meetinglink"
                };
                console.log(payload);
@@ -99,8 +101,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           }]);
           console.log("selectedslots: ", selectedSlots);
      };
-
-
 
 
      return (

@@ -45,6 +45,7 @@ class Meeting(Base):
     timezone = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     creator_user_sub = Column(String, ForeignKey("users.sub"))
+    slot_duration = Column(String, nullable=False)
     finalized = Column(Boolean, default=False)
     all_voted = Column(Boolean, default=False)
     url = Column(String, nullable=True)
