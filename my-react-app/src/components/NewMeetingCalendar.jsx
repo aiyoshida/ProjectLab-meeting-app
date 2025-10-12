@@ -110,10 +110,22 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                     <FullCalendar
                          timeZone={timezone}
                          headerToolbar={{
-                              left: '',
-                              center: '',
-                              right: 'prev,next today'
-                         }}
+                                        left: 'title',
+                                        center: '',
+                                        right: 'prev,next today'
+                                   }}
+                                   titleFormat={{ month: 'short', year: 'numeric' }}
+                                   dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+                                   dayHeaderContent={(arg) => (
+                                        <div className="flex flex-col items-center">
+                                             <span className="text-xs text-gray-500 font-medium uppercase">
+                                                  {arg.date.toLocaleString('en-US', { weekday: 'short' })}
+                                             </span>
+                                             <span className="text-lg text-gray-900 font-semibold">
+                                                  {arg.date.getDate()}
+                                             </span>
+                                        </div>
+                                        )}
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}

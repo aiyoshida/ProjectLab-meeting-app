@@ -157,18 +157,19 @@ async def get_contactlist(userId: str, db: Session = Depends(get_db)):
     #     return {"contacts": []}
 
     result = [
-            {
-                "id": c.id,
-                "sub": c.friend_of_this_user_sub,
-                "name": c.owner_user.username,
-                "gmail": c.owner_user.gmail,
-                "timezone": c.owner_user.timezone,
-                "picture": c.owner_user.picture
-            }
-            for c in contacts
-        ]
+        {
+            "id": c.id,
+            "sub": c.friend_of_this_user_sub,
+            "name": c.owner_user.username,
+            "gmail": c.owner_user.gmail,
+            "timezone": c.owner_user.timezone,
+            "picture": c.owner_user.picture,
+        }
+        for c in contacts
+    ]
 
     return {"contacts": result}
+
 
 # logger = logging.getLogger("uvicorn.error")
 
@@ -200,6 +201,7 @@ async def get_contactlist(userId: str, db: Session = Depends(get_db)):
 #         "picture": u.picture,
 #     } for c, u in rows]
 #     return {"contacts": result}
+
 
 # searching contact
 # GET /contact/search?gmail={gmail}
@@ -347,6 +349,7 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
 
     return {"message": "Meeting deleted", "id": cardId}
 
+
 # to get contact llist from user to create the new meeting
 # GET /newmeeting/{userId}
 @app.get("/newmeeting/{userId}")
@@ -362,12 +365,13 @@ async def get_meetingcontact(userId: str, db: Session = Depends(get_db)):
             "name": c.owner_user.username,
             "gmail": c.owner_user.gmail,
             "timezone": c.owner_user.timezone,
-            "picture": c.owner_user.picture
+            "picture": c.owner_user.picture,
         }
         for c in contacts
     ]
 
     return {"contacts": result}
+
 
 # GET newmeeting/timezone/${useId}
 @app.get("/newmeeting/timezone/{userId}")
@@ -408,20 +412,20 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     meeting.id = meeting.id
     db.commit()
 
-    creator_participant = Participant(
-        meeting_id=meeting.id,
-        user_id=data.creator_user_sub,
-        voted=True,
-    )
-    db.add(creator_participant)
+    # creator_participant = Participant(
+    #     meeting_id=meeting.id,
+    #     user_id=data.creator_user_sub,
+    #     voted=True,
+    # )
+    # db.add(creator_participant)
 
     #  add Participants
     for invitee_sub in data.invitees:
         participant = Participant(
-                meeting_id=meeting.id,
-                user_id=invitee_sub,
-                voted=False,
-            )
+            meeting_id=meeting.id,
+            user_id=invitee_sub,
+            voted=False,
+        )
         db.add(participant)
 
     # add VotedDate
@@ -438,7 +442,7 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
 # GET /meetinglink/timezone/{userId}
 @app.get("/meetinglink/timezone/{userId}")
 async def get_meetinglink_timezone(userId: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
+    user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     print(user.timezone)
@@ -450,6 +454,10 @@ async def get_meetinglink_timezone(userId: str, db: Session = Depends(get_db)):
 # GET /meetinglink/{meetingId}
 @app.get("/meetinglink/{meetingId}")
 async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
+    meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
     # participant
     participants = (
         db.query(Participant).filter(Participant.meeting_id == meetingId).all()
@@ -459,14 +467,15 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 
     contacts = []
     for p in participants:
-        user = db.query(User).filter(User.id == p.user_id).first()
+        user = db.query(User).filter(User.sub == p.user_id).first()
         if user:
             contacts.append(
                 {
-                    "id": user.id,
+                    "sub": user.sub,
                     "name": user.username,
                     "gmail": user.gmail,
                     "timezone": user.timezone,
+                    "picture": user.picture,
                     "voted": p.voted,
                 }
             )
@@ -496,7 +505,23 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
         for slot in slots
     ]
 
-    return {"contacts": contacts, "available_slots": available_slots}
+    creator_user = db.query(User).filter(User.sub == meeting.creator_user_sub).first()
+    creator_info = None
+    if creator_user:
+        creator_info = {
+            "sub": creator_user.sub,
+            "name": creator_user.username,
+            "gmail": creator_user.gmail,
+            "timezone": creator_user.timezone,
+            "picture": creator_user.picture,
+        }
+
+    return {
+        "contacts": contacts,
+        "available_slots": available_slots,
+        "slotDuration": meeting.slot_duration,
+        "creator":  creator_info,
+    }
 
 
 # POST /meetinglink/{meetingId}/vote
