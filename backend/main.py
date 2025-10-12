@@ -289,6 +289,7 @@ async def delete_contact(
 @app.get("/homepage/{userId}")
 async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
     # get list of the meeting that this user participates
+
     user_in_the_meeting = (
         db.query(Participant)
         .filter(Participant.user_id == userId, Participant.meeting_id != None)
@@ -321,6 +322,7 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
                 "slot_duration": meeting.meeting.slot_duration,
                 "title": meeting.meeting.title,
                 "date": meeting.meeting.created_at.strftime("%Y %b %d"),
+                "all_voted": meeting.meeting.all_voted,
                 "participants": participant_names,
                 "url": meeting.meeting.url,
             }
@@ -412,12 +414,13 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     meeting.id = meeting.id
     db.commit()
 
-    # creator_participant = Participant(
-    #     meeting_id=meeting.id,
-    #     user_id=data.creator_user_sub,
-    #     voted=True,
-    # )
-    # db.add(creator_participant)
+    creator_participant = Participant(
+        meeting_id=meeting.id,
+        user_id=data.creator_user_sub,
+        creator=True,
+        voted=True,
+    )
+    db.add(creator_participant)
 
     #  add Participants
     for invitee_sub in data.invitees:
@@ -458,9 +461,11 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
-    # participant
+    # participant...creator == false, how to distingusih creator or invitee.
     participants = (
-        db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+        db.query(Participant)
+        .filter(Participant.meeting_id == meetingId, Participant.creator == False)
+        .all()
     )
     if not participants:
         raise HTTPException(status_code=404, detail="Participants not found")
@@ -520,7 +525,7 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
         "contacts": contacts,
         "available_slots": available_slots,
         "slotDuration": meeting.slot_duration,
-        "creator":  creator_info,
+        "creator": creator_info,
     }
 
 
@@ -529,7 +534,9 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
     for voted_date_id in data.slots:
         vote = Vote(
-            user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
+            user_id=data.user_id, 
+            voted_date_id=voted_date_id, 
+            meeting_id=meetingId
         )
         db.add(vote)
 
@@ -542,4 +549,13 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
         participant.voted = True
 
     db.commit()
+
+    # make meeting.all_vote true if all participants voted.
+    participants = db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    if participants and all(p.voted for p in participants):
+        meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+        if meeting:
+            meeting.all_voted = True
+            db.commit()
+
     return {"message": "Vote submitted!"}

@@ -199,9 +199,9 @@ export default function MeetingLink() {
                               {participants.map((user, index) => (
                                    <label key={index} className="">
                                         <div className="flex items-center mb-4">
-                                             {/* <label>
-                                                  <input type="checkbox" className="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
-                                             </label> */}
+                                             <label>
+                                                  <input type="checkbox" className="checkbox" checked={user.voted} />
+                                             </label>
 
                                              <div className="flex items-center gap-3 ml-3 ">
                                                   <div className="avatar">
@@ -252,6 +252,8 @@ export default function MeetingLink() {
                                              <div className="flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3">
                                                   {moment.utc(date.start).tz(timezone).format("H:mm")}
                                                   <div className="badge badge-sm bg-transparent border-none">
+                                                       {/* Took good icon from here
+                                                       https://icon-rainbow.com/%e3%81%84%e3%81%84%e3%81%ad%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-1/  */}
                                                        <img src={good} alt='good' className="h-5 w-5" />
                                                   </div>
                                              </div>

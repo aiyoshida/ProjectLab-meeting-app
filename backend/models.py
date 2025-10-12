@@ -59,6 +59,7 @@ class Participant(Base):
     meeting_id = Column(Integer, ForeignKey("meetings.id"))
     user_id = Column(String, ForeignKey("users.sub"))
     voted = Column(Boolean, default=False)
+    creator = Column(Boolean, default=False)
     meeting = relationship("Meeting", backref="participants")
     user = relationship("User", backref="participations")
 
