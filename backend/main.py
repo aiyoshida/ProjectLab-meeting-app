@@ -10,9 +10,8 @@ from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import func
+import logging
 
-
-# implement pydantic for type definition later
 
 app = FastAPI()
 
@@ -25,37 +24,46 @@ app.add_middleware(
 )
 
 
+# level setting of the log
+logging.basicConfig(level=logging.DEBUG)
+
+
+# pydantic class definitions
+
+
 class SlotTime(BaseModel):
     start: datetime
     end: datetime
 
 
-# POST register
-class RegisteredData(BaseModel):
-    name: str
-    gmail: str
-    timezone: str
-
-
 class NewMeetingData(BaseModel):
     title: str
     timezone: str
-    creator_user_id: int
-    invitees: List[int]
+    creator_user_sub: str
+    invitees: List[str]
     slots: List[SlotTime]
+    slot_duration: str
     url: Optional[str] = None
 
 
 class VoteData(BaseModel):
-    user_id: int
+    user_id: str
     slots: List[int]
 
 
-# for GET register
-class RegsiteredUser(BaseModel):
+# for Google login POST
+class GoogleLogin(BaseModel):
+    name: str
     gmail: str
+    pic: str
 
 
+# for adding/deleting new contact
+class ManageContact(BaseModel):
+    sub: str
+
+
+# for create DB when app.db does not exist
 Base.metadata.create_all(bind=engine)
 
 
@@ -69,15 +77,17 @@ def get_db():
 
 # for PUT /setting/{user_id}
 class UserUpdate(BaseModel):
-    id: int
     username: str
     timezone: str
 
 
+# ==, !=, like, in_([1,2,3]), and_, or_, first(), all(), count()
+
+
 # GET /setting/{user_id}
 @app.get("/setting/{userId}")
-async def get_user_data(userId: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
+async def get_user_data(userId: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -85,15 +95,17 @@ async def get_user_data(userId: int, db: Session = Depends(get_db)):
         "username": user.username,
         "timezone": user.timezone,
         "gmail": user.gmail,
+        "picture": user.picture,
     }
 
 
 # PUT /setting/{user_id}
 @app.put("/setting/{userId}")
 async def update_user(
-    userId: int, user_data: UserUpdate, db: Session = Depends(get_db)
+    userId: str, user_data: UserUpdate, db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.id == userId).first()
+    print("received data: ", user_data)
+    user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -105,7 +117,7 @@ async def update_user(
     return {
         "message": "Success!",
         "data": {
-            "id": user.id,
+            "sub": user.sub,
             "username": user.username,
             "timezone": user.timezone,
             "gmail": user.gmail,
@@ -114,74 +126,203 @@ async def update_user(
 
 
 # POST /register/login
-@app.post("/register/login")
-async def login_user(req: RegsiteredUser, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.gmail == req.gmail).first()
+# first find sub in the DB? yes then, home, no then, add to the DB.
+@app.post("/register/{sub}")
+async def login_user(sub: str, req: GoogleLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == sub).first()
+    if user:
+        return user
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"userId": user.id}
-
-
-# POST /register
-@app.post("/register")
-async def register_user(req: RegisteredData, db: Session = Depends(get_db)):
-    new_user = User(username=req.name, gmail=req.gmail, timezone=req.timezone)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    # return auto created userId
-    return {"userId": new_user.id}
+        new_user = User(
+            sub=sub,
+            username=req.name,
+            gmail=req.gmail,
+            timezone="UTC",
+            picture=req.pic,
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    else:
+        raise HTTPException(status_code=404, detail="Error happened")
 
 
 # http://localhost:3000/contact
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
-async def get_contactlist(userId: int, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
+async def get_contactlist(userId: str, db: Session = Depends(get_db)):
+    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
+    # if not contacts:
+    #     return {"contacts": []}
 
-    if not contacts:
-        raise HTTPException(status_code=404, detail="User not found or no contacts")
-
-    result = []
-    for c in contacts:
-        contact_user = c.actual_user
-        result.append(
-            {
-                "id": c.id,
-                "name": contact_user.username,
-                "gmail": contact_user.gmail,
-                "timezone": contact_user.timezone,
-            }
-        )
+    result = [
+        {
+            "id": c.id,
+            "sub": c.friend_of_this_user_sub,
+            "name": c.owner_user.username,
+            "gmail": c.owner_user.gmail,
+            "timezone": c.owner_user.timezone,
+            "picture": c.owner_user.picture,
+        }
+        for c in contacts
+    ]
 
     return {"contacts": result}
 
 
+# logger = logging.getLogger("uvicorn.error")
+
+# @app.get("/contact/{userId}")
+# async def get_contactlist(userId: str, db: Session = Depends(get_db)):
+#     logger.info("userId=%r DB=%s", userId, db.bind.url)
+
+#     total = db.query(Contact).count()
+#     owners = [c.friend_of_this_user_sub for c in db.query(Contact).all()]
+#     hits_owner  = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).count()
+#     hits_friend = db.query(Contact).filter(Contact.user_sub == userId).count()
+#     logger.info("Contact total=%s owners=%s hits(owner)=%s hits(friend)=%s",
+#                 total, owners, hits_owner, hits_friend)
+
+#     rows = (
+#         db.query(Contact, User)
+#           .join(User, Contact.user_sub == User.sub)   # 友だち本人をJOIN
+#           .filter(Contact.friend_of_this_user_sub == userId)
+#           .all()
+#     )
+#     logger.info("join rows=%s", len(rows))
+
+#     result = [{
+#         "id": c.id,
+#         "sub": u.sub,
+#         "name": u.username,
+#         "gmail": u.gmail,
+#         "timezone": u.timezone,
+#         "picture": u.picture,
+#     } for c, u in rows]
+#     return {"contacts": result}
+
+
+# searching contact
+# GET /contact/search?gmail={gmail}
+@app.get("/contact/search/{gmail}")
+async def get_search_contact(gmail: str, db: Session = Depends(get_db)):
+    logging.info(
+        "gmail is: ",
+    )
+    contact = db.query(User).filter(User.gmail == gmail).first()
+    if not contact:
+        return {"sub": None}
+    return {
+        "sub": contact.sub,
+        "username": contact.username,
+        "gmail": contact.gmail,
+        "timezone": contact.timezone,
+        "picture": contact.picture,
+    }
+
+
+# POST /contact/add/{userId}
+# automatically rejects same contacts to add. good for this app but why...?
+@app.post("/contact/add/{userId}")
+async def add_new_contact(
+    userId: str, req: ManageContact, db: Session = Depends(get_db)
+):
+    friend = (
+        db.query(Contact)
+        .filter(Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.sub)
+        .first()
+    )
+
+    if friend:
+        return {"message": "This contact already exists in your contact"}
+    if not friend:
+        new_friend = Contact(user_sub=userId, friend_of_this_user_sub=req.sub)
+        db.add(new_friend)
+        db.commit()
+        db.refresh(new_friend)
+        return new_friend
+
+
+# DELETE /contact/delete/{userId}
+@app.delete("/contact/delete/{userId}")
+async def delete_contact(
+    userId: str, req: ManageContact, db: Session = Depends(get_db)
+):
+    friend = (
+        db.query(Contact)
+        .filter(Contact.user_sub == userId, Contact.friend_of_this_user_sub == req.sub)
+        .first()
+    )
+
+    if not friend:
+        return {"message": "This contact does not exist"}
+
+    db.delete(friend)
+    db.commit()
+    return {"message": "Successfully deleted!"}
+
+
+# Why I implemented this...?
+# # POST /contact/add/{userId}
+# @app.post("/contact/add/{userId}")
+# async def contact_add(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
+#     for voted_date_id in data.slots:
+#         vote = Vote(
+#             user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
+#         )
+#         db.add(vote)
+
+#     participant = (
+#         db.query(Participant)
+#         .filter_by(user_id=data.user_id, meeting_id=meetingId)
+#         .first()
+#     )
+#     if participant:
+#         participant.voted = True
+
+#     db.commit()
+#     return {"message": "new contact added!"}
+
+
 # GET /homepage/{userId}
 @app.get("/homepage/{userId}")
-async def get_meeting_card(userId: int, db: Session = Depends(get_db)):
-    participating_meeting = db.query(Participant).filter(Participant.user_id == userId, Participant.meeting_id != None).all()
+async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
+    # get list of the meeting that this user participates
+
+    user_in_the_meeting = (
+        db.query(Participant)
+        .filter(Participant.user_id == userId, Participant.meeting_id != None)
+        .all()
+    )
 
     result = []
     # ⭐️ working on progress
-    for meeting in participating_meeting:
-        if not meeting:
-            continue 
+    for meeting in user_in_the_meeting:
         participants = (
-            db.query(Participant).filter(Participant.meeting_id == meeting.meeting_id).all()
+            db.query(Participant)
+            .filter(Participant.meeting_id == meeting.meeting_id)
+            .all()
         )
-        participant_names = []
 
+        participant_names = []
         for p in participants:
-            user = db.query(User).filter(User.id == p.user_id).first()
+            user = db.query(User).filter(User.sub == p.user_id).first()
             if user:
                 participant_names.append(user.username)
+
+        creator_name = (
+            meeting.meeting.creator.username if meeting.meeting.creator else "Unknown"
+        )
 
         result.append(
             {
                 "id": meeting.meeting_id,
+                "creator": creator_name,
+                "slot_duration": meeting.meeting.slot_duration,
                 "title": meeting.meeting.title,
                 "date": meeting.meeting.created_at.strftime("%Y %b %d"),
+                "all_voted": meeting.meeting.all_voted,
                 "participants": participant_names,
                 "url": meeting.meeting.url,
             }
@@ -204,28 +345,29 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
     db.query(Participant).filter(Participant.meeting_id.is_(None)).delete(
         synchronize_session=False
     )
-    db.query(Vote).filter(Vote.meeting_id.is_(None)).delete(
-        synchronize_session=False
-    )
+    db.query(Vote).filter(Vote.meeting_id.is_(None)).delete(synchronize_session=False)
     db.delete(meeting)
     db.commit()
 
     return {"message": "Meeting deleted", "id": cardId}
 
 
+# to get contact llist from user to create the new meeting
 # GET /newmeeting/{userId}
 @app.get("/newmeeting/{userId}")
-async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.friend_of_this_user_id == userId).all()
+async def get_meetingcontact(userId: str, db: Session = Depends(get_db)):
+    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
     if not contacts:
-        raise HTTPException(status_code=404, detail="User not found or no contacts")
+        return {"contacts": []}
 
     result = [
         {
             "id": c.id,
-            "name": c.actual_user.username,
-            "gmail": c.actual_user.gmail,
-            "timezone": c.actual_user.timezone,
+            "sub": c.friend_of_this_user_sub,
+            "name": c.owner_user.username,
+            "gmail": c.owner_user.gmail,
+            "timezone": c.owner_user.timezone,
+            "picture": c.owner_user.picture,
         }
         for c in contacts
     ]
@@ -234,27 +376,23 @@ async def get_meetingcontact(userId: int, db: Session = Depends(get_db)):
 
 
 # GET newmeeting/timezone/${useId}
-@app.get("newmeeting/timezone/{userId}")
-async def get_newmeeting_timezone(userId: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    print(user.timezone)
-    return {
-        "timezone": user.timezone,
-    }
-
-
-#GET /newmeeting/timezone/{userId}
 @app.get("/newmeeting/timezone/{userId}")
-async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
+async def get_newmeeting_timezone(userId: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    print(user.timezone)
-    return {
-        "timezone": user.timezone,
-    }
+    print("User's timezone is ", user.timezone)
+    return {"timezone": user.timezone}
+
+
+# GET newmeeting/timezone/${useId}
+@app.get("/newmeetingother/timezone/{userId}")
+async def get_newmeetingother_timezone(userId: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    print("User's timezone is ", user.timezone)
+    return {"timezone": user.timezone}
 
 
 # POST /newmeeting/{userId}  create new meeting
@@ -263,8 +401,9 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
     # Meeting
     meeting = Meeting(
         title=data.title,
-        creator_user_id=data.creator_user_id,
+        creator_user_sub=data.creator_user_sub,
         timezone=data.timezone,
+        slot_duration=data.slot_duration,
         url="",
     )
     db.add(meeting)
@@ -277,21 +416,20 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
 
     creator_participant = Participant(
         meeting_id=meeting.id,
-        user_id=data.creator_user_id,
+        user_id=data.creator_user_sub,
+        creator=True,
         voted=True,
     )
     db.add(creator_participant)
 
     #  add Participants
-    for contact_id in data.invitees:
-        contact = db.query(Contact).filter(Contact.id == contact_id).first()
-        if contact:
-            participant = Participant(
-                meeting_id=meeting.id,
-                user_id=contact.user_id,
-                voted=False,
-            )
-            db.add(participant)
+    for invitee_sub in data.invitees:
+        participant = Participant(
+            meeting_id=meeting.id,
+            user_id=invitee_sub,
+            voted=False,
+        )
+        db.add(participant)
 
     # add VotedDate
     for slot in data.slots:
@@ -306,8 +444,8 @@ async def create_meeting(data: NewMeetingData, db: Session = Depends(get_db)):
 
 # GET /meetinglink/timezone/{userId}
 @app.get("/meetinglink/timezone/{userId}")
-async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
+async def get_meetinglink_timezone(userId: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.sub == userId).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     print(user.timezone)
@@ -319,23 +457,30 @@ async def get_meetinglink_timezone(userId: int, db: Session = Depends(get_db)):
 # GET /meetinglink/{meetingId}
 @app.get("/meetinglink/{meetingId}")
 async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
-    # participant
+    meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+
+    # participant...creator == false, how to distingusih creator or invitee.
     participants = (
-        db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+        db.query(Participant)
+        .filter(Participant.meeting_id == meetingId, Participant.creator == False)
+        .all()
     )
     if not participants:
         raise HTTPException(status_code=404, detail="Participants not found")
 
     contacts = []
     for p in participants:
-        user = db.query(User).filter(User.id == p.user_id).first()
+        user = db.query(User).filter(User.sub == p.user_id).first()
         if user:
             contacts.append(
                 {
-                    "id": user.id,
+                    "sub": user.sub,
                     "name": user.username,
                     "gmail": user.gmail,
                     "timezone": user.timezone,
+                    "picture": user.picture,
                     "voted": p.voted,
                 }
             )
@@ -365,7 +510,23 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
         for slot in slots
     ]
 
-    return {"contacts": contacts, "available_slots": available_slots}
+    creator_user = db.query(User).filter(User.sub == meeting.creator_user_sub).first()
+    creator_info = None
+    if creator_user:
+        creator_info = {
+            "sub": creator_user.sub,
+            "name": creator_user.username,
+            "gmail": creator_user.gmail,
+            "timezone": creator_user.timezone,
+            "picture": creator_user.picture,
+        }
+
+    return {
+        "contacts": contacts,
+        "available_slots": available_slots,
+        "slotDuration": meeting.slot_duration,
+        "creator": creator_info,
+    }
 
 
 # POST /meetinglink/{meetingId}/vote
@@ -373,7 +534,9 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
     for voted_date_id in data.slots:
         vote = Vote(
-            user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
+            user_id=data.user_id, 
+            voted_date_id=voted_date_id, 
+            meeting_id=meetingId
         )
         db.add(vote)
 
@@ -386,16 +549,13 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
         participant.voted = True
 
     db.commit()
+
+    # make meeting.all_vote true if all participants voted.
+    participants = db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    if participants and all(p.voted for p in participants):
+        meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+        if meeting:
+            meeting.all_voted = True
+            db.commit()
+
     return {"message": "Vote submitted!"}
-
-
-# GET newmeetingothers/timezone/${userId}
-@app.get("/newmeetingothers/timezone/{userId}")
-async def get_getbasetime_timezone(userId: int, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == userId).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    print(user.timezone)
-    return {
-        "timezone": user.timezone,
-    }

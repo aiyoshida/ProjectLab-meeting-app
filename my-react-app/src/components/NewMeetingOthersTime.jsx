@@ -1,4 +1,3 @@
-import './NewMeetingOthersTime.css';
 import getBaseTime from '../utils/getBaseTime';
 import React from "react";
 import { DateTime } from 'luxon';
@@ -6,51 +5,93 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 
-export default function NewMeetingOthersTime({checkedInvitees=[]}) {
+export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
      const [timezone, setTimezone] = useState("Europe/Budapest");
 
      //basetime 
      const basetime = getBaseTime(timezone);
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+     const userId = localStorage.getItem('userId');
      console.log("checkedInvitees:", checkedInvitees)
 
 
-          //get userId's timezone
+     //get userId's timezone
      useEffect(() => {
           axios
-               .get(`http://localhost:8000/newmeetingothers/timezone/${userId}`)
+               .get(`http://localhost:8000/newmeetingother/timezone/${userId}`)
                .then((res) => {
-               setTimezone(res.data.timezone)
-               console.log(res.data.timezone);
-          })
-               .catch ((err) => {
-               console.error("error: ", err)
-          })
-},[])
+                    setTimezone(res.data.timezone)
+                    console.log(res.data.timezone);
+               })
+               .catch((err) => {
+                    console.error("error: ", err)
+               })
+     }, [])
 
 
-     return(
-          <div className="othertimezone-container">
-               
-          <div className="othertimezone-header-row">
-               {checkedInvitees.map((tz) =>(
-                    <div key={tz.id} className="othertimezone-head-item"> {tz.timezone.split("/").pop()}</div>
-               ))}
-          </div>
+     return (
+          // <div className="othertimezone-container">
 
-          <div>
-               {basetime.map((slot,idx)=>(
-                    <div className="othertimezone-time-row" key={idx}>
-                         {checkedInvitees.map((tz)=>(
-                          <div key={tz.id} className="othertimezone-time-item">
-                              <div>{slot.setZone(tz.timezone).toFormat("HH:mm")}</div>
-                         </div>
+          // <div className="othertimezone-header-row">
+          //      {checkedInvitees.map((tz) =>(
+          //           <div key={tz.id} className="othertimezone-head-item"> {tz.timezone.split("/").pop()}</div>
+          //      ))}
+          // </div>
+
+          // <div>
+          //      {basetime.map((slot,idx)=>(
+          //           <div className="othertimezone-time-row" key={idx}>
+          //                {checkedInvitees.map((tz)=>(
+          //                 <div key={tz.id} className="othertimezone-time-item">
+          //                     <div>{slot.setZone(tz.timezone).toFormat("HH:mm")}</div>
+          //                </div>
+          //                ))}
+          //           </div>
+          //      ))}
+          // </div>
+
+          // </div>
+          <div className="w-1/3 max-w-full overflow-x-auto overflow-y-hidden mt-12 mb-9 ">
+               <table className="min-w-max ">
+                    <thead className="border rounded-lg">
+                         <tr >
+                              {/* 左上の空セル（時刻見出し用） */}
+
+                              {checkedInvitees.map((tz) => (
+                                   <th key={tz.id} scope="col" className="px-5 py-3 text-left font-semibold ">
+                                        {tz.timezone.split("/").pop()}
+                                   </th>
+                              ))}
+                         </tr>
+                    </thead>
+
+                    <tbody>
+                         {basetime.map((slot, i) => (
+                              <tr key={i} className="border-t border-zinc-400">
+                                   {checkedInvitees.map((tz) => {
+                                        const hour = slot.setZone(tz.timezone).hour; // 時間を数値で取得
+
+                                        let bgClass = "bg-white"; // デフォルト（白）
+                                        if (hour >= 9 && hour < 19) {
+                                             bgClass = "bg-rose-300"; // 赤系
+                                        } else if (hour >= 7 && hour < 22) {
+                                             bgClass = "bg-rose-100"; // ピンク系
+                                        }
+
+                                        return (
+                                             <td
+                                                  key={tz.id}
+                                                  className={`${bgClass} text-base justify-center px-5 py-[12.5px]`}
+                                             >
+                                                  {slot.setZone(tz.timezone).toFormat("HH:mm")}
+                                             </td>
+                                        );
+                                   })}
+                              </tr>
                          ))}
-                    </div>
-               ))}
+                    </tbody>
+
+               </table>
           </div>
 
-          </div>
      )
 };

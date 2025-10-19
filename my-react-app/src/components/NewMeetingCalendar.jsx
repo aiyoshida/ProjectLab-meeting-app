@@ -1,23 +1,22 @@
 import { Calendar } from '@fullcalendar/core';
 import momentPlugin from '@fullcalendar/moment';
-import React, { useState, useEffect } from "react";
-import './NewMeetingCalendar.css';
+import React, { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
-
 import { useNavigate } from 'react-router-dom';
 
 
-export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "" }) {
-     const storedId = localStorage.getItem('userId');
-     const userId = storedId ? parseInt(storedId) : null;
+export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
+     const userId = localStorage.getItem('userId');
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
+     const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
 
+     //TODO: take user's timezone from upper parents, not both from components. doubled now.
      useEffect(() => {
           console.log(userId);
           if (!userId)
@@ -34,17 +33,27 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      }, [userId]);
 
 
+     //to force fullcalendar to re-render.
+     useEffect(() => {
+          const api = calendarRef.current?.getApi?.();
+          if (api) api.setOption("slotDuration", slotDuration);
+     setSelectedSlots([]); //to reset selected timeslots
+     }, [slotDuration]);
+
+
      const handleShare = async () => {
           try {
+               console.log("This is invitee:", checkedInvitees );
                const payload = {
                     title: meetingTitle,
-                    creator_user_id: userId,
                     timezone: timezone,
-                    invitees: checkedInvitees.map(user => user.id),
+                    creator_user_sub: userId,
+                    invitees: checkedInvitees.map(invitee => invitee.sub),
                     slots: selectedSlots.map(slot => ({
                          start: slot.start,
                          end: slot.end
                     })),
+                    slot_duration: slotDuration,
                     url: "http://localhost:3000/meetinglink"
                };
                console.log(payload);
@@ -66,9 +75,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           }
      }
      const navigate = useNavigate();
-     const goToHomePage = () => {
-          navigate('/homepage');
-     }
 
 
      const handleSelect = (info) => {
@@ -82,7 +88,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           const newEnd = moment.parseZone(info.endStr).utc().toISOString();
           console.log("newStart", newStart);
 
-          const alreadySelected = selectedSlots.some(slot => slot.start === newStart); 
+          const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
 
           if (alreadySelected) {
                alert("This timeslot is already selected!");
@@ -97,22 +103,34 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      };
 
 
-
      return (
-          <div className="calendar-container">
+          <div className="relative w-full max-w-4xl ml-auto px-4">
 
-               <button onClick={handleShare} className="calendar-container-sharebutton">Share</button>
-               <button onClick={goToHomePage} className="calendar-container-close">✕</button>
-
-
-               <div style={{ width: "95%" }}>
+               <section className="flex-1 w-full min-w-0 overflow-hidden">
                     <FullCalendar
                          timeZone={timezone}
+                         headerToolbar={{
+                                        left: 'title',
+                                        center: '',
+                                        right: 'prev,next today'
+                                   }}
+                                   titleFormat={{ month: 'short', year: 'numeric' }}
+                                   dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+                                   dayHeaderContent={(arg) => (
+                                        <div className="flex flex-col items-center">
+                                             <span className="text-xs text-gray-500 font-medium uppercase">
+                                                  {arg.date.toLocaleString('en-US', { weekday: 'short' })}
+                                             </span>
+                                             <span className="text-lg text-gray-900 font-semibold">
+                                                  {arg.date.getDate()}
+                                             </span>
+                                        </div>
+                                        )}
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
                          initialView="timeGridWeek"
-                         slotDuration="00:30:00"
+                         slotDuration={slotDuration}
                          slotMinTime="09:00:00"
                          slotMaxTime="22:00:00"
                          slotLabelFormat={{
@@ -120,20 +138,22 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
-                         height="auto"
+                         contentHeight={690}   // make this to fixed height
+                         expandRows={true}
+                         handleWindowResize={false}
                          allDaySlot={false}
-                         firstDay={new Date().getDay()} 
+                         firstDay={new Date().getDay()}
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,
                               display: 'background',
-                              backgroundColor: '#ee827c',
-                              className: 'new-meeting-selectable-slot',
+                              backgroundColor: "red",
                          }))
 
                          }
                     />
-               </div>
+               </section>
+               <button onClick={handleShare} className="btn btn-sm flex ml-auto gap-2">Share</button>
           </div>
      );
 

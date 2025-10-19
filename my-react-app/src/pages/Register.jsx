@@ -1,21 +1,29 @@
-import './Register.css';
+//import './Register.css';
 import icon from '../images/icon.png';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
+import axios from "axios";
+import {useUser} from "../contexts/UserContext";
 
 
 export default function Register() {
   const [name, setName] = useState('');
   const [timezone, setTimezone] = useState('');
-  const timezones = moment.tz.names(); //list of all timezone with IANA
+  //const timezones = moment.tz.names(); //list of all timezone with IANA
   const [gmail, setGmail] = useState('');
+  const { setUserId } = useUser(); //to call 
 
   const navigate = useNavigate();
+  const divRef = useRef(null);
+  //for holding DOM, value. give this to Google SDK later.
+
+//only arrow func is accepted??
   const goToHomePage = () => {
     navigate('/homepage');
   }
 
+  //will delete here later
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -35,75 +43,96 @@ export default function Register() {
     }
   };
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/register/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gmail }),
-      });
+  //Google SDK initialzation, renderButton, callback registration
+  //FIX NEEDED : third gmail become garbled text + could not take pic info correctly.
+  useEffect(() => {
+    const google = window.google; // obj from Google's SDK
+    if (!google || !divRef.current) return; //if no SDK load, do nothing
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      localStorage.setItem('userId', data.userId);
-      navigate('/homepage');
-    } catch (error) {
-      console.error("Login error:", error);
-      alert('Login failed. Please check your Gmail.');
+    //Decode base64 あとで自分で探す。
+    function decodeJwt(token) {
+      const base64 = token.split('.')[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+      const json = atob(padded);
+      return JSON.parse(json);
     }
-  };
+
+    google.accounts.id.initialize({
+      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+      callback: async (resp) => {
+
+        const payload = decodeJwt(resp.credential);
+        console.log("Devoded payload:", payload);
+        const sub = payload.sub;
+        const gmail = payload.email;
+        const name = payload.name;
+        const picture = payload.picture;
+
+        console.log("AAAAA!!! user info: ", sub, gmail, name, picture);
+
+        //POST
+        try {
+          const response = await axios.post(`http://localhost:8000/register/${sub}`,
+            {
+              "gmail": gmail,
+              "name": name,
+              "pic": picture
+            })
+          console.log("Response from server : ", response.data);
+          localStorage.setItem("userId", sub);
+          setUserId(sub);
+          goToHomePage();
+
+  
+        } catch (err) {
+          console.error("Error happened : ", err);
+        }
+
+        // ID token in resp.credential
+        // fetch("/api/auth/google", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   credentials: "include", // Cookie
+        //   body: JSON.stringify({ id_token: resp.credential })
+        // });
+
+        // const token = resp.credential;
+        // console.log("Raw ID Token:", token);
+        // const payload = JSON.parse(atob(token.split('.')[1]));
+        // console.log("Decoded payload:", payload);
+      },
+    });
+
+    // draw google button to the divRef.current div
+    google.accounts.id.renderButton(divRef.current, {
+      theme: "outline",
+      size: "large",
+    });
+  }, []);
 
 
 
 
   return (
     <div>
-      <div className="register-all">
-        <div className="register-brand-row">
-          <img src={icon} alt="icon" className="register-icon" />
-          <h1 className="register-brand-name">AcrossTime</h1>
+      <div className="hero bg-pink-100 min-h-screen">
+        <div className="hero-content text-center">
+          <div className="max-w-md">
+            <h1 className="text-5xl font-bold">Hello there</h1>
+            <p className="py-6">
+              Effortlessly schedule meetings across time zones.
+              Do you have your friends or colleagues in the different time zones?
+              Do you feel troublesome calculating "What is the best time for us" everytime?
+              Then the best app is here for you!
+            </p>
+            <div ref={divRef} />
+
+          </div>
         </div>
-
-        <h2>Create an account</h2>
-        <p>Enter your user name, timezone, and gmail to sign up for this app</p>
-
-        <form onSubmit={handleSubmit}>
-          <input
-            className="register-input"
-            type="text"
-            placeholder="User name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <br /><br />
-          <label className="register-label">
-            <select className="register-input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-              <option>Choose your timezone</option>
-              {timezones.map((tz) => (
-                <option key={tz} value={tz}>
-                  {tz}
-                </option>
-              ))}
-
-            </select>
-          </label>
-          <br /><br />
-          <input
-            className="register-input"
-            type="text"
-            placeholder="  email@domain.com"
-            value={gmail}
-            onChange={(e) => setGmail(e.target.value)}
-          />
-          <br /><br />
-          <button className="register-button" type="submit">Create account</button>
-          <br /><br />
-          <button className="register-button" type="button" onClick={handleLogin}> Login</button>
-        </form>
       </div>
+
 
     </div>
 
