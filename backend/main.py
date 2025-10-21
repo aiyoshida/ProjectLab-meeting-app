@@ -12,6 +12,8 @@ from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import func
 import logging
+from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
+from .database import engine, SessionLocal
 
 
 app = FastAPI()
