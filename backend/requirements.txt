@@ -16,7 +16,7 @@ sqlparse==0.4.4
 starlette==0.46.2
 typing-inspection==0.4.0
 typing_extensions==4.13.2
-uvicorn[standard]
+uvicorn[standard]==0.34.2
 
 google-auth
 google-auth-oauthlib
