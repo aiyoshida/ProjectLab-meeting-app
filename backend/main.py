@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from pydantic import BaseModel
 from backend.models import Base
 from backend.database import engine
@@ -15,9 +16,13 @@ import logging
 
 app = FastAPI()
 
+
+# need to add vercel frontend URL later to allow_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -559,3 +564,9 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
             db.commit()
 
     return {"message": "Vote submitted!"}
+
+
+# for checking server activate or not. health check!
+@app.get("/health")
+def health():
+    return {"ok": True}
