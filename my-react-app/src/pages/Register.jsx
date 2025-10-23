@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
 import axios from "axios";
 import {useUser} from "../contexts/UserContext";
+import { API } from "../lib/api" //using this accesable by Render
 
 
 export default function Register() {
@@ -28,7 +29,7 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8000/register', {
+      const response = await fetch('${API}/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, gmail, timezone }),
@@ -74,7 +75,7 @@ export default function Register() {
 
         //POST
         try {
-          const response = await axios.post(`http://localhost:8000/register/${sub}`,
+          const response = await axios.post(`${API}/register/${sub}`,
             {
               "gmail": gmail,
               "name": name,
