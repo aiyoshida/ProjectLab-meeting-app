@@ -8,7 +8,7 @@ import check from '../images/check.svg';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react"
 import axios from "axios"
-
+import { API } from "../lib/api" //using this accesable by Render
 
 function Homepage() {
      const [cards, setCards] = useState([])
@@ -21,7 +21,7 @@ function Homepage() {
 
      const handleDelete = async (cardId) => {
           try {
-               await axios.delete(`http://localhost:8000/homepage/${cardId}`)
+               await axios.delete(`${API}/homepage/${cardId}`)
                setCards(prev => prev.filter(card => card.id !== cardId))
           } catch (err) {
                console.error("error", err)
@@ -31,7 +31,7 @@ function Homepage() {
 
      useEffect(() => {
           axios
-               .get(`http://localhost:8000/homepage/${userId}`)
+               .get(`${API}/homepage/${userId}`)
                .then((res) => {
                     setCards(res.data.cards)
                     console.log("The cards!!!: ", res.data.cards);
