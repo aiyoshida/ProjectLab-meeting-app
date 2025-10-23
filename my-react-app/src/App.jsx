@@ -1,6 +1,7 @@
-import icon from './images/icon.png';
+//import icon from './images/icon.png';
+import React, { useEffect } from "react";
 import './App.css';
-import { useState } from 'react';
+//import { useState } from 'react';
 import Register from './pages/Register';
 import Setting from './pages/Setting';
 import Contact from './pages/Contact';
@@ -9,9 +10,15 @@ import NewMeeting from './pages/NewMeeting';
 import MeetingLink from './pages/MeetingLink';
 import {UserProvider} from './contexts/UserContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { API } from "./lib/api";
 
 function App() {
-  
+    useEffect(() => {
+    fetch(`${API}/health`)
+      .then((res) => res.json())
+      .then((data) => console.log("API response:", data))
+      .catch((err) => console.error("API error:", err));
+  }, []);
   return (
     <UserProvider>
       <Router>
