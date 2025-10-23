@@ -1,4 +1,3 @@
-import './MeetingCard.css';
 import bin from '../images/bin.svg';
 
 export default function MeetingCard(){

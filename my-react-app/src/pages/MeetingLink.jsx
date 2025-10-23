@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import momentPlugin from '@fullcalendar/moment-timezone';
+import { API } from "../lib/api" //using this accesable by Render
 
 
 export default function MeetingLink() {
@@ -89,7 +90,7 @@ export default function MeetingLink() {
                     slots: voted_date_ids,
                };
                console.log(payload);
-               await axios.post(`http://localhost:8000/meetinglink/${meetingId}/vote`, payload);
+               await axios.post(`${API}/meetinglink/${meetingId}/vote`, payload);
 
 
                alert("Vote submitted!");
@@ -106,7 +107,7 @@ export default function MeetingLink() {
           if (!userId)
                alert("There is no userId available!");
           console.log("initial timezone: ", timezone);
-          axios.get(`http://localhost:8000/meetinglink/timezone/${userId}`).then(res => {
+          axios.get(`${API}/meetinglink/timezone/${userId}`).then(res => {
                setTimezone(res.data.timezone);
                console.log("Received timezone: ", res.data.timezone);
           })
@@ -122,7 +123,7 @@ export default function MeetingLink() {
           console.log(timezone);
 
           axios
-               .get(`http://localhost:8000/meetinglink/${meetingId}`)
+               .get(`${API}/meetinglink/${meetingId}`)
                .then((res) => {
                     setParticipants(res.data.contacts || []);
                     setAvailableSlots(res.data.available_slots || []);

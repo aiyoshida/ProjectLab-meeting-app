@@ -5,9 +5,7 @@ import axios from "axios"
 import plus from '../images/plus.svg';
 import bin from '../images/bin.svg';
 import search from '../images/search.svg';
-// import edit from '../images/edit.svg';
-//import Drawer from '../components/Drawer';
-// import FileUpload from '../components/FileUpload';
+import { API } from "../lib/api" //using this accesable by Render
 
 
 
@@ -32,7 +30,7 @@ function Contact() {
      useEffect(() => {
           // in the useEffect, to define HTTP req, either .then or define func with axios.
           axios
-               .get(`http://localhost:8000/contact/${userId}`)
+               .get(`${API}/contact/${userId}`)
                .then(response => {
                     console.log("contacts: ", response.data.contacts);
                     setContacts(response.data.contacts);
@@ -52,7 +50,7 @@ function Contact() {
                return;
           try {
                console.log("This is email to process: ", { searchEmail });
-               const res = await axios.get(`http://localhost:8000/contact/search/${searchEmail}`);
+               const res = await axios.get(`${API}/contact/search/${searchEmail}`);
                if (res.data.sub == null) {
                     console.log("Email has searched in the user table but no result");
                     setShowModal(true);
@@ -76,7 +74,7 @@ function Contact() {
      const handleAdd = async (e) => {
           try {
                console.log("This is friend info to add:", friendInfo);
-               const res = await axios.post(`http://localhost:8000/contact/add/${userId}`,
+               const res = await axios.post(`${API}/contact/add/${userId}`,
                     {
                          sub: friendInfo.sub
                     }
@@ -94,7 +92,7 @@ function Contact() {
      const handleDelete = async (contact) => {
           try {
                console.log("contact:", contact);
-               const res = await axios.delete(`http://localhost:8000/contact/delete/${userId}`,
+               const res = await axios.delete(`${API}/contact/delete/${userId}`,
                     { data: { sub: contact.sub } }
                );
           } catch (err) {

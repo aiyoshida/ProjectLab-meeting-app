@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react"
 import axios from "axios";
 import moment from "moment-timezone";
+import { API } from "../lib/api" //using this accesable by Render
+
 
 export default function Setting() {
      const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function Setting() {
           const fetchUserData = async () => {
                try {
                     console.log("This is userId stored in the local storage: ", userId);
-                    const response = await axios.get(`http://localhost:8000/setting/${userId}`);
+                    const response = await axios.get(`${API}/setting/${userId}`);
                     const data = response.data;
                     console.log("This is response from DB: ", response);
 
@@ -50,7 +52,7 @@ export default function Setting() {
           e.preventDefault()
 
           try {
-               const res = await axios.put(`http://localhost:8000/setting/${userId}`, {
+               const res = await axios.put(`${API}/setting/${userId}`, {
                     username: username,
                     timezone: timezone,
                },)

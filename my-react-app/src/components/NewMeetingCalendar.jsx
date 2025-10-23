@@ -8,6 +8,7 @@ import axios from "axios";
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { useNavigate } from 'react-router-dom';
+import { API } from "../lib/api" //using this accesable by Render
 
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
@@ -22,7 +23,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           if (!userId)
                alert("There is no userId available!");
           console.log("initial timezone: ", timezone);
-          axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`).then(res => {
+          axios.get(`${API}/newmeeting/timezone/${userId}`).then(res => {
                setTimezone(res.data.timezone);
                console.log("Received timezone: ", res.data.timezone);
           })
@@ -58,7 +59,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                };
                console.log(payload);
 
-               const response = await axios.post(`http://localhost:8000/newmeeting/${userId}`, payload);
+               const response = await axios.post(`${API}/newmeeting/${userId}`, payload);
                console.log("Meeting created:", response.data);
 
                navigate(`/meetinglink/${response.data.meeting_id}`);

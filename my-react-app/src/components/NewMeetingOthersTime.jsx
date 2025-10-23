@@ -3,6 +3,7 @@ import React from "react";
 import { DateTime } from 'luxon';
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { API } from "../lib/api" //using this accesable by Render
 
 
 export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
@@ -17,7 +18,7 @@ export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
      //get userId's timezone
      useEffect(() => {
           axios
-               .get(`http://localhost:8000/newmeetingother/timezone/${userId}`)
+               .get(`${API}/newmeetingother/timezone/${userId}`)
                .then((res) => {
                     setTimezone(res.data.timezone)
                     console.log(res.data.timezone);

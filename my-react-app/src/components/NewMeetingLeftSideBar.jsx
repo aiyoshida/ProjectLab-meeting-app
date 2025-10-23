@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import moment from "moment-timezone";
 import { useNavigate } from 'react-router-dom';
+import { API } from "../lib/api" //using this accesable by Render
 
 const timezones = moment.tz.names(); //list of all timezone with IANA
 
@@ -43,7 +44,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
           async function fetchContact() {
                try {
                     console.log("user_id: ", userId);
-                    const res = await axios.get(`http://localhost:8000/newmeeting/${userId}`);
+                    const res = await axios.get(`${API}/newmeeting/${userId}`);
                     setInvitees(res.data.contacts);
                     console.log("GET contact list: ", res.data.contacts)
 
@@ -58,7 +59,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
      useEffect(() => {
           async function fetchTimezone() {
                try {
-                    const res = await axios.get(`http://localhost:8000/newmeeting/timezone/${userId}`);
+                    const res = await axios.get(`${API}/newmeeting/timezone/${userId}`);
                     setTimezone(res.data.timezone);
                     console.log(res.data.timezone);
                } catch (err) {
