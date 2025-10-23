@@ -55,7 +55,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          end: slot.end
                     })),
                     slot_duration: slotDuration,
-                    url: "http://localhost:3000/meetinglink"
+                    url: "https://across-time.vercel.app//meetinglink"
                };
                console.log(payload);
 
@@ -64,13 +64,13 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
                navigate(`/meetinglink/${response.data.meeting_id}`);
                checkedInvitees.forEach((user) => {
-                    console.log(`Send to: ${user.gmail}, meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id}`);
+                    console.log(`Send to: ${user.gmail}, meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id}`);
                });
 
                let message = checkedInvitees.map((invitee) => {
                     return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
                }).join("\n")
-               alert(`meeting url: http://localhost:3000/meetinglink/${response.data.meeting_id} \n ${message}`);
+               alert(`meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id} \n ${message}`);
           } catch (error) {
                console.error("Failed to create meeting:", error);
           }
