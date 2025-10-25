@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from "moment-timezone";
 import axios from "axios";
-import {useUser} from "../contexts/UserContext";
+import { useUser } from "../contexts/UserContext";
 import { API } from "../lib/api" //using this accesable by Render
 
 
@@ -19,7 +19,7 @@ export default function Register() {
   const divRef = useRef(null);
   //for holding DOM, value. give this to Google SDK later.
 
-//only arrow func is accepted??
+  //only arrow func is accepted??
   const goToHomePage = () => {
     navigate('/homepage');
   }
@@ -47,6 +47,13 @@ export default function Register() {
   //Google SDK initialzation, renderButton, callback registration
   //FIX NEEDED : third gmail become garbled text + could not take pic info correctly.
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => { /* initialize code here */ };
+    document.body.appendChild(script);
+
     const google = window.google; // obj from Google's SDK
     if (!google || !divRef.current) return; //if no SDK load, do nothing
 
@@ -86,7 +93,7 @@ export default function Register() {
           setUserId(sub);
           goToHomePage();
 
-  
+
         } catch (err) {
           console.error("Error happened : ", err);
         }
