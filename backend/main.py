@@ -14,6 +14,7 @@ from sqlalchemy import func
 import logging
 from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
 from .database import engine, SessionLocal
+from .send_email import send_email
 
 
 app = FastAPI()
@@ -37,6 +38,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 # pydantic class definitions
+class EmailReq(BaseModel):
+    receivers: List[str]
+    subject: str
+    body: str
 
 
 class SlotTime(BaseModel):
@@ -542,9 +547,7 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
 async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
     for voted_date_id in data.slots:
         vote = Vote(
-            user_id=data.user_id, 
-            voted_date_id=voted_date_id, 
-            meeting_id=meetingId
+            user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
         )
         db.add(vote)
 
@@ -559,7 +562,9 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
     db.commit()
 
     # make meeting.all_vote true if all participants voted.
-    participants = db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    participants = (
+        db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    )
     if participants and all(p.voted for p in participants):
         meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
         if meeting:
@@ -567,6 +572,17 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
             db.commit()
 
     return {"message": "Vote submitted!"}
+
+
+# sending email function
+@app.post("/send_email/{userId}")
+async def send_emails(userId: int, req: EmailReq, db: Session = Depends(get_db)):
+    for receiver in req.receivers:
+        try:
+            send_email(receiver, req.subject, req.body)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    return {"message": True}
 
 
 # for checking server activate or not. health check!

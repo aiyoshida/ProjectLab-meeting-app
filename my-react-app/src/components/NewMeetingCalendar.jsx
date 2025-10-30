@@ -8,7 +8,7 @@ import axios from "axios";
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { useNavigate } from 'react-router-dom';
-import { API } from "../lib/api" //using this accesable by Render
+import { API, FRONT } from "../lib/api" //using this accesable by Render
 
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
@@ -38,13 +38,13 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      useEffect(() => {
           const api = calendarRef.current?.getApi?.();
           if (api) api.setOption("slotDuration", slotDuration);
-     setSelectedSlots([]); //to reset selected timeslots
+          setSelectedSlots([]); //to reset selected timeslots
      }, [slotDuration]);
 
 
      const handleShare = async () => {
           try {
-               console.log("This is invitee:", checkedInvitees );
+               console.log("This is invitee:", checkedInvitees);
                const payload = {
                     title: meetingTitle,
                     timezone: timezone,
@@ -57,22 +57,44 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                     slot_duration: slotDuration,
                     url: "https://across-time.vercel.app//meetinglink"
                };
-               console.log(payload);
+               console.log("NewMeetingCalendar: payload ", payload);
 
                const response = await axios.post(`${API}/newmeeting/${userId}`, payload);
-               console.log("Meeting created:", response.data);
+               console.log("NewMeetingCalendar: Meeting created", response.data);
 
+               //sending email to invitees
+               console.log("NewMeetingCalendar: invitee's email ", checkedInvitees.map(invitee => invitee.gmail));
+               const result = await axios.post(`${API}/send_email/${userId}`, {
+                    receivers: checkedInvitees.map(invitee => invitee.gmail),
+                    subject: "Acrosstime: you are invited to a meeting to join",
+                    body: 
+                    `Hi! This is AcrossTime
+
+                    You are invited to vote this meeting!
+                    URL: ${FRONT}/meetinglink/${response.data.meeting_id}
+                    `
+                    ,
+                    
+               });
+               if (result) {
+                    let message = checkedInvitees.map((invitee) => {
+                         return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
+                    }).join("\n")
+                    alert(`meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id} \n ${message}`);
+               } else {
+                    alert(`sending email has failed!`);
+                    console.log(`NewMeetingCalendar: Result is ${result} : sending email has failed!`);
+               }
+
+               //navigate user to created voting screen
                navigate(`/meetinglink/${response.data.meeting_id}`);
                checkedInvitees.forEach((user) => {
-                    console.log(`Send to: ${user.gmail}, meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id}`);
+                    console.log(`NewMeetingCalendar: Send to: ${user.gmail}, meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id}`);
                });
 
-               let message = checkedInvitees.map((invitee) => {
-                    return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
-               }).join("\n")
-               alert(`meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id} \n ${message}`);
+
           } catch (error) {
-               console.error("Failed to create meeting:", error);
+               console.error("NewMeetingCalendar: Failed to create meeting:", error);
           }
      }
      const navigate = useNavigate();
@@ -111,22 +133,22 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                     <FullCalendar
                          timeZone={timezone}
                          headerToolbar={{
-                                        left: 'title',
-                                        center: '',
-                                        right: 'prev,next today'
-                                   }}
-                                   titleFormat={{ month: 'short', year: 'numeric' }}
-                                   dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
-                                   dayHeaderContent={(arg) => (
-                                        <div className="flex flex-col items-center">
-                                             <span className="text-xs text-gray-500 font-medium uppercase">
-                                                  {arg.date.toLocaleString('en-US', { weekday: 'short' })}
-                                             </span>
-                                             <span className="text-lg text-gray-900 font-semibold">
-                                                  {arg.date.getDate()}
-                                             </span>
-                                        </div>
-                                        )}
+                              left: 'title',
+                              center: '',
+                              right: 'prev,next today'
+                         }}
+                         titleFormat={{ month: 'short', year: 'numeric' }}
+                         dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+                         dayHeaderContent={(arg) => (
+                              <div className="flex flex-col items-center">
+                                   <span className="text-xs text-gray-500 font-medium uppercase">
+                                        {arg.date.toLocaleString('en-US', { weekday: 'short' })}
+                                   </span>
+                                   <span className="text-lg text-gray-900 font-semibold">
+                                        {arg.date.getDate()}
+                                   </span>
+                              </div>
+                         )}
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
