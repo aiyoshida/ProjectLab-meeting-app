@@ -11,6 +11,7 @@ import MeetingLink from './pages/MeetingLink';
 import {UserProvider} from './contexts/UserContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { API } from "./lib/api";
+import FinalizeMeeting from "./pages/FinalizeMeeting";
 
 function App() {
     useEffect(() => {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/newmeeting" element={<NewMeeting />}/>
           <Route path="/homepage" element={<Homepage />}/>
           <Route path="/meetinglink/:meetingId" element={<MeetingLink />}/>
+          <Route path="/finalizemeeting/:meetingId" element={<FinalizeMeeting />}/>
       </Routes>
     </Router>
   </UserProvider>

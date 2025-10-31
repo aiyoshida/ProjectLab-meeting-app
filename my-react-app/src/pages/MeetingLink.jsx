@@ -257,6 +257,9 @@ export default function MeetingLink() {
                                                        https://icon-rainbow.com/%e3%81%84%e3%81%84%e3%81%ad%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-1/  */}
                                                        <img src={good} alt='good' className="h-5 w-5" />
                                                   </div>
+                                                  <div>
+                                                       <p>{date.vote_count}</p>
+                                                  </div>
                                              </div>
 
 

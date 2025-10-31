@@ -50,7 +50,8 @@ class Meeting(Base):
     all_voted = Column(Boolean, default=False)
     url = Column(String, nullable=True)
     creator = relationship("User", backref="meetings")
-
+    finalized_voted_date_id = Column(Integer, ForeignKey("voted_dates.id"), nullable=True)
+    
 
 class Participant(Base):
     __tablename__ = "participants"
@@ -72,7 +73,7 @@ class VotedDate(Base):
     starting_time = Column(DateTime, nullable=False)
     ending_time = Column(DateTime, nullable=False)
 
-    meeting = relationship("Meeting", backref="voted_dates")
+    meeting = relationship("Meeting", foreign_keys=[meeting_id], backref="voted_dates")
 
 
 class Vote(Base):

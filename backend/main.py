@@ -15,6 +15,7 @@ import logging
 from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
 from .database import engine, SessionLocal
 from .send_email import send_email
+from .ics_creator import ics_creator
 
 
 app = FastAPI()
@@ -62,6 +63,10 @@ class NewMeetingData(BaseModel):
 class VoteData(BaseModel):
     user_id: str
     slots: List[int]
+
+
+class FinalizeVote(BaseModel):
+    finalized_vote_id: int
 
 
 # for Google login POST
@@ -567,22 +572,74 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
     )
     if participants and all(p.voted for p in participants):
         meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+        # make table meeting all_voted true from false
         if meeting:
             meeting.all_voted = True
             db.commit()
+
+        # send notification email to creator of this meeting to finalize.
+        creator = db.query(User).filter(User.sub == meeting.creator_user_sub).first()
+
+        if creator and creator.gmail:
+            try:
+                send_email(
+                    creator.gmail,
+                    subject="Finalize your voting dates",
+                    body=f"""Hi, Please finalize the dates of the meeting
+                    URL: http://localhost:3000/finalizemeeting/{meetingId}
+                    """,
+                )
+            except Exception as e:
+                print("Failed to send notification email", repr(e))
 
     return {"message": "Vote submitted!"}
 
 
 # sending email function
 @app.post("/send_email/{userId}")
-async def send_emails(userId: int, req: EmailReq, db: Session = Depends(get_db)):
+async def send_emails(userId: int, req: EmailReq):
     for receiver in req.receivers:
         try:
             send_email(receiver, req.subject, req.body)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     return {"message": True}
+
+
+# Finalize meeting dates by creator
+@app.post("/finalizemeeting/{meetingId}/vote")
+async def finalize_meeting(
+    meetingId: int, req: FinalizeVote, db: Session = Depends(get_db)
+):
+    # change meeting table as finalized
+    meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
+    if meeting:
+        meeting.finalized = True
+        meeting.finalized_voted_date_id = req.finalized_vote_id
+        db.commit()
+    # Send notification email for participants
+    participants = (
+        db.query(Participant).filter(Participant.meeting_id == meetingId).all()
+    )
+
+    vote = db.query(VotedDate).filter(VotedDate.id == req.finalized_vote_id).first()
+    # Creating ics
+    ics = ics_creator(meeting.title, vote.starting_time, vote.ending_time)
+    for participant in participants:
+        try:
+            send_email(
+                participant.user.gmail,
+                subject="AcrossTime Notification: The meeting time is finalized",
+                body=f"""Hi {participant.user.username}, date of the meeting is finalized.
+                       Please add this date to your calendar!
+                    URL: http://localhost:3000/finalizemeeting/{meetingId}
+                    """,
+                ics=ics,
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Finalized successed!!"}
 
 
 # for checking server activate or not. health check!

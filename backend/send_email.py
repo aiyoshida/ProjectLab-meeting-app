@@ -2,10 +2,15 @@ import os
 import smtplib
 import ssl
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email import encoders
 from dotenv import load_dotenv
+from typing import Optional
 
+# If I want to make this app smoother, it is better to use fastAPI BackgroundTasks, so that I can make this func into work separately.
 
-def send_email(receiver: str, subject: str, body: str):
+def send_email(receiver: str, subject: str, body: str, ics: Optional[str] = None):
     load_dotenv()  # read .env
 
     # HTML + plain text
@@ -21,10 +26,25 @@ def send_email(receiver: str, subject: str, body: str):
         raise RuntimeError("No enough env variables")
 
     # email contents
-    msg = MIMEText(body, "plain", "utf-8")
+    msg = MIMEMultipart("alternative") # for adding ics
     msg["Subject"] = subject
     msg["From"] = sender_email
     msg["To"] = receiver_email
+    msg["Content-class"] = "urn:content-classes:calendarmessage"
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    # ics Reference 1: https://www.baryudin.com/blog/sending-outlook-appointments-python
+    # ics Reference 2: https://mailtrap.io/blog/python-send-email-gmail/
+    # ics Reference 3: https://developers.google.com/workspace/calendar/api/concepts/inviting-attendees-to-events
+    if ics:
+        filename = "invite.ics"
+        part = MIMEBase('text', "calendar", method="REQUEST", name=filename)
+        part.set_payload(ics)
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", f'attachment; filename="{filename}"')
+        msg.attach(part)
+
+
 
     # Send by Gmail SMTP（SSL 465）
     smtp_host = "smtp.gmail.com"
