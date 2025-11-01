@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import os
 from pydantic import BaseModel
 from backend.models import Base
 from backend.database import engine
@@ -101,6 +100,10 @@ class UserUpdate(BaseModel):
 
 # ==, !=, like, in_([1,2,3]), and_, or_, first(), all(), count()
 
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from Render / FastAPI!"}
 
 # GET /setting/{user_id}
 @app.get("/setting/{userId}")

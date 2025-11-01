@@ -17,6 +17,7 @@ starlette==0.46.2
 typing-inspection==0.4.0
 typing_extensions==4.13.2
 uvicorn[standard]==0.34.2
+ics==0.7.2
 
 google-auth
 google-auth-oauthlib
