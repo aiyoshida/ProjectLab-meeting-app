@@ -30,6 +30,9 @@ export default function Register() {
     e.preventDefault();
 
     try {
+      console.log("Register.jsx API =>", process.env.REACT_APP_API_BASE_URL);
+      
+
       const response = await fetch(`${API}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
