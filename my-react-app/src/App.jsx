@@ -8,13 +8,15 @@ import Contact from './pages/Contact';
 import Homepage from './pages/Homepage';
 import NewMeeting from './pages/NewMeeting';
 import MeetingLink from './pages/MeetingLink';
-import {UserProvider} from './contexts/UserContext';
+import { UserProvider } from './contexts/UserContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { API } from "./lib/api";
 import FinalizeMeeting from "./pages/FinalizeMeeting";
 
 function App() {
-    useEffect(() => {
+  useEffect(() => {
+    console.log("REACT_APP_API_BASE_URL =", process.env.REACT_APP_API_BASE_URL);
+    console.log("REACT_APP_FRONT_BASE_URL =", process.env.REACT_APP_FRONT_BASE_URL);
     fetch(`${API}/health`)
       .then((res) => res.json())
       .then((data) => console.log("API response:", data))
@@ -25,15 +27,15 @@ function App() {
       <Router>
         <Routes>
           <Route path="/register" element={<Register />} />
-          <Route path="/setting" element={<Setting />}/>
-          <Route path="/contact" element={<Contact />}/>
-          <Route path="/newmeeting" element={<NewMeeting />}/>
-          <Route path="/homepage" element={<Homepage />}/>
-          <Route path="/meetinglink/:meetingId" element={<MeetingLink />}/>
-          <Route path="/finalizemeeting/:meetingId" element={<FinalizeMeeting />}/>
-      </Routes>
-    </Router>
-  </UserProvider>
+          <Route path="/setting" element={<Setting />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/newmeeting" element={<NewMeeting />} />
+          <Route path="/homepage" element={<Homepage />} />
+          <Route path="/meetinglink/:meetingId" element={<MeetingLink />} />
+          <Route path="/finalizemeeting/:meetingId" element={<FinalizeMeeting />} />
+        </Routes>
+      </Router>
+    </UserProvider>
 
   );
 }
