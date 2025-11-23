@@ -1,20 +1,11 @@
-//import './Register.css';
-import icon from '../images/icon.png';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import moment from "moment-timezone";
 import axios from "axios";
 import { useUser } from "../contexts/UserContext";
 import { API } from "../lib/api" //using this accesable by Render
 
-
 export default function Register() {
-  const [name, setName] = useState('');
-  const [timezone, setTimezone] = useState('');
-  //const timezones = moment.tz.names(); //list of all timezone with IANA
-  const [gmail, setGmail] = useState('');
-  const { setUserId } = useUser(); //to call 
-
+  const { setUserId } = useUser(); //to call
   const navigate = useNavigate();
   const divRef = useRef(null);
   const initialized = useRef(false); //not to double initialize of GSI
@@ -24,29 +15,6 @@ export default function Register() {
   const goToHomePage = () => {
     navigate('/homepage');
   }
-
-  //will delete here later
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      console.log("Register.jsx API =>", process.env.REACT_APP_API_BASE_URL);
-      
-
-      const response = await fetch(`${API}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, gmail, timezone }),
-      });
-
-      const data = await response.json();
-      localStorage.setItem('userId', data.userId);
-      navigate('/homepage');
-    } catch (error) {
-      console.error(error);
-      alert('Registration failed');
-    }
-  };
 
   //Google SDK initialzation, renderButton, callback registration
   //FIX NEEDED : third gmail become garbled text + could not take pic info correctly.
@@ -89,25 +57,9 @@ export default function Register() {
           localStorage.setItem("userId", sub);
           setUserId(sub);
           goToHomePage();
-
-
         } catch (err) {
           console.error("Error happened : ", err);
-        }
-
-        // ID token in resp.credential
-        // fetch("/api/auth/google", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   credentials: "include", // Cookie
-        //   body: JSON.stringify({ id_token: resp.credential })
-        // });
-
-        // const token = resp.credential;
-        // console.log("Raw ID Token:", token);
-        // const payload = JSON.parse(atob(token.split('.')[1]));
-        // console.log("Decoded payload:", payload);
-      },
+        }},
     });
 
     // draw google button to the divRef.current div
@@ -115,8 +67,6 @@ export default function Register() {
       theme: "outline",
       size: "large",
     });
-
-
 
   const init = () => {
     if (initialized.current || !window.google || !divRef.current) return;
@@ -182,12 +132,9 @@ return (
             Then the best app is here for you!
           </p>
           <div ref={divRef} />
-
         </div>
       </div>
     </div>
-
-
   </div>
 
 )

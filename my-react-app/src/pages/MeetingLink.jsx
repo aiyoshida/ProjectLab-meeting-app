@@ -1,7 +1,6 @@
 import { useParams, useLocation } from "react-router-dom";
 // useParams is to tamle element from url, uselocation is to pass data
 //uselocation is for temporary, will use db soon.
-import NewMeetingCalendar from '../components/NewMeetingCalendar';
 import icon from '../images/icon.png';
 import watch from '../images/watch.svg';
 import timezone_icon from '../images/timezone_icon.svg';

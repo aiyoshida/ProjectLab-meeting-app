@@ -5,7 +5,6 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
-import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { DateTime } from "luxon";
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +16,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
+     const navigate = useNavigate();
 
      //TODO: take user's timezone from upper parents, not both from components. doubled now.
      useEffect(() => {
@@ -68,14 +68,14 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                const result = await axios.post(`${API}/send_email/${userId}`, {
                     receivers: checkedInvitees.map(invitee => invitee.gmail),
                     subject: "Acrosstime: you are invited to a meeting to join",
-                    body: 
-                    `Hi! This is AcrossTime
+                    body:
+                         `Hi! This is AcrossTime
 
                     You are invited to vote this meeting!
                     URL: ${FRONT}/meetinglink/${response.data.meeting_id}
                     `
                     ,
-                    
+
                });
                if (result) {
                     let message = checkedInvitees.map((invitee) => {
@@ -98,7 +98,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                console.error("NewMeetingCalendar: Failed to create meeting:", error);
           }
      }
-     const navigate = useNavigate();
+     
 
 
      const handleSelect = (info) => {
@@ -108,9 +108,14 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           }
           console.log(info);
           //make the selected slot UTC time and save to selected timeslots.
-          const newStart = moment.parseZone(info.startStr).utc().toISOString();
-          const newEnd = moment.parseZone(info.endStr).utc().toISOString();
-          console.log("newStart", newStart);
+          const newStart = DateTime.fromISO(info.startStr, { setZone: true })
+               .toUTC()
+               .toISO();
+          const newEnd = DateTime.fromISO(info.endStr, { setZone: true })
+               .toUTC()
+               .toISO();
+
+          console.log("NewMeetingCalendar.jsx newStart: ", newStart);
 
           const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
 
@@ -174,7 +179,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               display: 'background',
                               backgroundColor: "red",
                          }))
-
                          }
                     />
                </section>

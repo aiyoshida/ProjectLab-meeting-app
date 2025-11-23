@@ -8,7 +8,7 @@ import good from '../images/good.svg';
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { useNavigate } from 'react-router-dom';
-import moment from "moment-timezone";
+import { DateTime } from "luxon";
 import { API } from "../lib/api" //using this accesable by Render
 
 
@@ -33,43 +33,9 @@ export default function FinalizeMeeting() {
                return;
           }
           try {
-               //since gettime is too precise, use +-1sec
-               // const voted_date_ids = selectedSlots.map(slot => {
-               //      const match = availableSlots.find(s => {
-               //           {/*compare with UTC time*/ }
-               //           const startFormattedS = moment.utc(s.start);
-               //           const startFormattedSlot = moment.utc(slot.start);
-
-               //           const endFormattedS = moment.utc(s.end);
-               //           const endFormattedSlot = moment.utc(slot.end);
-
-               //           const startMatch = startFormattedS.isSame(startFormattedSlot, "minute");
-               //           const endMatch = endFormattedS.isSame(endFormattedSlot, "minute");
-
-               //           return startMatch && endMatch;
-               //      });
-
-               //      console.log("availableSlots", availableSlots);
-               //      console.log("selectedSlots: ", selectedSlots);
-
-               //      if (!match) {
-               //           throw new Error("Invalid selected slot.");
-               //      }
-
-               //      return match.id;
-               // });
-
-
-
-               // const payload = {
-               //      user_id: userId,
-               //      slots: voted_date_ids,
-               // };
                console.log("FinalizedMeeting.jsx, selectedSlot ", selectedSlots
                );
                await axios.post(`${API}/finalizemeeting/${meetingId}/vote`, { finalized_vote_id: selectedSlots });
-
-
                alert("Vote submitted!");
                navigate('/homepage');
           } catch (error) {
@@ -208,58 +174,42 @@ export default function FinalizeMeeting() {
                               <label className="text-lg my-3" >Vote dates</label>
 
                               <div className="space-y-1">
-                                   {availableSlots.map((date) => (
-                                        <div className="flex items-center ml-6" key={date.id}>
-                                             {moment.utc(date.start).tz(timezone).format("ddd, MMMM D")}
-                                             {/* https://v4.daisyui.com/components/badge/ # Badge in a button jsx */}
-                                             <div className={`flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3 hover:cursor-pointer  ${selectedSlots === date.id ? "border-2 border-blue-500" : "border border-gray-400"}`}
-                                                  onClick={() => {
-                                                       setSelectedSlots(date.id);
-                                                       console.log("FinalizeMeeting.jsx: selected slot:", date.id);
-                                                  }}
-                                             >
-                                                  {moment.utc(date.start).tz(timezone).format("H:mm")}
-                                                  <div className="badge badge-sm bg-transparent border-none">
-                                                       {/* Took good icon from here
+                                   {availableSlots.map((date) => {
+                                        const d = DateTime.fromISO(date.start, { zone: "utc" }).setZone(timezone);
+                                        return (
+                                             <div className="flex items-center ml-6" key={date.id}>
+                                                  {d.toFormat("ccc, LLLL d")}
+                                                  {/* https://v4.daisyui.com/components/badge/ # Badge in a button jsx */}
+                                                  <div className={`flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3 hover:cursor-pointer  ${selectedSlots === date.id ? "border-2 border-blue-500" : "border border-gray-400"}`}
+                                                       onClick={() => {
+                                                            setSelectedSlots(date.id);
+                                                            console.log("FinalizeMeeting.jsx: selected slot:", date.id);
+                                                       }}>
+                                                       {d.toFormat("H:mm")}
+                                                       <div className="badge badge-sm bg-transparent border-none">
+                                                            {/* Took good icon from here
                                                        https://icon-rainbow.com/%e3%81%84%e3%81%84%e3%81%ad%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-1/  */}
-                                                       <img src={good} alt='good' className="h-5 w-5" />
-                                                  </div>
+                                                            <img src={good} alt='good' className="h-5 w-5" />
+                                                       </div>
 
-                                                  <div>
-                                                       <p>{date.vote_count}</p>
+                                                       <div>
+                                                            <p>{date.vote_count}</p>
+                                                       </div>
                                                   </div>
                                              </div>
-
-
-                                        </div>
-
-                                   ))}
+                                        );
+                                   })}
                               </div>
-
-
                          </div>
-
-
-
-
-
-
-
                     </div>
-
-
-
-
                </div>
 
 
                <div className="fixed left-[480px] top-0 h-screen w-[945px]">
 
                     <button onClick={handleSubmit} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Finalize</button>
-                    {/* <button onClick={goToHomePage} className="fixed top-0 right-0 w-[50px] h-[50px] text-[30px] bg-white border-none">✕</button> */}
 
                </div>
-
           </div>
      );
 }

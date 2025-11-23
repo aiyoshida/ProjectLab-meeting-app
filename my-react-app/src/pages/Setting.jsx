@@ -14,7 +14,7 @@ export default function Setting() {
      }
      const [username, setUsername] = useState("No user name");
      const [timezone, setTimezone] = useState("UTC");
-     const timezones = moment.tz.names(); //list of all timezone with IANA
+     const timezones = moment.tz.names(); //list of all timezone with IANA. not available with Luxon.
      const [gmail, setGmail] = useState("example@gmail.com");
      const [picture, setPicture] = useState(null);
      //take userId from local storage

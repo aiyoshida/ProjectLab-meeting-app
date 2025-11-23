@@ -281,6 +281,12 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
             user = db.query(User).filter(User.sub == p.user_id).first()
             if user:
                 participant_names.append(user.username)
+        
+        participant_pics = []
+        for p in participants:
+            user = db.query(User).filter(User.sub == p.user_id).first()
+            if user:
+                participant_pics.append(user.picture)
 
         creator_name = (
             meeting.meeting.creator.username if meeting.meeting.creator else "Unknown"
@@ -295,6 +301,7 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
                 "date": meeting.meeting.created_at.strftime("%Y %b %d"),
                 "all_voted": meeting.meeting.all_voted,
                 "participants": participant_names,
+                "pictures": participant_pics,
                 "url": meeting.meeting.url,
             }
         )
