@@ -1,5 +1,4 @@
 import LeftSidebar from "../components/LeftSidebar";
-import MeetingCard from "../components/MeetingCard";
 import bin from '../images/bin.svg';
 import time from '../images/time.svg';
 import no from '../images/no.svg';

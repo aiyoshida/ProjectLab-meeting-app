@@ -1,18 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from backend.models import Base
+# from backend.models import Base
 from backend.database import engine
 from backend.database import SessionLocal
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
+# from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import func
 import logging
 from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
-from .database import engine, SessionLocal
+# from .database import engine, SessionLocal
 from .send_email import send_email
 from .ics_creator import ics_creator
 
@@ -173,10 +173,11 @@ async def login_user(sub: str, req: GoogleLogin, db: Session = Depends(get_db)):
 # GET /contact/{userId}
 @app.get("/contact/{userId}")
 async def get_contactlist(userId: str, db: Session = Depends(get_db)):
-    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
-    # if not contacts:
-    #     return {"contacts": []}
+    user = db.query(User).filter(User.sub == userId).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
+    contacts = db.query(Contact).filter(Contact.user_sub == userId).all()
     result = [
         {
             "id": c.id,
@@ -189,40 +190,11 @@ async def get_contactlist(userId: str, db: Session = Depends(get_db)):
         for c in contacts
     ]
 
-    return {"contacts": result}
+    return {"contacts": result,
+            "timezone": user.timezone, }
 
 
 # logger = logging.getLogger("uvicorn.error")
-
-# @app.get("/contact/{userId}")
-# async def get_contactlist(userId: str, db: Session = Depends(get_db)):
-#     logger.info("userId=%r DB=%s", userId, db.bind.url)
-
-#     total = db.query(Contact).count()
-#     owners = [c.friend_of_this_user_sub for c in db.query(Contact).all()]
-#     hits_owner  = db.query(Contact).filter(Contact.friend_of_this_user_sub == userId).count()
-#     hits_friend = db.query(Contact).filter(Contact.user_sub == userId).count()
-#     logger.info("Contact total=%s owners=%s hits(owner)=%s hits(friend)=%s",
-#                 total, owners, hits_owner, hits_friend)
-
-#     rows = (
-#         db.query(Contact, User)
-#           .join(User, Contact.user_sub == User.sub)   # 友だち本人をJOIN
-#           .filter(Contact.friend_of_this_user_sub == userId)
-#           .all()
-#     )
-#     logger.info("join rows=%s", len(rows))
-
-#     result = [{
-#         "id": c.id,
-#         "sub": u.sub,
-#         "name": u.username,
-#         "gmail": u.gmail,
-#         "timezone": u.timezone,
-#         "picture": u.picture,
-#     } for c, u in rows]
-#     return {"contacts": result}
-
 
 # searching contact
 # GET /contact/search?gmail={gmail}
@@ -282,28 +254,6 @@ async def delete_contact(
     db.delete(friend)
     db.commit()
     return {"message": "Successfully deleted!"}
-
-
-# Why I implemented this...?
-# # POST /contact/add/{userId}
-# @app.post("/contact/add/{userId}")
-# async def contact_add(meetingId: int, data: VoteData, db: Session = Depends(get_db)):
-#     for voted_date_id in data.slots:
-#         vote = Vote(
-#             user_id=data.user_id, voted_date_id=voted_date_id, meeting_id=meetingId
-#         )
-#         db.add(vote)
-
-#     participant = (
-#         db.query(Participant)
-#         .filter_by(user_id=data.user_id, meeting_id=meetingId)
-#         .first()
-#     )
-#     if participant:
-#         participant.voted = True
-
-#     db.commit()
-#     return {"message": "new contact added!"}
 
 
 # GET /homepage/{userId}

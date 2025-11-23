@@ -1,17 +1,17 @@
 import LeftSidebar from '../components/LeftSidebar';
-// import MeetingCard from '../components/MeetingCard';
 import { useEffect, useState } from "react"
 import axios from "axios"
 import plus from '../images/plus.svg';
 import bin from '../images/bin.svg';
 import search from '../images/search.svg';
+import { DateTime } from "luxon";
 import { API } from "../lib/api" //using this accesable by Render
-
 
 
 function Contact() {
      const [contacts, setContacts] = useState([]);
      const userId = localStorage.getItem('userId');
+     const [timezone, setTimezone] = useState("UTC");
      const [searchEmail, setSearchEmail] = useState("");
      const [friendInfo, setFriendInfo] = useState({
           sub: "0",
@@ -26,6 +26,17 @@ function Contact() {
      //decides display modal
      const [showModal, setShowModal] = useState(false);
 
+     function timeDifference(userLocation, friendLocation){
+          const d = DateTime.now(); 
+          console.log("Contact.jsx: userLocation", userLocation);
+          console.log("Contact.jsx: friendLocation", friendLocation);
+          const offsetUser = d.setZone(userLocation).offset;   
+          const offsetFriend = d.setZone(friendLocation).offset;      
+          const diffHours = (offsetFriend - offsetUser) / 60; 
+          console.log("Contact.jsx: timeDifference", diffHours);
+          return diffHours; 
+     }
+
 
      useEffect(() => {
           // in the useEffect, to define HTTP req, either .then or define func with axios.
@@ -34,6 +45,7 @@ function Contact() {
                .then(response => {
                     console.log("contacts: ", response.data.contacts);
                     setContacts(response.data.contacts);
+                    setTimezone(response.data.timezone)
                     console.log("user_id: ", userId);
                })
                .catch(error => {
@@ -160,7 +172,7 @@ function Contact() {
                                         <br />
                                    </td>
 
-                                   <td className="pl-5">-6h</td>
+                                   <td className="pl-5">{timeDifference(timezone, friendInfo.timezone)}h</td>
                                    <th>
                                         {/*add button: https://icon-rainbow.com/?s=%E5%8F%8B%E9%81%94*/}
                                         <button
@@ -210,7 +222,7 @@ function Contact() {
                                                        </div>
                                                   </td>
                                                   <td>{contact.gmail}</td>
-                                                  <td>{contact.timeDiff}</td>
+                                                  <td>{timeDifference(timezone, contact.timezone)}h</td>
                                                   <td>
 
                                                        <button
@@ -223,132 +235,12 @@ function Contact() {
                                              </tr>
                                         ))}
                                    </tbody>
-                                   {/* <tbody>
-                                      
-                                        <tr>
-
-                                             <td>
-                                                  <div className="flex items-center gap-3">
-                                                       <div className="avatar">
-                                                            <div className="mask mask-squircle h-12 w-12">
-                                                                 <img
-                                                                      src="https://img.daisyui.com/images/profile/demo/2@94.webp"
-                                                                      alt="Avatar Tailwind CSS Component" />
-                                                            </div>
-                                                       </div>
-                                                       <div>
-                                                            <div className="font-bold">Tariq</div>
-                                                            <div className="text-sm opacity-50">Jordan</div>
-                                                       </div>
-                                                  </div>
-                                             </td>
-                                             <td>
-                                                  example@google.com
-                                                  <br />
-                                                
-                                             </td>
-                                             <td>Purple</td>
-                                             <th>
-
-                                                  <button
-                                                       onClick={() => {
-                                                            
-                                                       }}
-                                                       className="p-1 hover:rounded"
-                                                  >
-                                                       <img src={bin} alt="bin" className="w-5 h-5" />
-                                                  </button>
-
-                                             </th>
-                                        </tr>
-                                       
-                                        <tr>
-                                             <td>
-                                                  <div className="flex items-center gap-3">
-                                                       <div className="avatar">
-                                                            <div className="mask mask-squircle h-12 w-12">
-                                                                 <img
-                                                                      src="https://img.daisyui.com/images/profile/demo/3@94.webp"
-                                                                      alt="Avatar Tailwind CSS Component" />
-                                                            </div>
-                                                       </div>
-                                                       <div>
-                                                            <div className="font-bold">Brice Swyre</div>
-                                                            <div className="text-sm opacity-50">China</div>
-                                                       </div>
-                                                  </div>
-                                             </td>
-                                             <td>
-                                                  Carroll Group
-                                                  <br />
-                                                  <span className="badge badge-ghost badge-sm">Tax Accountant</span>
-                                             </td>
-                                             <td>Red</td>
-                                             <th>
-                                                  <button className="btn btn-ghost btn-xs">details</button>
-                                             </th>
-                                        </tr>
-                                     
-                                        <tr>
-                                             <td>
-                                                  <div className="flex items-center gap-3">
-                                                       <div className="avatar">
-                                                            <div className="mask mask-squircle h-12 w-12">
-                                                                 <img
-                                                                      src="https://img.daisyui.com/images/profile/demo/4@94.webp"
-                                                                      alt="Avatar Tailwind CSS Component" />
-                                                            </div>
-                                                       </div>
-                                                       <div>
-                                                            <div className="font-bold">Marjy Ferencz</div>
-                                                            <div className="text-sm opacity-50">Russia</div>
-                                                       </div>
-                                                  </div>
-                                             </td>
-                                             <td>
-                                                  Rowe-Schoen
-                                                  <br />
-                                                  <span className="badge badge-ghost badge-sm">Office Assistant I</span>
-                                             </td>
-                                             <td>Crimson</td>
-                                             <th>
-                                                  <button className="btn btn-ghost btn-xs">details</button>
-                                             </th>
-                                        </tr>
-                                        
-                                        <tr>
-                                             <td>
-                                                  <div className="flex items-center gap-3">
-                                                       <div className="avatar">
-                                                            <div className="mask mask-squircle h-12 w-12">
-                                                                 <img
-                                                                      src="https://img.daisyui.com/images/profile/demo/5@94.webp"
-                                                                      alt="Avatar Tailwind CSS Component" />
-                                                            </div>
-                                                       </div>
-                                                       <div>
-                                                            <div className="font-bold">Yancy Tear</div>
-                                                            <div className="text-sm opacity-50">Brazil</div>
-                                                       </div>
-                                                  </div>
-                                             </td>
-                                             <td>
-                                                  Wyman-Ledner
-                                                  <br />
-                                                  <span className="badge badge-ghost badge-sm">Community Outreach Specialist</span>
-                                             </td>
-                                             <td>Indigo</td>
-                                             <th>
-                                                  <button className="btn btn-ghost btn-xs">details</button>
-                                             </th>
-                                        </tr>
-                                   </tbody> */}
+                                  
 
                               </table>
                          </div>
                     </section>
-                    {/* Drawer is for adding new contact manually*/}
-                    {/* <Drawer /> */}
+
 
 
 

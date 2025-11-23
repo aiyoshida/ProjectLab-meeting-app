@@ -7,6 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
+import { DateTime } from "luxon";
 import { useNavigate } from 'react-router-dom';
 import { API, FRONT } from "../lib/api" //using this accesable by Render
 
@@ -161,7 +162,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
-                         contentHeight={690}   // make this to fixed height
+                         //height="auto"
+                         height={793}   // make this to fixed height
                          expandRows={true}
                          handleWindowResize={false}
                          allDaySlot={false}

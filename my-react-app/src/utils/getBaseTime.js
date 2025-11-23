@@ -1,13 +1,10 @@
 //Library for date, time operation
+//指定されたタイムゾーンに基づいて「今日の9時〜21時までの1時間刻みの時刻（スロット）」の一覧を作成する関数
 import {DateTime} from "luxon";
 
 
-const storedId = localStorage.getItem('userId');
-const userId = storedId ? parseInt(storedId) : null;
-
 export default function getBaseTime(timezone) {
-
-     //Luxonを使った
+     // Luxon
      const baseDate = DateTime.now().setZone(timezone).startOf("day");
      const slots = [];
 
@@ -15,6 +12,6 @@ export default function getBaseTime(timezone) {
           const slot=baseDate.set({hour, minute:0});
           slots.push(slot);
      }
-     console.log(slots);
+     console.log("getBaseTime.js : ", slots);
      return slots;
 };

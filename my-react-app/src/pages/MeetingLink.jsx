@@ -12,9 +12,9 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios"
 import { useNavigate } from 'react-router-dom';
-import moment from "moment-timezone";
 import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import momentPlugin from '@fullcalendar/moment-timezone';
+import { DateTime } from "luxon";
 import { API } from "../lib/api" //using this accesable by Render
 
 
@@ -22,7 +22,7 @@ export default function MeetingLink() {
      const userId = localStorage.getItem('userId');
      const { meetingId } = useParams();
      const [participants, setParticipants] = useState([]);
-     const [creator, setCreator] = useState({ sub:"", gmail:"", picture:'', name:'', timezone:'', });
+     const [creator, setCreator] = useState({ sub: "", gmail: "", picture: '', name: '', timezone: '', });
      const [slotDuration, setSlotDuration] = useState("00:30:00");
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [availableSlots, setAvailableSlots] = useState([]);
@@ -39,16 +39,21 @@ export default function MeetingLink() {
                return;
           }
           console.log("handleSelect: ", info);
-          const newStart = moment.utc(info.startStr);
-          const alreadySelected = selectedSlots.some(slot => moment.utc(slot.startStr).isSame(newStart, "munite"));
+          const newStart = DateTime.fromISO(info.startStr).toUTC();
+          const alreadySelected = selectedSlots.some((slot) => {
+               const slotStart = DateTime.fromISO(slot.start, { zone: "utc" }).toUTC();
+               return slotStart.hasSame(newStart, "minute");
+          });
           if (alreadySelected) {
                alert("This timeslot is already selected!");
                return;
           }
-          setSelectedSlots([...selectedSlots, {
-               start: moment.parseZone(info.startStr).utc().toISOString(),
-               end: moment.parseZone(info.endStr).utc().toISOString(),
-          }]);
+          setSelectedSlots([
+               ...selectedSlots,
+               {
+                    start: DateTime.fromISO(info.startStr).toUTC().toISO(),
+                    end: DateTime.fromISO(info.endStr).toUTC().toISO(),
+               }]);
      };
 
      const handleSubmit = async () => {
@@ -61,20 +66,20 @@ export default function MeetingLink() {
                const voted_date_ids = selectedSlots.map(slot => {
                     const match = availableSlots.find(s => {
                          {/*compare with UTC time*/ }
-                         const startFormattedS = moment.utc(s.start);
-                         const startFormattedSlot = moment.utc(slot.start);
+                         const startFormattedS = DateTime.fromISO(s.start, { zone: "utc" }).toUTC();
+                         const startFormattedSlot = DateTime.fromISO(slot.start, { zone: "utc" }).toUTC();
 
-                         const endFormattedS = moment.utc(s.end);
-                         const endFormattedSlot = moment.utc(slot.end);
+                         const endFormattedS = DateTime.fromISO(s.end, { zone: "utc" }).toUTC();
+                         const endFormattedSlot = DateTime.fromISO(slot.end, { zone: "utc" }).toUTC();
 
-                         const startMatch = startFormattedS.isSame(startFormattedSlot, "minute");
-                         const endMatch = endFormattedS.isSame(endFormattedSlot, "minute");
+                         const startMatch = startFormattedS.hasSame(startFormattedSlot, "minute");
+                         const endMatch = endFormattedS.hasSame(endFormattedSlot, "minute");
 
                          return startMatch && endMatch;
                     });
 
-                    console.log("availableSlots", availableSlots);
-                    console.log("selectedSlots: ", selectedSlots);
+                    console.log("MeetingLink.jsx availableSlots: ", availableSlots);
+                    console.log("MeetingLink.jsx selectedSlots: ", selectedSlots);
 
                     if (!match) {
                          throw new Error("Invalid selected slot.");
@@ -83,15 +88,12 @@ export default function MeetingLink() {
                     return match.id;
                });
 
-
-
                const payload = {
                     user_id: userId,
                     slots: voted_date_ids,
                };
                console.log(payload);
                await axios.post(`${API}/meetinglink/${meetingId}/vote`, payload);
-
 
                alert("Vote submitted!");
                navigate('/homepage');
@@ -170,26 +172,23 @@ export default function MeetingLink() {
                          <div className="flex flex-col my-4 ">
                               <label className="text-lg">Created By</label>
                          </div>
-                         
-                           <div className="flex items-center mb-4">
-                                             {/* <label>
-                                                  <input type="checkbox" className="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
-                                             </label> */}
 
-                                             <div className="flex items-center gap-3 ml-3 ">
-                                                  <div className="avatar">
-                                                       <div className="mask mask-squircle h-12 w-12">
-                                                            <img
-                                                                 src={creator.picture}
-                                                                 alt="Avatar Tailwind CSS Component" />
-                                                       </div>
-                                                  </div>
-                                                  <div>
-                                                       <div className="font-bold">{creator.name}</div>
-                                                       <div className="text-sm opacity-50">{creator.timezone.split("/").pop()}</div>
-                                                  </div>
-                                             </div>
+                         <div className="flex items-center mb-4">
+
+                              <div className="flex items-center gap-3 ml-3 ">
+                                   <div className="avatar">
+                                        <div className="mask mask-squircle h-12 w-12">
+                                             <img
+                                                  src={creator.picture}
+                                                  alt="Avatar Tailwind CSS Component" />
                                         </div>
+                                   </div>
+                                   <div>
+                                        <div className="font-bold">{creator.name}</div>
+                                        <div className="text-sm opacity-50">{creator.timezone.split("/").pop()}</div>
+                                   </div>
+                              </div>
+                         </div>
 
 
                          <div className="flex flex-col my-4 ">
@@ -223,72 +222,41 @@ export default function MeetingLink() {
                                    </label>
                               ))}
                          </div>
-                         {/* 
-                         {participants.map((user) => (
-                              <div key={user.id} className="new-leftsidebar-invite-item">
-                                   <div className="new-leftsidebar-invite-first-row">
-                                        <div>{user.name}</div>
-                                        <div className="new-leftsidebar-country">in {user.timezone}</div>
-                                   </div>
-                                   <div className="new-leftsidebar-status">
-                                        {user.voted ? "✅ already voted" : "🕒 not voted yet"}
-                                   </div>
-                              </div>
-                         ))} */}
 
                          <div>
                               <label className="text-lg my-3" >Vote dates</label>
 
                               <div className="space-y-1">
-                                   {availableSlots.map((date) => (
-                                        <div className="flex items-center ml-6" key={date.id}>
-                                             {/* {moment.utc(date.start).tz(timezone).format("dddd, MMMM D  H:mm")}〜
-                                        {moment.utc(date.end).tz(timezone).format("HH:mm")} #votes: {date.vote_count}
-                                        {console.log("date start: ", date.start)}
-                                        {console.log("date start: ", date.end)}
-                                        {console.log("waAAAAA", moment("2025-05-25T03:00:00").tz(timezone).format("YYYY/MM/DD H:mm"))} */}
-
-                                             {moment.utc(date.start).tz(timezone).format("ddd, MMMM D")}
-                                             {/* https://v4.daisyui.com/components/badge/ # Badge in a button jsx */}
-                                             <div className="flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3">
-                                                  {moment.utc(date.start).tz(timezone).format("H:mm")}
-                                                  <div className="badge badge-sm bg-transparent border-none">
-                                                       {/* Took good icon from here
+                                   {availableSlots.map((date) => {
+                                        const d = DateTime.fromISO(date.start, { zone: "utc" }).setZone(timezone);
+                                        return (
+                                             <div className="flex items-center ml-6" key={date.id}>
+                                                  {d.toFormat("ccc, LLLL d")}
+                                                  {/*moment.utc(date.start).tz(timezone).format("ddd, MMMM D")*/}
+                                                  {/* https://v4.daisyui.com/components/badge/ # Badge in a button jsx */}
+                                                  <div className="flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3">
+                                                       {d.toFormat("H:mm")}
+                                                       {/*moment.utc(date.start).tz(timezone).format("H:mm")*/}
+                                                       <div className="badge badge-sm bg-transparent border-none">
+                                                            {/* Took good icon from here
                                                        https://icon-rainbow.com/%e3%81%84%e3%81%84%e3%81%ad%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-1/  */}
-                                                       <img src={good} alt='good' className="h-5 w-5" />
-                                                  </div>
-                                                  <div>
-                                                       <p>{date.vote_count}</p>
+                                                            <img src={good} alt='good' className="h-5 w-5" />
+                                                       </div>
+                                                       <div>
+                                                            <p>{date.vote_count}</p>
+                                                       </div>
                                                   </div>
                                              </div>
-
-
-                                        </div>
-
-                                   ))}
+                                        );
+                                   })}
                               </div>
-
-
                          </div>
-
-
-
-
-
-
                     </div>
-
-
-
-
                </div>
 
 
                <div className="fixed left-[480px] top-0 h-screen w-[945px]">
-
                     <button onClick={handleSubmit} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Submit</button>
-                    {/* <button onClick={goToHomePage} className="fixed top-0 right-0 w-[50px] h-[50px] text-[30px] bg-white border-none">✕</button> */}
-
 
                     <div className="relative w-full max-w-4xl ml-auto px-4">
                          <section className="flex-1 w-full min-w-0 overflow-hidden">
@@ -310,60 +278,68 @@ export default function MeetingLink() {
                                                   {arg.date.getDate()}
                                              </span>
                                         </div>
-                                        )}
+                                   )}
                                    selectable={true}
                                    select={handleSelect}
                                    plugins={[timeGridPlugin, interactionPlugin, momentPlugin, momentTimezonePlugin]}
                                    initialView="timeGridWeek"
                                    slotDuration={slotDuration}
                                    slotMinTime="09:00:00"
-                                   slotMaxTime="22:00:00"
+                                   slotMaxTime="33:00:00"
                                    slotLabelFormat={{
                                         hour: '2-digit',
                                         minute: '2-digit',
                                         hour12: false
                                    }}
-                                   contentHeight={690}   // make this to fixed height
+                                   height={800}   // make this to fixed height
                                    expandRows={true}
                                    handleWindowResize={false}
                                    allDaySlot={false}
                                    firstDay={new Date().getDay()}
                                    selectAllow={(selectInfo) => {
-                                        console.log("selectedInfo OBJ", selectInfo);
+                                        console.log("MeetingLink.jsx selectedInfo OBJ: ", selectInfo);
                                         {/*since ISOString cannot directly compared.compare with UTC*/ }
-                                        const selectedStart = moment.utc(selectInfo.startStr);
-                                        const selectedEnd = moment.utc(selectInfo.endStr);
-                                        console.log(selectInfo.start);
-                                        console.log(selectInfo.end);
-                                        console.log("selectInfo: ", selectedStart, selectedEnd);
+                                        const selectedStart = DateTime.fromISO(selectInfo.startStr).toUTC();
+                                        const selectedEnd = DateTime.fromISO(selectInfo.endStr).toUTC();
+                                        console.log("MeetingLink.jsx", selectInfo.start);
+                                        console.log("MeetingLink.jsx", selectInfo.end);
+                                        console.log("MeetingLink.jsx selectInfo: ", selectedStart, selectedEnd);
 
                                         return availableSlots.some(slot => {
-                                             const slotStart = moment.utc(slot.start);
-                                             const slotEnd = moment.utc(slot.end);
-                                             console.log("availableSlot", slotStart, slotEnd);
-
-                                             return selectedStart.isSame(slotStart, 'minute') && selectedEnd.isSame(slotEnd, 'minute');
+                                             const slotStart = DateTime.fromISO(slot.start, { zone: "utc" });
+                                             const slotEnd = DateTime.fromISO(slot.end, { zone: "utc" });
+                                             console.log("MeetingLink.jsx availableSlot", slotStart, slotEnd);
+                                             const startMatch = selectedStart.hasSame(slotStart, "minute");
+                                             const endMatch = selectedEnd.hasSame(slotEnd, "minute");
+                                             return startMatch && endMatch;
+                                             // return selectedStart.isSame(slotStart, 'minute') && selectedEnd.isSame(slotEnd, 'minute');
                                         });
                                    }}
+
                                    events={[
-                                        ...availableSlots.map(slot => ({
-                                             start: moment.utc(slot.start).tz(timezone).format(),
-                                             end: moment.utc(slot.end).tz(timezone).format(),
-                                             display: 'background',
-                                             allDay: false,
-                                             backgroundColor: '#a2d5f2',
-                                             className: 'calendar-available-slot',
-                                        }))
-                                        ,
+                                        ...availableSlots.map(slot => {
+                                             const start = DateTime.fromISO(slot.start, { zone: "utc" }).setZone(timezone).toISO();
+                                             const end = DateTime.fromISO(slot.end, { zone: "utc" }).setZone(timezone).toISO();
+
+                                             return {
+                                                  start,
+                                                  end,
+                                                  display: "background",
+                                                  allDay: false,
+                                                  backgroundColor: "#a2d5f2",
+                                                  className: "calendar-available-slot",
+                                             };
+                                        }),
+
                                         ...selectedSlots.map(slot => ({
                                              start: slot.start,
                                              end: slot.end,
-                                             display: 'background',
-                                             backgroundColor: '#f28b82',
-                                             className: 'calendar-selected-slot',
-                                        }))
-                                        ,
+                                             display: "background",
+                                             backgroundColor: "#f28b82",
+                                             className: "calendar-selected-slot",
+                                        })),
                                    ]}
+
                               />
                          </section>
 
