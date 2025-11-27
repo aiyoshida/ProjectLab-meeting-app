@@ -98,7 +98,6 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                console.error("NewMeetingCalendar: Failed to create meeting:", error);
           }
      }
-     
 
 
      const handleSelect = (info) => {

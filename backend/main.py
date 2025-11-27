@@ -546,7 +546,7 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
                     creator.gmail,
                     subject="Finalize your voting dates",
                     body=f"""Hi, Please finalize the dates of the meeting
-                    URL: http://localhost:3000/finalizemeeting/{meetingId}
+                    URL: https://across-time.vercel.app/finalizemeeting/{meetingId}
                     """,
                 )
             except Exception as e:
@@ -606,3 +606,5 @@ async def finalize_meeting(
 @app.get("/health")
 def health():
     return {"ok": True}
+
+

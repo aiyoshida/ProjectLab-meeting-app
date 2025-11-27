@@ -139,3 +139,25 @@ return (
 
 )
 }
+
+
+
+
+
+///
+const UserContext = createContext();
+export const UserProvider = ({children}) => {
+     const [userId, setUserId] = useState(null);
+     useEffect(()=>{
+          const storedId =localStorage.getItem('userId');
+          if (storedId){
+               setUserId(parseInt(storedId));
+          }
+     }, []); 
+     return (
+          <UserContext.Provider value={{userId, setUserId}}>
+               {children}
+          </UserContext.Provider>
+     );
+};
+export const useUser = () => useContext(UserContext);
