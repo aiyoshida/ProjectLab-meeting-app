@@ -216,31 +216,3 @@ export default function FinalizeMeeting() {
 
 
 
-////
-const handleShare = async () => {
-      try {
-            const payload = {
-               title: meetingTitle,
-               timezone: timezone,
-               creator_user_sub: userId,
-               invitees: checkedInvitees.map(invitee => invitee.sub),
-               slots: selectedSlots.map(slot => ({
-                  start: slot.start,
-                  end: slot.end
-               })),
-               slot_duration: slotDuration,
-                url: "https://across-time.vercel.app//meetinglink"
-               };
-               const response = await axios.post(`${API}/newmeeting/${userId}`, payload);
-
-               //sending email to invitees
-               const result = await axios.post(`${API}/send_email/${userId}`, {
-                    receivers: checkedInvitees.map(invitee => invitee.gmail),
-                    subject: ...,
-                    body:
-                         `...
-                    URL: ${FRONT}/meetinglink/${response.data.meeting_id}
-                    `,
-                    });
-								...
-     }
