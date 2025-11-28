@@ -317,6 +317,7 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
 
+    db.query(Vote).filter(Vote.meeting_id.is_(None)).delete(synchronize_session=False)
     # to adjust child tables to deleted meeting table
     db.query(VotedDate).filter(VotedDate.meeting_id.is_(None)).delete(
         synchronize_session=False
@@ -324,7 +325,6 @@ async def delete_card(cardId: int, db: Session = Depends(get_db)):
     db.query(Participant).filter(Participant.meeting_id.is_(None)).delete(
         synchronize_session=False
     )
-    db.query(Vote).filter(Vote.meeting_id.is_(None)).delete(synchronize_session=False)
     db.delete(meeting)
     db.commit()
 
