@@ -15,6 +15,7 @@ from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
 # from .database import engine, SessionLocal
 from .send_email import send_email
 from .ics_creator import ics_creator
+from fastapi.responses import PlainTextResponse
 
 
 app = FastAPI()
@@ -608,3 +609,7 @@ def health():
     return {"ok": True}
 
 
+# load.io testing
+@app.get("/loaderio-2c8bc3f252825b403905c3693e0d1cce")
+def loaderio_verify():
+    return PlainTextResponse("loaderio-2c8bc3f252825b403905c3693e0d1cce")
