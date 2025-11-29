@@ -1,17 +1,20 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
 # from backend.models import Base
 from backend.database import engine
 from backend.database import SessionLocal
 from fastapi import Depends
 from sqlalchemy.orm import Session
+
 # from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import func
 import logging
 from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
+
 # from .database import engine, SessionLocal
 from .send_email import send_email
 from .ics_creator import ics_creator
@@ -106,6 +109,7 @@ class UserUpdate(BaseModel):
 def read_root():
     return {"message": "Hello from Render / FastAPI!"}
 
+
 # GET /setting/{user_id}
 @app.get("/setting/{userId}")
 async def get_user_data(userId: str, db: Session = Depends(get_db)):
@@ -191,11 +195,14 @@ async def get_contactlist(userId: str, db: Session = Depends(get_db)):
         for c in contacts
     ]
 
-    return {"contacts": result,
-            "timezone": user.timezone, }
+    return {
+        "contacts": result,
+        "timezone": user.timezone,
+    }
 
 
 # logger = logging.getLogger("uvicorn.error")
+
 
 # searching contact
 # GET /contact/search?gmail={gmail}
@@ -282,7 +289,7 @@ async def get_meeting_card(userId: str, db: Session = Depends(get_db)):
             user = db.query(User).filter(User.sub == p.user_id).first()
             if user:
                 participant_names.append(user.username)
-        
+
         participant_pics = []
         for p in participants:
             user = db.query(User).filter(User.sub == p.user_id).first()
@@ -519,7 +526,9 @@ async def submit_vote(meetingId: int, data: VoteData, db: Session = Depends(get_
 
     participant = (
         db.query(Participant)
-        .filter_by(user_id=data.user_id, meeting_id=meetingId)
+        .filter(
+            Participant.user_id == data.user_id, Participant.meeting_id == meetingId
+        )
         .first()
     )
     if participant:
