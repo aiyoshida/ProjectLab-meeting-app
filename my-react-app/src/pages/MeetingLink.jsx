@@ -130,10 +130,10 @@ export default function MeetingLink() {
                     setAvailableSlots(res.data.available_slots || []);
                     setSlotDuration(res.data.slotDuration);
                     setCreator(res.data.creator);
-                    console.log("received creator", res.data.creator)
-                    console.log("received participants: ", res.data.contacts);
-                    console.log("available slots: ", res.data.available_slots);
-                    console.log("slot_duration:", res.data.slotDuration);
+                    console.log("MeetingLink.jsx received creator", res.data.creator)
+                    console.log("MeetingLink.jsx received participants: ", res.data.contacts);
+                    console.log("MeetingLink.jsx available slots: ", res.data.available_slots);
+                    console.log("MeetingLink.jsx slot_duration:", res.data.slotDuration);
                })
                .catch((err) => {
                     console.error("Failed to load meeting data", err);
