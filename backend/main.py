@@ -593,7 +593,7 @@ async def finalize_meeting(
                 subject="AcrossTime Notification: The meeting time is finalized",
                 body=f"""Hi {participant.user.username}, date of the meeting is finalized.
                        Please add this date to your calendar!
-                    URL: http://localhost:3000/finalizemeeting/{meetingId}
+                    URL: https://across-time.vercel.app/finalizemeeting/{meetingId}
                     """,
                 ics=ics,
             )
