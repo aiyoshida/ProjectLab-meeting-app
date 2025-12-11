@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from zoneinfo import ZoneInfo
 
 # from backend.models import Base
 from backend.database import engine
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 # from backend.models import Meeting, Participant, User, Contact, VotedDate, Vote
 from typing import List, Optional
 from datetime import datetime
+from datetime import timezone
 from sqlalchemy import func
 import logging
 from .models import Base, Meeting, Participant, User, Contact, VotedDate, Vote
@@ -595,14 +597,24 @@ async def finalize_meeting(
     vote = db.query(VotedDate).filter(VotedDate.id == req.finalized_vote_id).first()
     # Creating ics
     ics = ics_creator(meeting.title, vote.starting_time, vote.ending_time)
+    start_utc = vote.starting_time.replace(tzinfo=timezone.utc)
+    end_utc = vote.ending_time.replace(tzinfo=timezone.utc)
     for participant in participants:
         try:
+            user_tz = ZoneInfo(participant.user.timezone)
+            start_local = start_utc.astimezone(user_tz)
+            end_local = end_utc.astimezone(user_tz)
+            localized_range = (
+                f"{start_local.strftime('%Y-%m-%d %H:%M')} "
+                f"- {end_local.strftime('%H:%M')}"
+            )
             send_email(
                 participant.user.gmail,
                 subject="AcrossTime Notification: The meeting time is finalized",
                 body=f"""Hi {participant.user.username}, date of the meeting is finalized.
-                       Please add this date to your calendar!
-                    URL: https://across-time.vercel.app/finalizemeeting/{meetingId}
+                In your timezone {participant.user.timezone}, the meeting time will be {localized_range}
+                Please add this date to your calendar!
+                URL: https://across-time.vercel.app/finalizemeeting/{meetingId}
                     """,
                 ics=ics,
             )

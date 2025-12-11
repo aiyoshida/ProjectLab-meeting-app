@@ -26,3 +26,6 @@ export const UserProvider = ({children}) => {
 
 //custom hook to get userId by const { userId, setUserId } = useUser()
 export const useUser = () => useContext(UserContext);
+
+
+
