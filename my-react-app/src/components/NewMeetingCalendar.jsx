@@ -107,12 +107,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           }
           console.log(info);
           //make the selected slot UTC time and save to selected timeslots.
-          const newStart = DateTime.fromISO(info.startStr, { setZone: true })
-               .toUTC()
-               .toISO();
-          const newEnd = DateTime.fromISO(info.endStr, { setZone: true })
-               .toUTC()
-               .toISO();
+          const newStart = DateTime.fromISO(info.startStr, { setZone: true }).toUTC().toISO();
+          const newEnd = DateTime.fromISO(info.endStr, { setZone: true }).toUTC().toISO();
 
           console.log("NewMeetingCalendar.jsx newStart: ", newStart);
 

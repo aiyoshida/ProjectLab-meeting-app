@@ -442,9 +442,14 @@ async def get_meetinglink_timezone(userId: str, db: Session = Depends(get_db)):
     }
 
 
-# GET /meetinglink/{meetingId}
+###################### GET /meetinglink/{meetingId} #################################################
 @app.get("/meetinglink/{meetingId}")
 async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db)):
+    import time
+
+    t0 = time.time()
+    print(f"[meetinglink] start meetingId={meetingId}")
+
     meeting = db.query(Meeting).filter(Meeting.id == meetingId).first()
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
@@ -472,9 +477,13 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
                     "voted": p.voted,
                 }
             )
+    t1 = time.time()
+    print(f"[meetinglink] after contacts {(t1 - t0)*1000:.0f} ms")
 
     # slots
     # slots = db.query(VotedDate).filter(VotedDate.meeting_id == meetingId).all()
+    t_db_start = time.time()
+
     slots = (
         db.query(
             VotedDate.id,
@@ -487,6 +496,9 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
         .group_by(VotedDate.id, VotedDate.starting_time, VotedDate.ending_time)
         .all()
     )
+    t_db_end = time.time()
+    print(f"[meetinglink] slots query {(t_db_end - t_db_start)*1000:.0f} ms")
+
 
     available_slots = [
         {
@@ -508,6 +520,8 @@ async def get_meetinglink_contact(meetingId: int, db: Session = Depends(get_db))
             "timezone": creator_user.timezone,
             "picture": creator_user.picture,
         }
+    t2 = time.time()
+    print(f"[meetinglink] end total {(t2 - t0)*1000:.0f} ms")
 
     return {
         "contacts": contacts,
