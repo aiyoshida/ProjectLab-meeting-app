@@ -16,9 +16,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      const [timezone, setTimezone] = useState("Europe/Budapest");
      const [viewKey, setViewKey] = useState(0);
      const [slotLayout, setSlotLayout] = useState([]);
-     const [calendarScrollTop, setCalendarScrollTop] = useState(0);
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
      const calendarBodyRef = useRef(null);
+     const timezoneRowsRef = useRef(null);
      const navigate = useNavigate();
 
      //TODO: take user's timezone from upper parents, not both from components. doubled now.
@@ -48,6 +48,13 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      useEffect(() => {
           const body = calendarBodyRef.current;
           if (!body) return undefined;
+          let scrollFrame = null;
+
+          const syncTimezoneScroll = (scrollTop) => {
+               if (timezoneRowsRef.current) {
+                    timezoneRowsRef.current.style.transform = `translate3d(0, ${-scrollTop}px, 0)`;
+               }
+          };
 
           const measureSlots = () => {
                const bodyRect = body.getBoundingClientRect();
@@ -63,7 +70,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          height: rect.height,
                     };
                }));
-               setCalendarScrollTop(scrollTop);
+               syncTimezoneScroll(scrollTop);
           };
 
           const frame = requestAnimationFrame(measureSlots);
@@ -72,12 +79,17 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           const slotScroller = Array.from(body.querySelectorAll('.fc-scroller'))
                .find((element) => element.querySelector('.fc-timegrid-slots'));
           const handleCalendarScroll = () => {
-               setCalendarScrollTop(slotScroller?.scrollTop || 0);
+               if (scrollFrame !== null) return;
+               scrollFrame = requestAnimationFrame(() => {
+                    syncTimezoneScroll(slotScroller?.scrollTop || 0);
+                    scrollFrame = null;
+               });
           };
           slotScroller?.addEventListener('scroll', handleCalendarScroll, { passive: true });
 
           return () => {
                cancelAnimationFrame(frame);
+               if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
                observer.disconnect();
                slotScroller?.removeEventListener('scroll', handleCalendarScroll);
           };
@@ -175,7 +187,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                                    style={{ width: `${checkedInvitees.length * 4.25}rem` }}
                               >
                                    <div
-                                        className="absolute left-0 right-0 grid border-b border-[#eadde1] bg-white"
+                                        className="absolute left-0 right-0 z-10 grid border-b border-[#eadde1] bg-white shadow-[0_4px_10px_rgba(89,55,65,0.05)]"
                                         style={{
                                              bottom: slotLayout.length ? `${calendarBodyRef.current?.clientHeight - slotLayout[0].top}px` : 'auto',
                                              gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
@@ -187,30 +199,32 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                                              </div>
                                         ))}
                                    </div>
-                                   {slotLayout.map((slot, slotIndex) => {
-                                        const creatorTime = comparisonSlots[slotIndex];
-                                        if (!creatorTime) return null;
-                                        return (
-                                             <div
-                                                  key={slot.time}
-                                                  className="absolute left-0 right-0 grid gap-px"
-                                                  style={{
-                                                       top: `${slot.top - calendarScrollTop}px`,
-                                                       height: `${slot.height}px`,
-                                                       gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
-                                                  }}
-                                             >
-                                                  {checkedInvitees.map((invitee) => {
-                                                       const inviteeTime = creatorTime.setZone(invitee.timezone);
-                                                       return (
-                                                            <div key={invitee.sub || invitee.id} className={`flex items-center justify-center text-xs font-semibold ${getAvailabilityClass(inviteeTime.hour)}`}>
-                                                                 {inviteeTime.toFormat('HH:mm')}
-                                                            </div>
-                                                       );
-                                                  })}
-                                             </div>
-                                        );
-                                   })}
+                                   <div ref={timezoneRowsRef} className="absolute inset-0 will-change-transform">
+                                        {slotLayout.map((slot, slotIndex) => {
+                                             const creatorTime = comparisonSlots[slotIndex];
+                                             if (!creatorTime) return null;
+                                             return (
+                                                  <div
+                                                       key={slot.time}
+                                                       className="absolute left-0 right-0 grid gap-px"
+                                                       style={{
+                                                            top: `${slot.top}px`,
+                                                            height: `${slot.height}px`,
+                                                            gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
+                                                       }}
+                                                  >
+                                                       {checkedInvitees.map((invitee) => {
+                                                            const inviteeTime = creatorTime.setZone(invitee.timezone);
+                                                            return (
+                                                                 <div key={invitee.sub || invitee.id} className={`flex items-center justify-center text-xs font-semibold ${getAvailabilityClass(inviteeTime.hour)}`}>
+                                                                      {inviteeTime.toFormat('HH:mm')}
+                                                                 </div>
+                                                            );
+                                                       })}
+                                                  </div>
+                                             );
+                                        })}
+                                   </div>
                               </div>
                          )}
                          <div className="min-w-0 flex-1">

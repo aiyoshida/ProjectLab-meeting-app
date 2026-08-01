@@ -125,6 +125,29 @@
   overflow: hidden;
 }
 
+.fc .fc-scroller {
+  scrollbar-color: #b9adb1 transparent;
+  scrollbar-width: thin;
+}
+
+.fc .fc-scroller::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #b9adb1;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: #95878c;
+}
+
 .fc .fc-timegrid-slot-label,
 .fc .fc-col-header-cell-cushion {
   color: #776b70;
