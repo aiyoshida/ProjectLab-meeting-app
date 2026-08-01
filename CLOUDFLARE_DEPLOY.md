@@ -74,14 +74,15 @@ Keep `http://localhost:3000` for local development.
 
 In Cloudflare choose **Workers & Pages → Create application → Import a repository**,
 connect `aiyoshida/ProjectLab-meeting-app`, and use `main` as the production
-branch. Set **Root directory** to `cloudflare`, then configure the two build steps:
+branch. Leave **Root directory** empty so both `my-react-app` and `cloudflare` are
+available to the build, then configure the two build steps:
 
 ```sh
-# Build command
-npm --prefix ../my-react-app ci && npm run build:frontend
+# Build command (runs from the repository root)
+npm --prefix my-react-app ci && npm --prefix cloudflare ci && npm --prefix my-react-app run build
 
-# Deploy command
-npx wrangler deploy
+# Deploy command (runs from the repository root)
+cd cloudflare && npx wrangler deploy
 ```
 
 No React production environment variables are required. The frontend defaults to
