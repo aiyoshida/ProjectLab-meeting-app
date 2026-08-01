@@ -213,31 +213,36 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                                              </div>
                                         ))}
                                    </div>
-                                   <div ref={timezoneRowsRef} className="absolute inset-0 will-change-transform">
-                                        {slotLayout.map((slot, slotIndex) => {
-                                             const creatorTime = comparisonSlots[slotIndex];
-                                             if (!creatorTime) return null;
-                                             return (
-                                                  <div
-                                                       key={slot.time}
-                                                       className="absolute left-0 right-0 grid gap-px"
-                                                       style={{
-                                                            top: `${slot.top}px`,
-                                                            height: `${slot.height}px`,
-                                                            gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
-                                                       }}
-                                                  >
-                                                       {checkedInvitees.map((invitee) => {
-                                                            const inviteeTime = creatorTime.setZone(invitee.timezone);
-                                                            return (
-                                                                 <div key={invitee.sub || invitee.id} className={`flex items-center justify-center text-xs font-semibold ${getAvailabilityClass(inviteeTime.hour)}`}>
-                                                                      {inviteeTime.toFormat('HH:mm')}
-                                                                 </div>
-                                                            );
-                                                       })}
-                                                  </div>
-                                             );
-                                        })}
+                                   <div
+                                        className="absolute bottom-0 left-0 right-0 overflow-hidden"
+                                        style={{ top: slotLayout.length ? `${slotLayout[0].top}px` : '100%' }}
+                                   >
+                                        <div ref={timezoneRowsRef} className="absolute inset-0 will-change-transform">
+                                             {slotLayout.map((slot, slotIndex) => {
+                                                  const creatorTime = comparisonSlots[slotIndex];
+                                                  if (!creatorTime) return null;
+                                                  return (
+                                                       <div
+                                                            key={slot.time}
+                                                            className="absolute left-0 right-0 grid gap-px"
+                                                            style={{
+                                                                 top: `${slot.top - slotLayout[0].top}px`,
+                                                                 height: `${slot.height}px`,
+                                                                 gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
+                                                            }}
+                                                       >
+                                                            {checkedInvitees.map((invitee) => {
+                                                                 const inviteeTime = creatorTime.setZone(invitee.timezone);
+                                                                 return (
+                                                                      <div key={invitee.sub || invitee.id} className={`flex items-center justify-center text-xs font-semibold ${getAvailabilityClass(inviteeTime.hour)}`}>
+                                                                           {inviteeTime.toFormat('HH:mm')}
+                                                                      </div>
+                                                                 );
+                                                            })}
+                                                       </div>
+                                                  );
+                                             })}
+                                        </div>
                                    </div>
                               </div>
                          )}
