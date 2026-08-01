@@ -1,6 +1,5 @@
 import React from "react";
 import NewMeetingLeftSideBar from '../components/NewMeetingLeftSideBar';
-import NewMeetingOthersTime from '../components/NewMeetingOthersTime';
 import NewMeetingCalendar from '../components/NewMeetingCalendar';
 import  { useState } from "react";
 
@@ -22,9 +21,6 @@ function NewMeeting(){
                     setCheckedInvitees={setCheckedInvitees}
                     meetingTitle = {meetingTitle}
                     setMeetingTitle={setMeetingTitle}
-               />
-                <NewMeetingOthersTime 
-                    checkedInvitees={checkedInvitees}
                />
                 <NewMeetingCalendar 
                     slotDuration={slotDuration}

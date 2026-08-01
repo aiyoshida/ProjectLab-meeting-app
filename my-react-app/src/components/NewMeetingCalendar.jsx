@@ -105,12 +105,54 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           console.log("selectedslots: ", selectedSlots);
      };
 
+     const getAvailabilityClass = (hour) => {
+          if (hour >= 9 && hour < 19) return "timezone-slot-good";
+          if (hour >= 7 && hour < 22) return "timezone-slot-okay";
+          return "timezone-slot-poor";
+     };
+
+     const renderComparedTimes = (arg) => {
+          const creatorTime = DateTime.fromJSDate(arg.date, { zone: timezone });
+          const comparedTimes = [
+               { key: "creator", label: creatorTime.toFormat("HH:mm"), className: "timezone-slot-owner" },
+               ...checkedInvitees.map((invitee) => {
+                    const inviteeTime = creatorTime.setZone(invitee.timezone);
+                    return {
+                         key: invitee.sub || invitee.id,
+                         label: inviteeTime.toFormat("HH:mm"),
+                         className: getAvailabilityClass(inviteeTime.hour),
+                    };
+               }),
+          ];
+
+          return (
+               <div
+                    className="timezone-slot-grid"
+                    style={{ gridTemplateColumns: `repeat(${comparedTimes.length}, minmax(3.5rem, 1fr))` }}
+               >
+                    {comparedTimes.map((time) => (
+                         <span key={time.key} className={`timezone-slot ${time.className}`}>
+                              {time.label}
+                         </span>
+                    ))}
+               </div>
+          );
+     };
+
 
      return (
           <div className="relative flex h-full min-w-0 max-w-5xl flex-1 flex-col gap-2 p-3">
 
-               <section className="calendar-surface flex-1 w-full min-w-0 min-h-0 overflow-hidden">
-                    <FullCalendar
+               <section className="calendar-surface flex flex-1 flex-col w-full min-w-0 min-h-0 overflow-hidden">
+                    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#eee4e7] pb-2 text-xs text-[#776b70]">
+                         <span className="font-semibold text-[#4b3f43]">Time comparison</span>
+                         <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#81d7bb]" />09–19</span>
+                         <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#d4c89d]" />07–09 / 19–22</span>
+                         <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#caabb6]" />22–07</span>
+                         <span className="ml-auto font-medium">{['You', ...checkedInvitees.map(invitee => invitee.timezone.split('/').pop())].join(' · ')}</span>
+                    </div>
+                    <div className="min-h-0 flex-1">
+                         <FullCalendar
                          timeZone={timezone}
                          headerToolbar={{
                               left: 'title',
@@ -141,6 +183,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
+                         slotLabelContent={renderComparedTimes}
                          height="100%"
                          expandRows={true}
                          handleWindowResize={false}
@@ -153,7 +196,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               backgroundColor: "red",
                          }))
                          }
-                    />
+                         />
+                    </div>
                </section>
                <button onClick={handleShare} className="primary-button shrink-0 self-end">Share</button>
           </div>
