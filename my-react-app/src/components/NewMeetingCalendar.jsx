@@ -13,7 +13,10 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      const userId = localStorage.getItem('userId');
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
+     const [viewStart, setViewStart] = useState(null);
+     const [slotLayout, setSlotLayout] = useState([]);
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
+     const calendarBodyRef = useRef(null);
      const navigate = useNavigate();
 
      //TODO: take user's timezone from upper parents, not both from components. doubled now.
@@ -39,6 +42,33 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           if (api) api.setOption("slotDuration", slotDuration);
           setSelectedSlots([]); //to reset selected timeslots
      }, [slotDuration]);
+
+     useEffect(() => {
+          const body = calendarBodyRef.current;
+          if (!body) return undefined;
+
+          const measureSlots = () => {
+               const bodyRect = body.getBoundingClientRect();
+               const slotElements = body.querySelectorAll('.fc-timegrid-slots tr[data-time]');
+               setSlotLayout(Array.from(slotElements).map((element) => {
+                    const rect = element.getBoundingClientRect();
+                    return {
+                         time: element.getAttribute('data-time'),
+                         top: rect.top - bodyRect.top,
+                         height: rect.height,
+                    };
+               }));
+          };
+
+          const frame = requestAnimationFrame(measureSlots);
+          const observer = new ResizeObserver(measureSlots);
+          observer.observe(body);
+
+          return () => {
+               cancelAnimationFrame(frame);
+               observer.disconnect();
+          };
+     }, [slotDuration, timezone, viewStart, checkedInvitees.length]);
 
 
      const handleShare = async () => {
@@ -111,32 +141,13 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           return "timezone-slot-poor";
      };
 
-     const renderComparedTimes = (arg) => {
-          const creatorTime = DateTime.fromJSDate(arg.date, { zone: timezone });
-          const comparedTimes = [
-               { key: "creator", label: creatorTime.toFormat("HH:mm"), className: "timezone-slot-owner" },
-               ...checkedInvitees.map((invitee) => {
-                    const inviteeTime = creatorTime.setZone(invitee.timezone);
-                    return {
-                         key: invitee.sub || invitee.id,
-                         label: inviteeTime.toFormat("HH:mm"),
-                         className: getAvailabilityClass(inviteeTime.hour),
-                    };
-               }),
-          ];
-
-          return (
-               <div
-                    className="timezone-slot-grid"
-                    style={{ gridTemplateColumns: `repeat(${comparedTimes.length}, minmax(3.5rem, 1fr))` }}
-               >
-                    {comparedTimes.map((time) => (
-                         <span key={time.key} className={`timezone-slot ${time.className}`}>
-                              {time.label}
-                         </span>
-                    ))}
-               </div>
-          );
+     const getSlotDateTime = (time) => {
+          if (!viewStart || !time) return null;
+          const [hours, minutes, seconds] = time.split(':').map(Number);
+          return DateTime.fromISO(viewStart, { setZone: true })
+               .setZone(timezone)
+               .startOf('day')
+               .plus({ hours, minutes, seconds });
      };
 
 
@@ -149,10 +160,56 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#81d7bb]" />09–19</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#d4c89d]" />07–09 / 19–22</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#caabb6]" />22–07</span>
-                         <span className="ml-auto font-medium">{['You', ...checkedInvitees.map(invitee => invitee.timezone.split('/').pop())].join(' · ')}</span>
+                         <span className="ml-auto font-medium">Calendar: {timezone.split('/').pop()}</span>
                     </div>
-                    <div className="min-h-0 flex-1">
+                    <div ref={calendarBodyRef} className="flex min-h-0 flex-1 gap-2">
+                         {checkedInvitees.length > 0 && (
+                              <div
+                                   className="relative shrink-0 overflow-hidden rounded-xl border border-[#eadde1] bg-[#faf7f8]"
+                                   style={{ width: `${checkedInvitees.length * 4.25}rem` }}
+                              >
+                                   <div
+                                        className="absolute left-0 right-0 grid border-b border-[#eadde1] bg-white"
+                                        style={{
+                                             bottom: slotLayout.length ? `${calendarBodyRef.current?.clientHeight - slotLayout[0].top}px` : 'auto',
+                                             gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
+                                        }}
+                                   >
+                                        {checkedInvitees.map((invitee) => (
+                                             <div key={invitee.sub || invitee.id} className="truncate px-1 py-2 text-center text-[11px] font-semibold text-[#5f4d53]" title={invitee.timezone}>
+                                                  {invitee.timezone.split('/').pop()}
+                                             </div>
+                                        ))}
+                                   </div>
+                                   {slotLayout.map((slot) => {
+                                        const creatorTime = getSlotDateTime(slot.time);
+                                        if (!creatorTime) return null;
+                                        return (
+                                             <div
+                                                  key={slot.time}
+                                                  className="absolute left-0 right-0 grid gap-px"
+                                                  style={{
+                                                       top: `${slot.top}px`,
+                                                       height: `${slot.height}px`,
+                                                       gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
+                                                  }}
+                                             >
+                                                  {checkedInvitees.map((invitee) => {
+                                                       const inviteeTime = creatorTime.setZone(invitee.timezone);
+                                                       return (
+                                                            <div key={invitee.sub || invitee.id} className={`flex items-center justify-center text-xs font-semibold ${getAvailabilityClass(inviteeTime.hour)}`}>
+                                                                 {inviteeTime.toFormat('HH:mm')}
+                                                            </div>
+                                                       );
+                                                  })}
+                                             </div>
+                                        );
+                                   })}
+                              </div>
+                         )}
+                         <div className="min-w-0 flex-1">
                          <FullCalendar
+                         ref={calendarRef}
                          timeZone={timezone}
                          headerToolbar={{
                               left: 'title',
@@ -161,16 +218,19 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          }}
                          titleFormat={{ month: 'short', year: 'numeric' }}
                          dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
-                         dayHeaderContent={(arg) => (
+                         dayHeaderContent={(arg) => {
+                              const headerDate = DateTime.fromJSDate(arg.date, { zone: timezone });
+                              return (
                               <div className="flex flex-col items-center">
                                    <span className="text-xs text-gray-500 font-medium uppercase">
-                                        {arg.date.toLocaleString('en-US', { weekday: 'short' })}
+                                        {headerDate.toFormat('ccc')}
                                    </span>
                                    <span className="text-lg text-gray-900 font-semibold">
-                                        {arg.date.getDate()}
+                                        {headerDate.day}
                                    </span>
                               </div>
-                         )}
+                              );
+                         }}
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
@@ -183,12 +243,12 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
-                         slotLabelContent={renderComparedTimes}
                          height="100%"
                          expandRows={true}
                          handleWindowResize={false}
                          allDaySlot={false}
                          firstDay={new Date().getDay()}
+                         datesSet={(dateInfo) => setViewStart(dateInfo.startStr)}
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,
@@ -197,6 +257,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          }))
                          }
                          />
+                         </div>
                     </div>
                </section>
                <button onClick={handleShare} className="primary-button shrink-0 self-end">Share</button>

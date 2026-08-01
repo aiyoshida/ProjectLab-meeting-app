@@ -131,31 +131,6 @@
   font-size: 0.75rem;
 }
 
-.timezone-slot-grid {
-  display: grid;
-  min-width: max-content;
-  gap: 2px;
-  padding: 1px 3px;
-}
-
-.timezone-slot {
-  display: flex;
-  min-height: 1.7rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.4rem;
-  padding: 0 0.35rem;
-  color: #43383c;
-  font-size: 0.72rem;
-  font-weight: 650;
-  line-height: 1;
-}
-
-.timezone-slot-owner {
-  background: #f5eff1;
-  color: #695b60;
-}
-
 .timezone-slot-good {
   background: #81d7bb;
 }
