@@ -148,17 +148,13 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      }
 
 
-     const handleSelect = (info) => {
+     const addSelectedSlot = (start, end) => {
           if (selectedSlots.length >= 10) {
                alert("Only 10 timeslots are available!");
                return;
           }
-          console.log(info);
-          //make the selected slot UTC time and save to selected timeslots.
-          const newStart = DateTime.fromISO(info.startStr, { setZone: true }).toUTC().toISO();
-          const newEnd = DateTime.fromISO(info.endStr, { setZone: true }).toUTC().toISO();
-
-          console.log("NewMeetingCalendar.jsx newStart: ", newStart);
+          const newStart = start.toUTC().toISO();
+          const newEnd = end.toUTC().toISO();
 
           const alreadySelected = selectedSlots.some(slot => slot.start === newStart);
 
@@ -171,7 +167,20 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                start: newStart,
                end: newEnd,
           }]);
-          console.log("selectedslots: ", selectedSlots);
+     };
+
+     const handleSelect = (info) => {
+          addSelectedSlot(
+               DateTime.fromISO(info.startStr, { setZone: true }),
+               DateTime.fromISO(info.endStr, { setZone: true }),
+          );
+     };
+
+     const handleMobileDateClick = (info) => {
+          if (!isMobile) return;
+          const [hours, minutes, seconds] = slotDuration.split(':').map(Number);
+          const start = DateTime.fromISO(info.dateStr, { setZone: true });
+          addSelectedSlot(start, start.plus({ hours, minutes, seconds }));
      };
 
      const getAvailabilityClass = (hour) => {
@@ -193,6 +202,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#d4c89d]" />07–09 / 19–22</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#caabb6]" />22–07</span>
                          <span className="ml-auto font-medium">{timezone.split('/').pop()}</span>
+                         {isMobile && <span className="w-full text-[#94878c]">Tap a time to select it</span>}
                     </div>
                     <div ref={calendarBodyRef} className="flex min-h-0 flex-1 gap-1.5 overflow-hidden sm:gap-2">
                          {checkedInvitees.length > 0 && (
@@ -270,8 +280,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               </div>
                               );
                          }}
-                         selectable={true}
+                         selectable={!isMobile}
                          select={handleSelect}
+                         dateClick={handleMobileDateClick}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
                          initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
                          slotDuration={slotDuration}
