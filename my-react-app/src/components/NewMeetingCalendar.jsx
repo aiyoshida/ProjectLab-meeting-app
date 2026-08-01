@@ -63,35 +63,16 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                const response = await axios.post(`${API}/newmeeting/${userId}`, payload);
                console.log("NewMeetingCalendar: Meeting created", response.data);
 
-               //sending email to invitees
-               console.log("NewMeetingCalendar: invitee's email ", checkedInvitees.map(invitee => invitee.gmail));
-               const result = await axios.post(`${API}/send_email/${userId}`, {
-                    receivers: checkedInvitees.map(invitee => invitee.gmail),
-                    subject: "Acrosstime: you are invited to a meeting to join",
-                    body:
-                         `Hi! This is AcrossTime
-
-                    You are invited to vote this meeting!
-                    URL: ${FRONT}/meetinglink/${response.data.meeting_id}
-                    `
-                    ,
-
-               });
-               if (result) {
-                    let message = checkedInvitees.map((invitee) => {
-                         return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
-                    }).join("\n")
-                    alert(`meeting url: ${FRONT}/meetinglink/${response.data.meeting_id} \n ${message}`);
-               } else {
-                    alert(`sending email has failed!`);
-                    console.log(`NewMeetingCalendar: Result is ${result} : sending email has failed!`);
+               const meetingUrl = `${FRONT}/meetinglink/${response.data.meeting_id}`;
+               try {
+                    await navigator.clipboard.writeText(meetingUrl);
+                    alert(`Meeting created. The sharing URL was copied:\n${meetingUrl}`);
+               } catch {
+                    alert(`Meeting created. Share this URL with participants:\n${meetingUrl}`);
                }
 
                //navigate user to created voting screen
                navigate(`/meetinglink/${response.data.meeting_id}`);
-               checkedInvitees.forEach((user) => {
-                    console.log(`NewMeetingCalendar: Send to: ${user.gmail}, meeting url: ${FRONT}/meetinglink/${response.data.meeting_id}`);
-               });
 
 
           } catch (error) {

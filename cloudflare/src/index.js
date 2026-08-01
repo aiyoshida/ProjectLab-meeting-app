@@ -70,26 +70,6 @@ async function meetingAccess(env, meetingId, userId, creatorOnly = false) {
   return !!row && (creatorOnly ? row.creator_user_sub === userId : row.creator_user_sub === userId || row.user_id === userId);
 }
 
-function makeIcs(title, start, end) {
-  const stamp = (value) => new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-  const escape = (value) => String(value).replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
-  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//AcrossTime//Meeting//EN", "METHOD:REQUEST", "BEGIN:VEVENT",
-    `UID:${crypto.randomUUID()}@acrosstime`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`,
-    `SUMMARY:${escape(title)}`, "END:VEVENT", "END:VCALENDAR", ""].join("\r\n");
-}
-
-async function sendEmail(env, to, subject, text, ics) {
-  if (!env.RESEND_API_KEY || !env.EMAIL_FROM) return { skipped: true };
-  const attachments = ics ? [{ filename: "invite.ics", content: btoa(unescape(encodeURIComponent(ics))) }] : undefined;
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ from: env.EMAIL_FROM, to: [to], subject, text, attachments }),
-  });
-  if (!response.ok) throw new Error(`Email provider returned ${response.status}`);
-  return response.json();
-}
-
 async function route(request, env, identity) {
   const url = new URL(request.url);
   const frontendUrl = url.origin;
@@ -233,16 +213,6 @@ async function route(request, env, identity) {
     return json({ message: "Vote submitted!" });
   }
 
-  if ((match = path.match(/^\/send_email\/([^/]+)$/)) && method === "POST") {
-    const userId = decodeURIComponent(match[1]); requireOwnUser(identity, userId); const input = await body(request);
-    if (!Array.isArray(input.receivers) || input.receivers.length > 10) return json({ detail: "Invalid receivers" }, 400);
-    const contacts = await env.DB.prepare(`SELECT u.gmail FROM contacts c JOIN users u ON u.sub=c.friend_of_this_user_sub WHERE c.user_sub=?`).bind(userId).all();
-    const allowed = new Set(contacts.results.map((r) => r.gmail));
-    if (input.receivers.some((email) => !allowed.has(email))) return json({ detail: "Receiver must be a contact" }, 403);
-    await Promise.all(input.receivers.map((to) => sendEmail(env, to, input.subject, input.body)));
-    return json({ message: true, email_configured: !!env.RESEND_API_KEY });
-  }
-
   if ((match = path.match(/^\/finalizemeeting\/(\d+)\/vote$/)) && method === "POST") {
     const meetingId = Number(match[1]);
     if (!await meetingAccess(env, meetingId, identity.sub, true)) return json({ detail: "Forbidden" }, 403);
@@ -250,13 +220,7 @@ async function route(request, env, identity) {
     const selected = await env.DB.prepare(`SELECT d.starting_time,d.ending_time,m.title FROM voted_dates d JOIN meetings m ON m.id=d.meeting_id WHERE d.id=? AND d.meeting_id=?`).bind(input.finalized_vote_id, meetingId).first();
     if (!selected) return json({ detail: "Invalid slot" }, 400);
     await env.DB.prepare("UPDATE meetings SET finalized=1,finalized_voted_date_id=? WHERE id=?").bind(input.finalized_vote_id, meetingId).run();
-    const participants = await env.DB.prepare(`SELECT u.gmail,u.username,u.timezone FROM participants p JOIN users u ON u.sub=p.user_id WHERE p.meeting_id=?`).bind(meetingId).all();
-    const ics = makeIcs(selected.title, selected.starting_time, selected.ending_time);
-    await Promise.all(participants.results.map((p) => {
-      const format = new Intl.DateTimeFormat("en-GB", { timeZone: p.timezone, dateStyle: "medium", timeStyle: "short" });
-      return sendEmail(env, p.gmail, "AcrossTime: meeting time finalized", `Hi ${p.username},\n\n${selected.title} is finalized for ${format.format(new Date(selected.starting_time))} (${p.timezone}).\n${frontendUrl}/finalizemeeting/${meetingId}`, ics);
-    }));
-    return json({ message: "Finalized successfully!", email_configured: !!env.RESEND_API_KEY });
+    return json({ message: "Finalized successfully!" });
   }
 
   return json({ detail: "Not found" }, 404);

@@ -73,7 +73,7 @@ Keep `http://localhost:3000` for local development.
 ## Git-based automatic deployments (optional)
 
 In Cloudflare choose **Workers & Pages → Create application → Import a repository**,
-connect `aiyoshida/ProjectLab-meeting-app`, and use `for-publish` as the production
+connect `aiyoshida/ProjectLab-meeting-app`, and use `main` as the production
 branch. Set **Root directory** to `cloudflare`, then configure the two build steps:
 
 ```sh
@@ -85,21 +85,13 @@ npx wrangler deploy
 ```
 
 No React production environment variables are required. The frontend defaults to
-the same-origin `/api` endpoint. Store `RESEND_API_KEY` as a Worker secret rather
-than a Git build environment variable.
+the same-origin `/api` endpoint.
 
-## Optional email delivery
+## Email
 
-After configuring a sending provider, set secrets interactively; never commit API
-keys:
-
-```sh
-npx wrangler secret put RESEND_API_KEY
-```
-
-Add a non-secret `EMAIL_FROM` value under `vars` in `wrangler.jsonc`. Without email
-configuration, meetings, contacts and voting still work and email delivery is
-skipped.
+Email delivery is intentionally disabled so the application stays within the
+Workers Free plan. After creating a meeting, the frontend copies a sharing URL that
+can be sent to participants with any messaging application.
 
 ## Local development
 
