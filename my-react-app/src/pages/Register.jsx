@@ -1,143 +1,125 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
-import { useUser } from "../contexts/UserContext";
-import { API } from "../lib/api" //using this accesable by Render
+import axios from 'axios';
+import { useUser } from '../contexts/UserContext';
+import { API } from '../lib/api';
+
+const GOOGLE_SCRIPT_ID = 'google-identity-services';
+
+function decodeJwtPayload(token) {
+  const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const padded = encoded + '='.repeat((4 - (encoded.length % 4)) % 4);
+  const bytes = Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
 
 export default function Register() {
-  const { setUserId } = useUser(); //to call
+  const { setUserId } = useUser();
   const navigate = useNavigate();
-  const divRef = useRef(null);
-  const initialized = useRef(false); //not to double initialize of GSI
-  //for holding DOM, value. give this to Google SDK later.
+  const buttonRef = useRef(null);
+  const rendered = useRef(false);
+  const [googleReady, setGoogleReady] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
 
-  //only arrow func is accepted??
-  const goToHomePage = () => {
-    navigate('/homepage');
-  }
-
-  //Google SDK initialzation, renderButton, callback registration
-  //FIX NEEDED : third gmail become garbled text + could not take pic info correctly.
   useEffect(() => {
-    const google = window.google; // obj from Google's SDK
-    if (!google || !divRef.current) return; //if no SDK load, do nothing
+    let cancelled = false;
+    let script = document.getElementById(GOOGLE_SCRIPT_ID);
 
-    //Decode base64 あとで自分で探す。
-    function decodeJwt(token) {
-      const base64 = token.split('.')[1]
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-      const json = atob(padded);
-      return JSON.parse(json);
+    const renderGoogleButton = () => {
+      if (cancelled || rendered.current || !buttonRef.current) return;
+
+      const googleIdentity = window.google?.accounts?.id;
+      if (!googleIdentity) {
+        setGoogleError(true);
+        return;
+      }
+
+      rendered.current = true;
+      buttonRef.current.replaceChildren();
+
+      googleIdentity.initialize({
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        callback: async ({ credential }) => {
+          try {
+            const payload = decodeJwtPayload(credential);
+            const { sub, email: gmail, name, picture } = payload;
+
+            localStorage.setItem('googleIdToken', credential);
+            await axios.post(`${API}/register/${sub}`, {
+              gmail,
+              name,
+              pic: picture,
+            });
+            localStorage.setItem('userId', sub);
+            setUserId(sub);
+            navigate('/homepage');
+          } catch (error) {
+            console.error('Google sign-in failed:', error);
+            setGoogleError(true);
+          }
+        },
+      });
+
+      googleIdentity.renderButton(buttonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        shape: 'rectangular',
+        width: 320,
+      });
+      setGoogleReady(true);
+      setGoogleError(false);
+    };
+
+    const handleScriptError = () => {
+      if (!cancelled) setGoogleError(true);
+    };
+
+    if (window.google?.accounts?.id) {
+      renderGoogleButton();
+    } else {
+      if (!script) {
+        script = document.createElement('script');
+        script.id = GOOGLE_SCRIPT_ID;
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', renderGoogleButton);
+      script.addEventListener('error', handleScriptError);
     }
 
-    google.accounts.id.initialize({
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-      callback: async (resp) => {
+    return () => {
+      cancelled = true;
+      script?.removeEventListener('load', renderGoogleButton);
+      script?.removeEventListener('error', handleScriptError);
+    };
+  }, [navigate, setUserId]);
 
-        const payload = decodeJwt(resp.credential);
-        console.log("Devoded payload:", payload);
-        const sub = payload.sub;
-        const gmail = payload.email;
-        const name = payload.name;
-        const picture = payload.picture;
-
-        console.log("AAAAA!!! user info: ", sub, gmail, name, picture);
-
-        //POST
-        try {
-          localStorage.setItem("googleIdToken", resp.credential);
-          const response = await axios.post(`${API}/register/${sub}`,
-            {
-              "gmail": gmail,
-              "name": name,
-              "pic": picture
-            })
-          console.log("Response from server : ", response.data);
-          localStorage.setItem("userId", sub);
-          setUserId(sub);
-          goToHomePage();
-        } catch (err) {
-          console.error("Error happened : ", err);
-        }},
-    });
-
-    // draw google button to the divRef.current div
-    google.accounts.id.renderButton(divRef.current, {
-      theme: "outline",
-      size: "large",
-    });
-
-  const init = () => {
-    if (initialized.current || !window.google || !divRef.current) return;
-    initialized.current = true;
-
-    function decodeJwt(token) {
-      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-      return JSON.parse(atob(padded));
-    }
-
-    window.google.accounts.id.initialize({
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-      callback: async (resp) => {
-        const payload = decodeJwt(resp.credential);
-        const { sub, email: gmail, name, picture } = payload;
-
-        try {
-          localStorage.setItem("googleIdToken", resp.credential);
-          const response = await axios.post(`${API}/register/${sub}`, { gmail, name, pic: picture });
-          console.log("Response from server:", response.data);
-          localStorage.setItem("userId", sub);
-          setUserId(sub);
-          goToHomePage();
-        } catch (err) {
-          console.error("Error happened:", err);
-        }
-      },
-    });
-
-    //fix button size
-    window.google.accounts.id.renderButton(divRef.current, {
-      theme: "outline",
-      size: "large",
-      width: 320, 
-    });
-  };
-
-  // if sdk is loaded
-  if (window.google && window.google.accounts) {
-    init();
-    return;
-  }
-
-  // if not, add script and init by onload 
-  const script = document.createElement("script");
-  script.src = "https://accounts.google.com/gsi/client";
-  script.async = true;
-  script.defer = true;
-  script.onload = init;
-  document.head.appendChild(script);
-}, []);
-
-return (
-  <div>
-    <div className="hero bg-pink-100 min-h-screen">
-      <div className="hero-content text-center">
-        <div className="max-w-md">
+  return (
+    <div className="hero min-h-screen bg-pink-100">
+      <div className="hero-content w-full text-center">
+        <div className="w-full max-w-md">
           <h1 className="text-5xl font-bold">Hello there</h1>
           <p className="py-6">
             Effortlessly schedule meetings across time zones.
             Do you have your friends or colleagues in the different time zones?
-            Do you feel troublesome calculating "What is the best time for us" everytime?
+            Do you feel troublesome calculating &quot;What is the best time for us&quot; everytime?
             Then the best app is here for you!
           </p>
-          <div ref={divRef} />
+          <div className="flex min-h-[44px] w-full items-center justify-center">
+            <div ref={buttonRef} className="flex justify-center" />
+            {!googleReady && !googleError && (
+              <span className="text-sm text-gray-500">Loading Google Sign-In…</span>
+            )}
+          </div>
+          {googleError && (
+            <p className="mt-3 text-sm text-red-600">
+              Google Sign-In could not be loaded. Please check your connection and try again.
+            </p>
+          )}
         </div>
       </div>
     </div>
-  </div>
-
-)
+  );
 }

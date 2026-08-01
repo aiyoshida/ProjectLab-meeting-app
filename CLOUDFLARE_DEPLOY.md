@@ -79,7 +79,7 @@ available to the build, then configure the two build steps:
 
 ```sh
 # Build command (runs from the repository root)
-npm --prefix my-react-app ci && npm --prefix cloudflare ci && npm --prefix my-react-app run build
+npm --prefix my-react-app ci && npm --prefix cloudflare ci && CI=false npm --prefix my-react-app run build
 
 # Deploy command (runs from the repository root)
 cd cloudflare && npx wrangler deploy
