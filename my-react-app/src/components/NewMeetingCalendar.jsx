@@ -7,13 +7,14 @@ import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { DateTime } from "luxon";
 import { useNavigate } from 'react-router-dom';
 import { API, FRONT } from "../lib/api" //using this accesable by Render
+import getBaseTime from '../utils/getBaseTime';
 
 
 export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle = "", slotDuration }) {
      const userId = localStorage.getItem('userId');
      const [selectedSlots, setSelectedSlots] = useState([]);
      const [timezone, setTimezone] = useState("Europe/Budapest");
-     const [viewStart, setViewStart] = useState(null);
+     const [viewKey, setViewKey] = useState(0);
      const [slotLayout, setSlotLayout] = useState([]);
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
      const calendarBodyRef = useRef(null);
@@ -49,7 +50,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
           const measureSlots = () => {
                const bodyRect = body.getBoundingClientRect();
-               const slotElements = body.querySelectorAll('.fc-timegrid-slots tr[data-time]');
+               const slotElements = body.querySelectorAll('.fc-timegrid-slot-lane[data-time]');
                setSlotLayout(Array.from(slotElements).map((element) => {
                     const rect = element.getBoundingClientRect();
                     return {
@@ -68,7 +69,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                cancelAnimationFrame(frame);
                observer.disconnect();
           };
-     }, [slotDuration, timezone, viewStart, checkedInvitees.length]);
+     }, [slotDuration, timezone, viewKey, checkedInvitees.length]);
 
 
      const handleShare = async () => {
@@ -141,14 +142,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           return "timezone-slot-poor";
      };
 
-     const getSlotDateTime = (time) => {
-          if (!viewStart || !time) return null;
-          const [hours, minutes, seconds] = time.split(':').map(Number);
-          return DateTime.fromISO(viewStart, { setZone: true })
-               .setZone(timezone)
-               .startOf('day')
-               .plus({ hours, minutes, seconds });
-     };
+     const comparisonSlots = getBaseTime(timezone, slotDuration);
 
 
      return (
@@ -181,8 +175,8 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                                              </div>
                                         ))}
                                    </div>
-                                   {slotLayout.map((slot) => {
-                                        const creatorTime = getSlotDateTime(slot.time);
+                                   {slotLayout.map((slot, slotIndex) => {
+                                        const creatorTime = comparisonSlots[slotIndex];
                                         if (!creatorTime) return null;
                                         return (
                                              <div
@@ -248,7 +242,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          handleWindowResize={false}
                          allDaySlot={false}
                          firstDay={new Date().getDay()}
-                         datesSet={(dateInfo) => setViewStart(dateInfo.startStr)}
+                         datesSet={() => setViewKey((current) => current + 1)}
                          events={selectedSlots.map(slot => ({
                               start: slot.start,
                               end: slot.end,
