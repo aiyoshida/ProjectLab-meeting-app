@@ -63,7 +63,7 @@ function Homepage() {
 
                                         <div className="mt-6">
                                              <p className="text-xs font-medium text-[#94878c]">Participants</p>
-                                             <div className="avatar-group -space-x-3 rtl:space-x-reverse mt-2">
+                                             <div className="meeting-avatar-group avatar-group -space-x-3 rtl:space-x-reverse mt-2">
                                                   {meeting.pictures.map((picture, index) => (
                                                        <div className="avatar" key={`${meeting.id}-${index}`}>
                                                             <div className="w-10 rounded-full border-2 border-white ring-1 ring-[#eadde1]">

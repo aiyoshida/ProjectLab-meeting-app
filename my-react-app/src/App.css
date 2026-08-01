@@ -180,3 +180,10 @@
 .timezone-slot-poor {
   background: #caabb6;
 }
+
+.meeting-avatar-group :where(.avatar) {
+  border-color: #f1d9e0;
+  border-width: 3px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(137, 78, 96, 0.12);
+}
