@@ -25,6 +25,7 @@ export default function LeftSidebar() {
 
      const handleLogout = () => {
           localStorage.removeItem('userId');
+          localStorage.removeItem('googleIdToken');
           navigate('/register');
      };
 

@@ -1,0 +1,17 @@
+name = "acrosstime-api"
+main = "src/index.js"
+compatibility_date = "2026-07-31"
+
+[vars]
+# Set these to the deployed Pages URL and the same Google OAuth client used by React.
+FRONTEND_URL = "http://localhost:3000"
+GOOGLE_CLIENT_ID = "1075678670548-1i330iun823bu7pgl1q45fng69ic91eu.apps.googleusercontent.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "acrosstime"
+database_id = "5cd49f3e-34e4-4f29-b019-27f4f2c33e8c"
+migrations_dir = "migrations"
+
+# Set RESEND_API_KEY with `npx wrangler secret put RESEND_API_KEY`.
+# Set EMAIL_FROM after verifying a sending domain in Resend.

@@ -47,6 +47,7 @@ export default function Register() {
 
         //POST
         try {
+          localStorage.setItem("googleIdToken", resp.credential);
           const response = await axios.post(`${API}/register/${sub}`,
             {
               "gmail": gmail,
@@ -85,6 +86,7 @@ export default function Register() {
         const { sub, email: gmail, name, picture } = payload;
 
         try {
+          localStorage.setItem("googleIdToken", resp.credential);
           const response = await axios.post(`${API}/register/${sub}`, { gmail, name, pic: picture });
           console.log("Response from server:", response.data);
           localStorage.setItem("userId", sub);
@@ -139,4 +141,3 @@ return (
 
 )
 }
-
