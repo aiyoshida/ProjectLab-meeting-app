@@ -1,5 +1,5 @@
 import LeftSidebar from '../components/LeftSidebar';
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import axios from "axios"
 import plus from '../images/plus.svg';
 import bin from '../images/bin.svg';
@@ -25,6 +25,7 @@ function Contact() {
      const [showResult, setShowResult] = useState(false);
      //decides display modal
      const [showModal, setShowModal] = useState(false);
+     const [pendingContactSub, setPendingContactSub] = useState(null);
 
      function timeDifference(userLocation, friendLocation){
           const d = DateTime.now(); 
@@ -38,20 +39,18 @@ function Contact() {
      }
 
 
+     const loadContacts = useCallback(async () => {
+          if (!userId) return;
+          const response = await axios.get(`${API}/contact/${userId}`);
+          setContacts(response.data.contacts);
+          setTimezone(response.data.timezone);
+     }, [userId]);
+
      useEffect(() => {
-          // in the useEffect, to define HTTP req, either .then or define func with axios.
-          axios
-               .get(`${API}/contact/${userId}`)
-               .then(response => {
-                    console.log("contacts: ", response.data.contacts);
-                    setContacts(response.data.contacts);
-                    setTimezone(response.data.timezone)
-                    console.log("user_id: ", userId);
-               })
-               .catch(error => {
-                    console.error("error: ", error)
-               })
-     }, [userId])
+          loadContacts().catch(error => {
+               console.error("Failed to load contacts:", error);
+          });
+     }, [loadContacts]);
 
      //finding new friend contact from DB by email
      const handleSearch = async (e) => {
@@ -82,33 +81,59 @@ function Contact() {
           }
           setShowResult(true);
      }
-     // TODO: needs reload to reflect change now
-     const handleAdd = async (e) => {
-          try {
-               console.log("This is friend info to add:", friendInfo);
-               const res = await axios.post(`${API}/contact/add/${userId}`,
-                    {
-                         sub: friendInfo.sub
-                    }
-               );
-          } catch (err) {
-               console.error("This is error: ", err);
+     const handleAdd = async () => {
+          if (pendingContactSub || contacts.some(contact => contact.sub === friendInfo.sub)) {
+               setShowResult(false);
+               return;
           }
+
+          const previousContacts = contacts;
+          const optimisticContact = {
+               id: `pending-${friendInfo.sub}`,
+               sub: friendInfo.sub,
+               name: friendInfo.username,
+               gmail: friendInfo.gmail,
+               timezone: friendInfo.timezone,
+               picture: friendInfo.picture
+          };
+
+          setPendingContactSub(friendInfo.sub);
+          setContacts(current => [...current, optimisticContact]
+               .sort((a, b) => a.name.localeCompare(b.name)));
           setShowResult(false);
+          setSearchEmail("");
+
+          try {
+               await axios.post(`${API}/contact/add/${userId}`, { sub: friendInfo.sub });
+               await loadContacts();
+          } catch (err) {
+               setContacts(previousContacts);
+               console.error("Failed to add contact:", err);
+          } finally {
+               setPendingContactSub(null);
+          }
      }
      // official Axios document :
      // https://axios-http.com/docs/api_intro 
      // for axios.delete, data should be explicitly written
      // axios.delete(url, config)
-     // TODO: needs reload to reflect change now
      const handleDelete = async (contact) => {
+          if (pendingContactSub) return;
+
+          const previousContacts = contacts;
+          setPendingContactSub(contact.sub);
+          setContacts(current => current.filter(item => item.sub !== contact.sub));
+
           try {
-               console.log("contact:", contact);
-               const res = await axios.delete(`${API}/contact/delete/${userId}`,
+               await axios.delete(`${API}/contact/delete/${userId}`,
                     { data: { sub: contact.sub } }
                );
+               await loadContacts();
           } catch (err) {
-               console.error("This is error: ", err);
+               setContacts(previousContacts);
+               console.error("Failed to delete contact:", err);
+          } finally {
+               setPendingContactSub(null);
           }
      }
 
@@ -177,7 +202,8 @@ function Contact() {
                                         {/*add button: https://icon-rainbow.com/?s=%E5%8F%8B%E9%81%94*/}
                                         <button
                                              onClick={handleAdd}
-                                             className="p-1 hover:rounded"
+                                             disabled={pendingContactSub !== null}
+                                             className="p-1 hover:rounded disabled:cursor-not-allowed disabled:opacity-40"
                                         >
                                              <img src={plus} alt="plus" className="w-6 h-6 ml-5 mr-5" />
                                         </button>
@@ -227,7 +253,8 @@ function Contact() {
 
                                                        <button
                                                             onClick={() => handleDelete(contact)}
-                                                            className="p-1 hover:rounded"
+                                                            disabled={pendingContactSub !== null}
+                                                            className="p-1 hover:rounded disabled:cursor-not-allowed disabled:opacity-40"
                                                        >
                                                             <img src={bin} alt="bin" className="w-5 h-5" />
                                                        </button>
