@@ -42,22 +42,23 @@ function Homepage() {
      }, [])
 
      return (
-          <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
+          <div className="app-shell">
                <LeftSidebar />
 
-               <main className="min-h-dvh bg-[#f6e5e7] p-10 ">
-                    <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11 ">
-                         Meeting List
-                    </h1>
+               <main className="app-main">
+                    <header className="mb-8">
+                         <h1 className="page-heading">Meeting List</h1>
+                         <p className="page-subtitle">Your upcoming meeting polls and their voting status.</p>
+                    </header>
 
-                    <div class="grid grid-cols-2 ml-20">
+                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                          {cards.map((meeting) => (
-                              <section key={meeting.id} className="max-w-3xl mb-10">
-                                   <a className="block rounded-md border border-gray-300 bg-white shadow-sm sm:p-6 w-96">
+                              <section key={meeting.id} className="surface-card group p-6">
+                                   <div>
                                         <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
                                              {/* navigate to voting screen by click */}
-                                             <div onClick={() => navigate(`/meetinglink/${meeting.id}`)} className="mt-4 sm:mt-0 hover:cursor-pointer">
-                                                  <h3 className="text-xl font-medium text-pretty text-gray-900">{meeting.title}</h3>
+                                             <div onClick={() => navigate(`/meetinglink/${meeting.id}`)} className="cursor-pointer">
+                                                  <h3 className="text-xl font-semibold text-pretty text-[#30282b] group-hover:text-[#913c57]">{meeting.title}</h3>
                                                   <p className="mt-2 text-sm text-gray-700">Created By : {meeting.creator}</p>
                                                   {/*https://v4.daisyui.com/components/avatar/    avatar-group*/}
                                                   {/* <p className="mt-2 line-clamp-2 text-sm text-pretty text-gray-700">Participants : {meeting.participants}</p> */}
@@ -66,10 +67,10 @@ function Homepage() {
                                                        <p className="text-sm text-gray-700 font-medium">Participants:</p>
 
                                                        <div className="avatar-group -space-x-6 rtl:space-x-reverse mt-1">
-                                                            {meeting.pictures.map((pic) => (
-                                                                 <div className="avatar" >
+                                                            {meeting.pictures.map((pic, index) => (
+                                                                 <div className="avatar" key={`${meeting.id}-${index}`}>
                                                                       <div className="w-10 rounded-full border">
-                                                                           <img src={pic} />
+                                                                           <img src={pic} alt="Participant" />
                                                                       </div>
                                                                  </div>
                                                             ))}
@@ -78,7 +79,7 @@ function Homepage() {
                                              </div>
                                         </div>
 
-                                        <dl className="mt-5 flex gap-4 lg:gap-6 items-center">
+                                        <dl className="mt-6 flex flex-wrap items-center gap-5 border-t border-[#f0e7e9] pt-4">
 
                                              <div className="flex flex-col">
                                                   {/*  Date */}
@@ -105,9 +106,11 @@ function Homepage() {
 
 
                                              {/* bin */}
-                                             <img src={bin} alt="bin" className="w-5 h-5 cursor-pointer hover:bg-gray-300 rounded" onClick={() => { handleDelete(meeting.id) }} />
+                                             <button className="icon-button ml-auto" onClick={() => { handleDelete(meeting.id) }} aria-label="Delete meeting">
+                                                  <img src={bin} alt="" className="w-5 h-5" />
+                                             </button>
                                         </dl>
-                                   </a>
+                                   </div>
                               </section>
                          ))}
                     </div>

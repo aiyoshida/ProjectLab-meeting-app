@@ -1,5 +1,3 @@
-import { Calendar } from '@fullcalendar/core';
-import momentPlugin from '@fullcalendar/moment';
 import React, { useState, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -109,9 +107,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
      return (
-          <div className="relative flex h-full min-w-0 max-w-4xl flex-1 flex-col ml-auto px-4 pb-1">
+          <div className="relative flex h-full min-w-0 max-w-5xl flex-1 flex-col gap-2 p-3">
 
-               <section className="flex-1 w-full min-w-0 min-h-0 overflow-hidden">
+               <section className="calendar-surface flex-1 w-full min-w-0 min-h-0 overflow-hidden">
                     <FullCalendar
                          timeZone={timezone}
                          headerToolbar={{
@@ -157,7 +155,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          }
                     />
                </section>
-               <button onClick={handleShare} className="btn btn-sm flex shrink-0 ml-auto gap-2">Share</button>
+               <button onClick={handleShare} className="primary-button shrink-0 self-end">Share</button>
           </div>
      );
 

@@ -1,3 +1,132 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    color: #30282b;
+    background: #fbf7f8;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: #fbf7f8;
+    color: #30282b;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 3px solid rgba(190, 91, 119, 0.22);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply grid min-h-screen grid-cols-[17rem_minmax(0,1fr)] bg-[#fbf7f8];
+  }
+
+  .app-main {
+    @apply min-w-0 bg-[#fbf7f8] px-5 py-8 sm:px-8 lg:px-12;
+  }
+
+  .page-heading {
+    @apply text-3xl font-semibold tracking-[-0.03em] text-[#30282b];
+  }
+
+  .page-subtitle {
+    @apply mt-2 text-sm leading-6 text-[#776b70];
+  }
+
+  .surface-card {
+    @apply rounded-2xl border border-[#eadde1] bg-white shadow-[0_10px_30px_rgba(89,55,65,0.06)];
+  }
+
+  .primary-button {
+    @apply inline-flex h-10 items-center justify-center rounded-xl bg-[#a94765] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#8f3854] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .secondary-button {
+    @apply inline-flex h-10 items-center justify-center rounded-xl border border-[#dfcbd1] bg-white px-4 py-2 text-sm font-semibold text-[#5f4d53] hover:border-[#cdaeb8] hover:bg-[#fff8fa];
+  }
+
+  .icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-transparent hover:border-[#eadde1] hover:bg-[#fff4f7];
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-[#5f4d53];
+  }
+
+  .app-field {
+    @apply h-11 w-full rounded-xl border border-[#dfd3d7] bg-white px-3 text-sm text-[#30282b] shadow-sm outline-none placeholder:text-[#a89da1] focus:border-[#b95d78] focus:ring-4 focus:ring-[#f4dce3];
+  }
+
+  .brand-lockup {
+    @apply flex items-center gap-2 font-semibold tracking-[-0.02em] text-[#3c3034];
+  }
+
+  .calendar-surface {
+    @apply rounded-2xl border border-[#eadde1] bg-white p-3 shadow-[0_10px_30px_rgba(89,55,65,0.06)];
+  }
+}
+
+.fc {
+  --fc-border-color: #eee4e7;
+  --fc-page-bg-color: #fff;
+  --fc-neutral-bg-color: #faf6f7;
+  --fc-today-bg-color: #fff3f6;
+  --fc-button-bg-color: #fff;
+  --fc-button-border-color: #dfcbd1;
+  --fc-button-text-color: #5f4d53;
+  --fc-button-hover-bg-color: #fff4f7;
+  --fc-button-hover-border-color: #cdaeb8;
+  --fc-button-active-bg-color: #a94765;
+  --fc-button-active-border-color: #a94765;
+  color: #4b3f43;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.fc .fc-button {
+  border-radius: 0.65rem;
+  box-shadow: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.fc .fc-scrollgrid {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.fc .fc-timegrid-slot-label,
+.fc .fc-col-header-cell-cushion {
+  color: #776b70;
+  font-size: 0.75rem;
+}

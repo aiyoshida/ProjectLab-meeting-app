@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 // useParams is to tamle element from url, uselocation is to pass data
 //uselocation is for temporary, will use db soon.
 import icon from '../images/icon.png';
@@ -145,20 +145,20 @@ export default function MeetingLink() {
 
 
      return (
-          <div className="">
-               <div className="" >
+          <div className="grid h-screen grid-cols-[30rem_minmax(0,1fr)] overflow-hidden bg-[#fbf7f8]">
+               <div className="h-full overflow-y-auto border-r border-[#eadde1] bg-white" >
 
-                    <div className="flex justify-start items-center hover:cursor-pointer m-3" onClick={goToHomePage}>
-                         <img src={icon} alt='icon' className="h-16 w-16" />
-                         <h3 className="text-2xl">AcrossTime</h3>
+                    <div className="brand-lockup cursor-pointer px-7 pt-6" onClick={goToHomePage}>
+                         <img src={icon} alt='' className="h-12 w-12" />
+                         <h3 className="text-xl">AcrossTime</h3>
                     </div>
 
-                    <div className="items-baseline p-7">
+                    <div className="p-7 pt-8">
                          <div className="flex justify-start items-center " >
                               {/* watch icon took from this website 
                               https://icon-rainbow.com/%e6%99%82%e8%a8%88%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-6/ */}
                               <img src={watch} alt='watch' className="h-5 w-5" />
-                              <p className="ml-2">{slotDuration} min</p>
+                              <p className="ml-2">{Number(slotDuration.split(':')[0]) * 60 + Number(slotDuration.split(':')[1])} min</p>
                          </div>
 
                          <div className="flex justify-start items-center my-2" >
@@ -254,9 +254,9 @@ export default function MeetingLink() {
                </div>
 
 
-               <div className="fixed left-[480px] top-0 flex h-screen w-[945px] flex-col">
-                    <div className="relative flex min-h-0 w-full max-w-4xl flex-1 ml-auto px-4">
-                         <section className="h-full w-full min-w-0 overflow-hidden">
+               <div className="flex h-screen min-w-0 flex-col gap-3 p-3">
+                    <div className="relative flex min-h-0 w-full flex-1">
+                         <section className="calendar-surface h-full w-full min-w-0 overflow-hidden">
                               <FullCalendar
                                    timeZone={timezone}
                                    headerToolbar={{
@@ -340,8 +340,8 @@ export default function MeetingLink() {
                               />
                          </section>
                     </div>
-                    <div className="flex shrink-0 justify-end px-4 pb-1">
-                         <button onClick={handleSubmit} className="bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Submit</button>
+                    <div className="flex shrink-0 justify-end">
+                         <button onClick={handleSubmit} className="primary-button">Submit vote</button>
                     </div>
                </div>
 

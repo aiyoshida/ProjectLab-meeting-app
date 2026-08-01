@@ -72,24 +72,24 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
      return (
-          <div className="h-full shrink-0 items-baseline overflow-y-auto p-5">
+          <aside className="h-full w-72 shrink-0 overflow-y-auto border-r border-[#eadde1] bg-white p-5">
 
-               <div className="flex items-center hover:cursor-pointer " onClick={goToHomePage} >
-                    <img src={icon} alt='icon' className="w-10 h-10" />
-                    <h3 className="">AcrossTime</h3>
+               <div className="brand-lockup cursor-pointer" onClick={goToHomePage} >
+                    <img src={icon} alt='' className="w-11 h-11" />
+                    <h3 className="text-lg">AcrossTime</h3>
                </div>
                {/*title input - mandatory to write*/}
-               <div className="flex flex-col my-3">
-                    <label className="">Meeting Title *</label>
-                    <input type="text" placeholder="Enter meeting title" className="input input-bordered w-56"
+               <div className="mt-8">
+                    <label className="field-label">Meeting title *</label>
+                    <input type="text" placeholder="Enter meeting title" className="app-field"
                          value={meetingTitle}
                          onChange={(e) => setMeetingTitle(e.target.value)} />
                </div>
 
                {/* timezone */}
-               <div className="flex flex-col my-4">
-                    <label className="">Your Timezone</label>
-                    <select className="select select-bordered w-56">
+               <div className="mt-5">
+                    <label className="field-label">Your timezone</label>
+                    <select className="app-field">
                          <option disabled selected>{timezone}</option>
                          {timezones.map((tz) => (
                               <option key={tz} value={tz}>
@@ -99,9 +99,9 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
                     </select>
                </div>
 
-               <div className="flex flex-col my-4">
-                    <label className="new-leftsidebar-label">Duration</label>
-                    <select className="select select-bordered w-56" value={value} onChange={(e) => onChange(e.target.value)}>
+               <div className="mt-5">
+                    <label className="field-label">Duration</label>
+                    <select className="app-field" value={value} onChange={(e) => onChange(e.target.value)}>
                          <option disabled selected value="00:30:00">30 min</option>
                          <option value="00:30:00">30min</option>
                          <option value="01:00:00">60min</option>
@@ -111,16 +111,17 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
                {/* invite*/}
-               <div className="flex flex-col my-4 ">
-                    <label className="">Invite</label>
+               <div className="mb-3 mt-7 flex items-center justify-between">
+                    <label className="field-label mb-0">Invite</label>
+                    <span className="text-xs text-[#9a8d92]">Up to 3</span>
                </div>
 
 
                {/* あとでscrollableにする */}
-               <div className="ml-2">
+               <div className="space-y-2">
                     {invitees.map((user, index) => (
                          <label key={index} className="">
-                              <div className="flex items-center mb-4">
+                              <div className="flex items-center rounded-xl p-2 hover:bg-[#faf5f6]">
                                    <label>
                                         <input type="checkbox" className="checkbox" checked={checkedInvitees.some(i => i.id === user.id)} onChange={() => handleCheck(user)} />
                                    </label>
@@ -148,7 +149,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
 
-          </div>
+          </aside>
 
      );
 }

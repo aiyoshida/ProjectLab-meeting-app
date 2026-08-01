@@ -140,24 +140,24 @@ function Contact() {
 
      return (
 
-          <div className="min-h-dvh grid grid-cols-[18rem_1fr]">
+          <div className="app-shell">
                <LeftSidebar />
-               <main className="min-h-dvh bg-[#f6e5e7] p-2">
-                    <div className="flex items-center">
-                         <h1 className="text-left text-2xl font-semibold text-gray-700 p-10 ml-11">
-                              Contact
-                         </h1>
+               <main className="app-main">
+                    <header className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                         <div>
+                              <h1 className="page-heading">Contacts</h1>
+                              <p className="page-subtitle">Find people by Gmail and compare local time at a glance.</p>
+                         </div>
 
-                         <label className="input input-bordered flex items-center gap-2 w-64">
-                              <input type="text" value={searchEmail} onChange={(e) => setSearchEmail(e.target.value)} className="grow" placeholder="Search new contact by gmail" />
-
-                         </label>
+                         <form className="relative flex w-full max-w-md gap-2" onSubmit={handleSearch}>
+                              <input type="email" value={searchEmail} onChange={(e) => setSearchEmail(e.target.value)} className="app-field pr-12" placeholder="Search by Gmail address" />
 
                          {/* search button: https://v4.daisyui.com/components/button/ */}
-                         <button className="btn btn-square btn-outline ml-3" onClick={handleSearch}>
-                              <img src={search} alt="search" className="w-5 h-5" />
+                         <button type="submit" className="icon-button absolute right-0.5 top-0.5" aria-label="Search contacts">
+                              <img src={search} alt="" className="w-5 h-5" />
                          </button>
-                    </div>
+                         </form>
+                    </header>
                {/*Tailwind template: https://v4.daisyui.com/components/modal/ "Dialog modal with a close button at corner" jsx with some modification. */}
                     {showModal && 
                <dialog id="my_modal_3" className="modal modal-top" open>
@@ -173,7 +173,7 @@ function Contact() {
 
                     {/* contact search */}
                     {/*maybe better to on/off with dom, not css...? */}
-                    <table className={` fixed top-24 left-300px ml-52 bg-white rounded-md z-50 ${showResult ? "block" : "hidden"}`}>
+                    <table className={`surface-card mb-5 ml-auto w-full max-w-2xl overflow-hidden ${showResult ? "table" : "hidden"}`}>
                          <tbody >
                               <tr>
                                    <td className="p-1.5">
@@ -214,8 +214,8 @@ function Contact() {
                     </table>
 
                     {/*contact table*/}
-                    <section className="max-w-2xl mx-auto">
-                         <div className="overflow-x-auto">
+                    <section className="surface-card mx-auto max-w-4xl overflow-hidden">
+                         <div className="overflow-x-auto p-2 sm:p-4">
                               <table className="table">
                                    {/* head */}
                                    <thead>
@@ -230,7 +230,7 @@ function Contact() {
 
                                    <tbody>
                                         {contacts.map((contact) => (
-                                             <tr key={contact.id}>
+                                             <tr key={contact.id} className="hover:bg-[#fff9fa]">
                                                   <td>
                                                        <div className="flex items-center gap-3">
                                                             <div className="avatar">

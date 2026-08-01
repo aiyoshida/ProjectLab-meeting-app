@@ -1,6 +1,5 @@
 import getBaseTime from '../utils/getBaseTime';
 import React from "react";
-import { DateTime } from 'luxon';
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { API } from "../lib/api" //using this accesable by Render
@@ -28,7 +27,7 @@ export default function NewMeetingOthersTime({ checkedInvitees = [] }) {
 
 
      return (
-          <div className="h-full w-1/3 min-w-0 max-w-full overflow-x-auto overflow-y-hidden mt-16 pt-0.5 mr-3">
+          <div className="mt-16 mb-3 w-1/3 min-w-0 max-w-full self-stretch overflow-x-auto overflow-y-hidden rounded-xl border border-[#eadde1] bg-white mr-1">
                <table className="min-w-max ml-auto ">
                     <thead className="border rounded-lg">
                          <tr >

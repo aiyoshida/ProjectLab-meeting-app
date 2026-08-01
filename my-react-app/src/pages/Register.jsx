@@ -99,11 +99,14 @@ export default function Register() {
   }, [navigate, setUserId]);
 
   return (
-    <div className="hero min-h-screen bg-pink-100">
-      <div className="hero-content w-full text-center">
-        <div className="w-full max-w-md">
-          <h1 className="text-5xl font-bold">Hello there</h1>
-          <p className="py-6">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fbf7f8] px-5 py-12">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#f4dce3] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-[#eee2cc] opacity-60 blur-3xl" />
+      <div className="surface-card relative w-full max-w-lg px-8 py-12 text-center sm:px-12">
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f8e6eb] text-xl">✦</div>
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#a94765]">AcrossTime</p>
+          <h1 className="text-4xl font-semibold tracking-[-0.04em] text-[#30282b] sm:text-5xl">Hello there</h1>
+          <p className="mx-auto max-w-md py-6 text-[15px] leading-7 text-[#776b70]">
             Effortlessly schedule meetings across time zones.
             Do you have your friends or colleagues in the different time zones?
             Do you feel troublesome calculating &quot;What is the best time for us&quot; everytime?
@@ -120,7 +123,6 @@ export default function Register() {
               Google Sign-In could not be loaded. Please check your connection and try again.
             </p>
           )}
-        </div>
       </div>
     </div>
   );

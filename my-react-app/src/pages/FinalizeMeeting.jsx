@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 // useParams is to tamle element from url, uselocation is to pass data
 //uselocation is for temporary, will use db soon.
 import icon from '../images/icon.png';
@@ -28,7 +28,7 @@ export default function FinalizeMeeting() {
 
 
      const handleSubmit = async () => {
-          if (selectedSlots.length === 0) {
+          if (selectedSlots == null) {
                alert("Please select one timeslot.");
                return;
           }
@@ -87,22 +87,22 @@ export default function FinalizeMeeting() {
 
 
      return (
-          <div className="">
-               <div className="" >
+          <div className="min-h-screen bg-[#fbf7f8]">
+               <div>
 
-                    <div className="flex justify-start items-center hover:cursor-pointer m-3" onClick={goToHomePage}>
-                         <img src={icon} alt='icon' className="h-16 w-16" />
-                         <h3 className="text-2xl">AcrossTime</h3>
+                    <div className="brand-lockup cursor-pointer px-8 pt-6" onClick={goToHomePage}>
+                         <img src={icon} alt='' className="h-12 w-12" />
+                         <h3 className="text-xl">AcrossTime</h3>
                     </div>
 
-                    <div className="items-baseline p-7 flex flex-row items-start">
+                    <div className="surface-card mx-auto mt-8 flex max-w-4xl flex-col gap-10 p-8 md:flex-row md:items-start">
 
                          <div className="flex flex-col mr-12">
                               <div className="flex justify-start items-center " >
                                    {/* watch icon took from this website 
                               https://icon-rainbow.com/%e6%99%82%e8%a8%88%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-6/ */}
                                    <img src={watch} alt='watch' className="h-5 w-5" />
-                                   <p className="ml-2">{slotDuration} min</p>
+                                   <p className="ml-2">{Number(slotDuration.split(':')[0]) * 60 + Number(slotDuration.split(':')[1])} min</p>
                               </div>
 
                               <div className="flex justify-start items-center my-2" >
@@ -170,17 +170,17 @@ export default function FinalizeMeeting() {
                               </div>
                          </div>
 
-                         <div className="flex flex-col w-1/2">
+                         <div className="flex min-w-0 flex-1 flex-col">
                               <label className="text-lg my-3" >Vote dates</label>
 
                               <div className="space-y-1">
                                    {availableSlots.map((date) => {
                                         const d = DateTime.fromISO(date.start, { zone: "utc" }).setZone(timezone);
                                         return (
-                                             <div className="flex items-center ml-6" key={date.id}>
+                                             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#eee4e7] p-3" key={date.id}>
                                                   {d.toFormat("ccc, LLLL d")}
                                                   {/* https://v4.daisyui.com/components/badge/ # Badge in a button jsx */}
-                                                  <div className={`flex items-center px-2 py-1 rounded-md text-md font-semibold text-gray-700 bg-transparent border border-blue-500 ml-3 hover:cursor-pointer  ${selectedSlots === date.id ? "border-2 border-blue-500" : "border border-gray-400"}`}
+                                                  <div className={`flex cursor-pointer items-center rounded-xl px-3 py-2 text-sm font-semibold ${selectedSlots === date.id ? "bg-[#a94765] text-white ring-4 ring-[#f4dce3]" : "border border-[#dfcbd1] bg-white text-[#5f4d53] hover:bg-[#fff4f7]"}`}
                                                        onClick={() => {
                                                             setSelectedSlots(date.id);
                                                             console.log("FinalizeMeeting.jsx: selected slot:", date.id);
@@ -205,14 +205,10 @@ export default function FinalizeMeeting() {
                </div>
 
 
-               <div className="fixed left-[480px] top-0 h-screen w-[945px]">
-
-                    <button onClick={handleSubmit} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Finalize</button>
-
+               <div className="mx-auto flex max-w-4xl justify-end py-5">
+                    <button onClick={handleSubmit} className="primary-button">Finalize meeting</button>
                </div>
           </div>
      );
 }
-
-
 
