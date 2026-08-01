@@ -12,7 +12,8 @@ export const UserProvider = ({children}) => {
           //keep userId after reloading
           const storedId =localStorage.getItem('userId');
           if (storedId){
-               setUserId(parseInt(storedId));
+               // Google `sub` values are identifiers, not safe JavaScript numbers.
+               setUserId(storedId);
           }
      }, []); // empty [] = only first time
 
@@ -26,6 +27,5 @@ export const UserProvider = ({children}) => {
 
 //custom hook to get userId by const { userId, setUserId } = useUser()
 export const useUser = () => useContext(UserContext);
-
 
 

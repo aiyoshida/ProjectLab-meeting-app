@@ -1,0 +1,5 @@
+.dev.vars
+cloudflare/.dev.vars
+my-react-app/.env.local
+cloudflare/node_modules/
+cloudflare/.wrangler/

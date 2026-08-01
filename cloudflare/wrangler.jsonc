@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "acrosstime",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "../my-react-app/build",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "GOOGLE_CLIENT_ID": "1075678670548-1i330iun823bu7pgl1q45fng69ic91eu.apps.googleusercontent.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "acrosstime",
+      "database_id": "5cd49f3e-34e4-4f29-b019-27f4f2c33e8c",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

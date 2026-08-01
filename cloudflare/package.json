@@ -1,0 +1,19 @@
+{
+  "name": "acrosstime-worker",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "build:frontend": "npm --prefix ../my-react-app run build",
+    "deploy": "npm run build:frontend && wrangler deploy",
+    "deploy:check": "npm run build:frontend && wrangler deploy --dry-run",
+    "db:local": "wrangler d1 migrations apply acrosstime --local",
+    "db:remote": "wrangler d1 migrations apply acrosstime --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

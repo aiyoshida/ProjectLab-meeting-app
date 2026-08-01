@@ -26,6 +26,7 @@ function App() {
     <UserProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Register />} />
           <Route path="/register" element={<Register />} />
           <Route path="/setting" element={<Setting />} />
           <Route path="/contact" element={<Contact />} />

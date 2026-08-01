@@ -56,7 +56,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          end: slot.end
                     })),
                     slot_duration: slotDuration,
-                    url: "https://across-time.vercel.app//meetinglink"
+                    url: `${FRONT}/meetinglink`
                };
                console.log("NewMeetingCalendar: payload ", payload);
 
@@ -81,7 +81,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                     let message = checkedInvitees.map((invitee) => {
                          return `Meeting invitation is sent to ${invitee.name} : ${invitee.gmail}`;
                     }).join("\n")
-                    alert(`meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id} \n ${message}`);
+                    alert(`meeting url: ${FRONT}/meetinglink/${response.data.meeting_id} \n ${message}`);
                } else {
                     alert(`sending email has failed!`);
                     console.log(`NewMeetingCalendar: Result is ${result} : sending email has failed!`);
@@ -90,7 +90,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                //navigate user to created voting screen
                navigate(`/meetinglink/${response.data.meeting_id}`);
                checkedInvitees.forEach((user) => {
-                    console.log(`NewMeetingCalendar: Send to: ${user.gmail}, meeting url: https://across-time.vercel.app//meetinglink/${response.data.meeting_id}`);
+                    console.log(`NewMeetingCalendar: Send to: ${user.gmail}, meeting url: ${FRONT}/meetinglink/${response.data.meeting_id}`);
                });
 
 
