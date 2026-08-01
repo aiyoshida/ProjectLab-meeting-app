@@ -184,7 +184,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
      return (
-          <div className="relative flex h-[42rem] w-full min-w-0 max-w-5xl flex-1 flex-col gap-2 p-2 sm:p-3 md:h-full">
+          <div className="relative flex h-[48rem] min-h-[48rem] w-full min-w-0 max-w-5xl flex-none flex-col gap-2 p-2 sm:p-3 md:h-full md:min-h-0 md:flex-1">
 
                <section className="calendar-surface flex flex-1 flex-col w-full min-w-0 min-h-0 overflow-hidden">
                     <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[#eee4e7] pb-2 text-[11px] text-[#776b70] sm:gap-x-4 sm:text-xs">
@@ -299,7 +299,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          </div>
                     </div>
                </section>
-               <button onClick={handleShare} className="primary-button sticky right-3 shrink-0 self-end">Share</button>
+               <button onClick={handleShare} className="primary-button shrink-0 self-end md:sticky md:right-3">Share</button>
           </div>
      );
 
