@@ -16,6 +16,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      const [timezone, setTimezone] = useState("Europe/Budapest");
      const [viewKey, setViewKey] = useState(0);
      const [slotLayout, setSlotLayout] = useState([]);
+     const [calendarScrollTop, setCalendarScrollTop] = useState(0);
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
      const calendarBodyRef = useRef(null);
      const navigate = useNavigate();
@@ -51,23 +52,34 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           const measureSlots = () => {
                const bodyRect = body.getBoundingClientRect();
                const slotElements = body.querySelectorAll('.fc-timegrid-slot-lane[data-time]');
+               const slotScroller = Array.from(body.querySelectorAll('.fc-scroller'))
+                    .find((element) => element.querySelector('.fc-timegrid-slots'));
+               const scrollTop = slotScroller?.scrollTop || 0;
                setSlotLayout(Array.from(slotElements).map((element) => {
                     const rect = element.getBoundingClientRect();
                     return {
                          time: element.getAttribute('data-time'),
-                         top: rect.top - bodyRect.top,
+                         top: rect.top - bodyRect.top + scrollTop,
                          height: rect.height,
                     };
                }));
+               setCalendarScrollTop(scrollTop);
           };
 
           const frame = requestAnimationFrame(measureSlots);
           const observer = new ResizeObserver(measureSlots);
           observer.observe(body);
+          const slotScroller = Array.from(body.querySelectorAll('.fc-scroller'))
+               .find((element) => element.querySelector('.fc-timegrid-slots'));
+          const handleCalendarScroll = () => {
+               setCalendarScrollTop(slotScroller?.scrollTop || 0);
+          };
+          slotScroller?.addEventListener('scroll', handleCalendarScroll, { passive: true });
 
           return () => {
                cancelAnimationFrame(frame);
                observer.disconnect();
+               slotScroller?.removeEventListener('scroll', handleCalendarScroll);
           };
      }, [slotDuration, timezone, viewKey, checkedInvitees.length]);
 
@@ -183,7 +195,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                                                   key={slot.time}
                                                   className="absolute left-0 right-0 grid gap-px"
                                                   style={{
-                                                       top: `${slot.top}px`,
+                                                       top: `${slot.top - calendarScrollTop}px`,
                                                        height: `${slot.height}px`,
                                                        gridTemplateColumns: `repeat(${checkedInvitees.length}, minmax(0, 1fr))`,
                                                   }}
