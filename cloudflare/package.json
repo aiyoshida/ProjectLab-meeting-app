@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build:frontend": "npm --prefix ../my-react-app run build",
+    "deploy": "npm run build:frontend && wrangler deploy",
+    "deploy:check": "npm run build:frontend && wrangler deploy --dry-run",
     "db:local": "wrangler d1 migrations apply acrosstime --local",
     "db:remote": "wrangler d1 migrations apply acrosstime --remote"
   },

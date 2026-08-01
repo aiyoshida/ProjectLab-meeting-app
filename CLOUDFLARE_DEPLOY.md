@@ -1,97 +1,127 @@
-# Cloudflare deployment
+# Deploy AcrossTime as one Cloudflare Worker
 
-The React frontend runs on Cloudflare Pages. The API runs on a Worker and stores
-data in D1. Google ID tokens are verified by the Worker on every protected API
-request. Email is optional and uses Resend's HTTPS API instead of SMTP.
+The React SPA, API and D1 binding are deployed as one Worker using Workers Static
+Assets. Browser routes are served from the React build and `/api/*` is handled by
+the Worker script. Because both use the same origin, production CORS and separate
+Pages/API URLs are unnecessary.
 
-## 1. Create the D1 database
+## Architecture
 
-Install Node.js 22 or newer, log in to Cloudflare, then run:
+```text
+https://acrosstime.<account>.workers.dev/
+├── /, /register, /homepage, ...  React static assets
+└── /api/*                        Worker API → D1
+```
+
+## Prerequisites
+
+- Node.js 22 or newer
+- A Cloudflare account
+- Wrangler authenticated with `npx wrangler login`
+
+## 1. Apply the D1 migration
+
+The D1 database ID is already set in `cloudflare/wrangler.jsonc`.
 
 ```sh
 cd cloudflare
 npm install
-npx wrangler login
-npx wrangler d1 create acrosstime
-```
-
-Copy the returned `database_id` into `cloudflare/wrangler.toml`, then apply the
-schema:
-
-```sh
 npm run db:remote
 ```
 
-Update these values in `wrangler.toml`:
+## 2. Deploy the complete application
 
-```toml
-FRONTEND_URL = "https://YOUR-PAGES-PROJECT.pages.dev"
-GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-```
-
-Deploy the API:
+From `cloudflare/` run:
 
 ```sh
+npm run deploy:check
 npm run deploy
 ```
 
-## 2. Deploy the React app to Pages
-
-Connect this repository in Cloudflare Pages and use:
-
-- Root directory: `my-react-app`
-- Build command: `npm run build`
-- Build output directory: `build`
-
-Set the Pages build environment variables:
+The deploy script first builds `my-react-app`, then Wrangler uploads that build as
+Static Assets and deploys the API script with its D1 binding. Wrangler prints the
+production URL, for example:
 
 ```text
-REACT_APP_API_BASE_URL=https://acrosstime-api.YOUR-SUBDOMAIN.workers.dev
-REACT_APP_FRONT_BASE_URL=https://YOUR-PAGES-PROJECT.pages.dev
-REACT_APP_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+https://acrosstime.YOUR-WORKERS-SUBDOMAIN.workers.dev
 ```
 
-In Google Cloud Console, add the Pages URL to the OAuth client's **Authorized
-JavaScript origins**. A custom domain must also be added if one is attached later.
+Test the API at:
 
-After the first Pages deployment, make sure `FRONTEND_URL` in `wrangler.toml`
-exactly matches the deployed origin and deploy the Worker again. This value controls
-CORS and links included in meeting emails.
+```text
+https://acrosstime.YOUR-WORKERS-SUBDOMAIN.workers.dev/api/health
+```
 
-## 3. Optional email delivery
+## 3. Configure Google Sign-In
 
-Verify a sending domain with Resend, add `EMAIL_FROM` under `[vars]` in
-`wrangler.toml`, and store the API key as a secret:
+In Google Cloud Console, open **Google Auth Platform → Clients**, select the Web
+client ending in:
+
+```text
+1075678670548-1i330iun823bu7pgl1q45fng69ic91eu.apps.googleusercontent.com
+```
+
+Add the exact Worker origin under **Authorized JavaScript origins**. Include only
+the scheme and hostname: no trailing slash and no path.
+
+```text
+https://acrosstime.YOUR-WORKERS-SUBDOMAIN.workers.dev
+```
+
+Keep `http://localhost:3000` for local development.
+
+## Git-based automatic deployments (optional)
+
+In Cloudflare choose **Workers & Pages → Create application → Import a repository**,
+connect `aiyoshida/ProjectLab-meeting-app`, and use `for-publish` as the production
+branch. Set **Root directory** to `cloudflare`, then configure the two build steps:
+
+```sh
+# Build command
+npm --prefix ../my-react-app ci && npm run build:frontend
+
+# Deploy command
+npx wrangler deploy
+```
+
+No React production environment variables are required. The frontend defaults to
+the same-origin `/api` endpoint. Store `RESEND_API_KEY` as a Worker secret rather
+than a Git build environment variable.
+
+## Optional email delivery
+
+After configuring a sending provider, set secrets interactively; never commit API
+keys:
 
 ```sh
 npx wrangler secret put RESEND_API_KEY
 ```
 
-Without these values, meetings and voting continue to work; email calls report
-`email_configured: false` and do not send mail.
+Add a non-secret `EMAIL_FROM` value under `vars` in `wrangler.jsonc`. Without email
+configuration, meetings, contacts and voting still work and email delivery is
+skipped.
 
 ## Local development
 
-Set a real Google client ID in `wrangler.toml`, then run:
+The React development server and Worker can run separately. `.env.local` already
+points React to the local API. In two terminals run:
 
 ```sh
 cd cloudflare
-npm install
 npm run db:local
 npm run dev
 ```
 
-In a second terminal:
-
 ```sh
 cd my-react-app
-cp .env.example .env.local
 npm start
 ```
 
-## Existing SQLite data
+For a production-like local test, build the frontend and start Wrangler, then open
+the Wrangler URL:
 
-The migration creates an empty production database. The existing `app.db` is not
-uploaded automatically. Export it to SQL, review the data and import it only if the
-development accounts should become production accounts. Never commit OAuth or
-email secrets.
+```sh
+cd cloudflare
+npm run build:frontend
+npm run dev
+```

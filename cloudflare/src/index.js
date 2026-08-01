@@ -7,7 +7,7 @@ const json = (body, status = 200, headers = {}) => new Response(JSON.stringify(b
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("origin");
-  const allowed = [env.FRONTEND_URL, "http://localhost:3000"].filter(Boolean);
+  const allowed = ["http://localhost:3000"];
   return origin && allowed.includes(origin) ? {
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
@@ -92,7 +92,8 @@ async function sendEmail(env, to, subject, text, ics) {
 
 async function route(request, env, identity) {
   const url = new URL(request.url);
-  const path = url.pathname.replace(/\/+$/, "") || "/";
+  const frontendUrl = url.origin;
+  const path = url.pathname.replace(/^\/api(?=\/|$)/, "").replace(/\/+$/, "") || "/";
   const method = request.method;
   let match;
 
@@ -195,7 +196,7 @@ async function route(request, env, identity) {
       const meeting = await env.DB.prepare("INSERT INTO meetings (title, timezone, creator_user_sub, slot_duration, url) VALUES (?, ?, ?, ?, '')")
         .bind(input.title, input.timezone, userId, input.slot_duration).run();
       const meetingId = meeting.meta.last_row_id;
-      const publicUrl = `${env.FRONTEND_URL}/meetinglink/${meetingId}`;
+      const publicUrl = `${frontendUrl}/meetinglink/${meetingId}`;
       const statements = [env.DB.prepare("UPDATE meetings SET url=? WHERE id=?").bind(publicUrl, meetingId),
         env.DB.prepare("INSERT INTO participants (meeting_id,user_id,voted,creator) VALUES (?,?,1,1)").bind(meetingId, userId),
         ...(input.invitees || []).map((id) => env.DB.prepare("INSERT INTO participants (meeting_id,user_id,voted,creator) VALUES (?,?,0,0)").bind(meetingId, id)),
@@ -253,7 +254,7 @@ async function route(request, env, identity) {
     const ics = makeIcs(selected.title, selected.starting_time, selected.ending_time);
     await Promise.all(participants.results.map((p) => {
       const format = new Intl.DateTimeFormat("en-GB", { timeZone: p.timezone, dateStyle: "medium", timeStyle: "short" });
-      return sendEmail(env, p.gmail, "AcrossTime: meeting time finalized", `Hi ${p.username},\n\n${selected.title} is finalized for ${format.format(new Date(selected.starting_time))} (${p.timezone}).\n${env.FRONTEND_URL}/finalizemeeting/${meetingId}`, ics);
+      return sendEmail(env, p.gmail, "AcrossTime: meeting time finalized", `Hi ${p.username},\n\n${selected.title} is finalized for ${format.format(new Date(selected.starting_time))} (${p.timezone}).\n${frontendUrl}/finalizemeeting/${meetingId}`, ics);
     }));
     return json({ message: "Finalized successfully!", email_configured: !!env.RESEND_API_KEY });
   }
@@ -267,7 +268,8 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     try {
       const url = new URL(request.url);
-      const isPublic = url.pathname === "/" || url.pathname === "/health";
+      const apiPath = url.pathname.replace(/^\/api(?=\/|$)/, "") || "/";
+      const isPublic = apiPath === "/" || apiPath === "/health";
       const identity = isPublic ? null : await verifyGoogleToken(request, env);
       const response = await route(request, env, identity);
       const headers = new Headers(response.headers);
