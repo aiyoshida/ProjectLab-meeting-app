@@ -90,14 +90,14 @@ export default function FinalizeMeeting() {
           <div className="min-h-screen bg-[#fbf7f8]">
                <div>
 
-                    <div className="brand-lockup cursor-pointer px-8 pt-6" onClick={goToHomePage}>
+                    <div className="brand-lockup cursor-pointer px-5 pt-5 sm:px-8 sm:pt-6" onClick={goToHomePage}>
                          <img src={icon} alt='' className="h-12 w-12" />
                          <h3 className="text-xl">AcrossTime</h3>
                     </div>
 
-                    <div className="surface-card mx-auto mt-8 flex max-w-4xl flex-col gap-10 p-8 md:flex-row md:items-start">
+                    <div className="surface-card mx-4 mt-6 flex max-w-4xl flex-col gap-8 p-5 sm:mx-auto sm:mt-8 sm:p-8 md:flex-row md:items-start md:gap-10">
 
-                         <div className="flex flex-col mr-12">
+                         <div className="flex flex-col md:mr-12">
                               <div className="flex justify-start items-center " >
                                    {/* watch icon took from this website 
                               https://icon-rainbow.com/%e6%99%82%e8%a8%88%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-6/ */}
@@ -205,10 +205,9 @@ export default function FinalizeMeeting() {
                </div>
 
 
-               <div className="mx-auto flex max-w-4xl justify-end py-5">
+               <div className="mx-4 flex max-w-4xl justify-end py-5 sm:mx-auto">
                     <button onClick={handleSubmit} className="primary-button">Finalize meeting</button>
                </div>
           </div>
      );
 }
-

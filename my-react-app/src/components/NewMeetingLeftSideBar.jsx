@@ -72,7 +72,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
      return (
-          <aside className="h-full w-72 shrink-0 overflow-y-auto border-r border-[#eadde1] bg-white p-5">
+          <aside className="h-auto w-full shrink-0 border-b border-[#eadde1] bg-white p-5 md:h-full md:w-72 md:overflow-y-auto md:border-b-0 md:border-r">
 
                <div className="brand-lockup cursor-pointer" onClick={goToHomePage} >
                     <img src={icon} alt='' className="w-11 h-11" />
@@ -118,7 +118,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
                {/* あとでscrollableにする */}
-               <div className="space-y-2">
+               <div className="grid gap-2 sm:grid-cols-2 md:block md:space-y-2">
                     {invitees.map((user, index) => (
                          <label key={index} className="">
                               <div className="flex items-center rounded-xl p-2 hover:bg-[#faf5f6]">

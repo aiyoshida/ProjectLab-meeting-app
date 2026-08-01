@@ -66,7 +66,7 @@ export default function Register() {
         theme: 'outline',
         size: 'large',
         shape: 'rectangular',
-        width: 320,
+        width: Math.min(320, Math.floor(buttonRef.current.clientWidth || 320)),
       });
       setGoogleReady(true);
       setGoogleError(false);
@@ -102,7 +102,7 @@ export default function Register() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fbf7f8] px-5 py-12">
       <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#f4dce3] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-[#eee2cc] opacity-60 blur-3xl" />
-      <div className="surface-card relative w-full max-w-lg px-8 py-12 text-center sm:px-12">
+      <div className="surface-card relative w-full max-w-lg px-5 py-9 text-center sm:px-12 sm:py-12">
           <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f8e6eb] text-xl">✦</div>
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#a94765]">AcrossTime</p>
           <h1 className="text-4xl font-semibold tracking-[-0.04em] text-[#30282b] sm:text-5xl">Hello there</h1>
@@ -113,7 +113,7 @@ export default function Register() {
             Then the best app is here for you!
           </p>
           <div className="flex min-h-[44px] w-full items-center justify-center">
-            <div ref={buttonRef} className="flex justify-center" />
+            <div ref={buttonRef} className="flex max-w-full justify-center overflow-hidden" />
             {!googleReady && !googleError && (
               <span className="text-sm text-gray-500">Loading Google Sign-In…</span>
             )}

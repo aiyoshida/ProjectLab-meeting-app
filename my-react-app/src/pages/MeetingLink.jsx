@@ -145,15 +145,15 @@ export default function MeetingLink() {
 
 
      return (
-          <div className="grid h-screen grid-cols-[30rem_minmax(0,1fr)] overflow-hidden bg-[#fbf7f8]">
-               <div className="h-full overflow-y-auto border-r border-[#eadde1] bg-white" >
+          <div className="grid min-h-screen grid-cols-1 overflow-x-hidden bg-[#fbf7f8] md:h-screen md:grid-cols-[30rem_minmax(0,1fr)] md:overflow-hidden">
+               <div className="h-auto border-b border-[#eadde1] bg-white md:h-full md:overflow-y-auto md:border-b-0 md:border-r" >
 
                     <div className="brand-lockup cursor-pointer px-7 pt-6" onClick={goToHomePage}>
                          <img src={icon} alt='' className="h-12 w-12" />
                          <h3 className="text-xl">AcrossTime</h3>
                     </div>
 
-                    <div className="p-7 pt-8">
+                    <div className="p-5 pt-6 sm:p-7 sm:pt-8">
                          <div className="flex justify-start items-center " >
                               {/* watch icon took from this website 
                               https://icon-rainbow.com/%e6%99%82%e8%a8%88%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-6/ */}
@@ -254,8 +254,8 @@ export default function MeetingLink() {
                </div>
 
 
-               <div className="flex h-screen min-w-0 flex-col gap-3 p-3">
-                    <div className="relative flex min-h-0 w-full flex-1">
+               <div className="flex h-[46rem] min-w-0 flex-col gap-3 overflow-x-auto p-3 md:h-screen md:overflow-x-hidden">
+                    <div className="relative flex min-h-0 w-full min-w-[52rem] flex-1 md:min-w-0">
                          <section className="calendar-surface h-full w-full min-w-0 overflow-hidden">
                               <FullCalendar
                                    timeZone={timezone}
@@ -340,7 +340,7 @@ export default function MeetingLink() {
                               />
                          </section>
                     </div>
-                    <div className="flex shrink-0 justify-end">
+                    <div className="sticky right-0 flex shrink-0 justify-end">
                          <button onClick={handleSubmit} className="primary-button">Submit vote</button>
                     </div>
                </div>

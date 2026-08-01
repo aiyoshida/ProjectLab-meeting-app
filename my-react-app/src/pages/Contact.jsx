@@ -216,7 +216,7 @@ function Contact() {
                     {/*contact table*/}
                     <section className="surface-card mx-auto max-w-4xl overflow-hidden">
                          <div className="overflow-x-auto p-2 sm:p-4">
-                              <table className="table">
+                              <table className="table min-w-[42rem]">
                                    {/* head */}
                                    <thead>
                                         <tr>
