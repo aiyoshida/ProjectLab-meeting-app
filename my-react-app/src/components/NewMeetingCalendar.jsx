@@ -109,9 +109,9 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
      return (
-          <div className="relative w-full max-w-4xl ml-auto px-4">
+          <div className="relative flex h-full min-w-0 max-w-4xl flex-1 flex-col ml-auto px-4 pb-1">
 
-               <section className="flex-1 w-full min-w-0 overflow-hidden">
+               <section className="flex-1 w-full min-w-0 min-h-0 overflow-hidden">
                     <FullCalendar
                          timeZone={timezone}
                          headerToolbar={{
@@ -143,8 +143,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                               minute: '2-digit',
                               hour12: false
                          }}
-                         //height="auto"
-                         height={793}   // make this to fixed height
+                         height="100%"
                          expandRows={true}
                          handleWindowResize={false}
                          allDaySlot={false}
@@ -158,7 +157,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          }
                     />
                </section>
-               <button onClick={handleShare} className="btn btn-sm flex ml-auto gap-2">Share</button>
+               <button onClick={handleShare} className="btn btn-sm flex shrink-0 ml-auto gap-2">Share</button>
           </div>
      );
 

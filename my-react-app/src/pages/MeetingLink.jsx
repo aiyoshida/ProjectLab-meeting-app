@@ -254,11 +254,9 @@ export default function MeetingLink() {
                </div>
 
 
-               <div className="fixed left-[480px] top-0 h-screen w-[945px]">
-                    <button onClick={handleSubmit} className="fixed right-[45px] bottom-[2px] bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Submit</button>
-
-                    <div className="relative w-full max-w-4xl ml-auto px-4">
-                         <section className="flex-1 w-full min-w-0 overflow-hidden">
+               <div className="fixed left-[480px] top-0 flex h-screen w-[945px] flex-col">
+                    <div className="relative flex min-h-0 w-full max-w-4xl flex-1 ml-auto px-4">
+                         <section className="h-full w-full min-w-0 overflow-hidden">
                               <FullCalendar
                                    timeZone={timezone}
                                    headerToolbar={{
@@ -290,7 +288,7 @@ export default function MeetingLink() {
                                         minute: '2-digit',
                                         hour12: false
                                    }}
-                                   height={800}   // make this to fixed height
+                                   height="100%"
                                    expandRows={true}
                                    handleWindowResize={false}
                                    allDaySlot={false}
@@ -341,8 +339,9 @@ export default function MeetingLink() {
 
                               />
                          </section>
-
-
+                    </div>
+                    <div className="flex shrink-0 justify-end px-4 pb-1">
+                         <button onClick={handleSubmit} className="bg-black text-white p-[5px] w-[70px] rounded-[8px] text-[15px]">Submit</button>
                     </div>
                </div>
 

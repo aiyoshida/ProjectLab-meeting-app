@@ -72,7 +72,7 @@ export default function NewMeetingLeftSideBar({ checkedInvitees = [], setChecked
 
 
      return (
-          <div className="items-baseline p-5">
+          <div className="h-full shrink-0 items-baseline overflow-y-auto p-5">
 
                <div className="flex items-center hover:cursor-pointer " onClick={goToHomePage} >
                     <img src={icon} alt='icon' className="w-10 h-10" />
