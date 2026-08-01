@@ -16,6 +16,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
      const [timezone, setTimezone] = useState("Europe/Budapest");
      const [viewKey, setViewKey] = useState(0);
      const [slotLayout, setSlotLayout] = useState([]);
+     const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
      const calendarRef = useRef(null); // to use ref to the fullcalendar. For React DOM.
      const calendarBodyRef = useRef(null);
      const timezoneRowsRef = useRef(null);
@@ -44,6 +45,19 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
           if (api) api.setOption("slotDuration", slotDuration);
           setSelectedSlots([]); //to reset selected timeslots
      }, [slotDuration]);
+
+     useEffect(() => {
+          const mediaQuery = window.matchMedia('(max-width: 767px)');
+          const updateView = (event) => {
+               const mobile = event.matches;
+               setIsMobile(mobile);
+               calendarRef.current?.getApi?.().changeView(mobile ? 'timeGridDay' : 'timeGridWeek');
+          };
+
+          updateView(mediaQuery);
+          mediaQuery.addEventListener('change', updateView);
+          return () => mediaQuery.removeEventListener('change', updateView);
+     }, []);
 
      useEffect(() => {
           const body = calendarBodyRef.current;
@@ -170,21 +184,21 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
 
 
      return (
-          <div className="relative flex h-[46rem] min-w-[52rem] max-w-5xl flex-1 flex-col gap-2 p-3 md:h-full md:min-w-0">
+          <div className="relative flex h-[42rem] w-full min-w-0 max-w-5xl flex-1 flex-col gap-2 p-2 sm:p-3 md:h-full">
 
                <section className="calendar-surface flex flex-1 flex-col w-full min-w-0 min-h-0 overflow-hidden">
-                    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#eee4e7] pb-2 text-xs text-[#776b70]">
+                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[#eee4e7] pb-2 text-[11px] text-[#776b70] sm:gap-x-4 sm:text-xs">
                          <span className="font-semibold text-[#4b3f43]">Time comparison</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#81d7bb]" />09–19</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#d4c89d]" />07–09 / 19–22</span>
                          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#caabb6]" />22–07</span>
-                         <span className="ml-auto font-medium">Calendar: {timezone.split('/').pop()}</span>
+                         <span className="ml-auto font-medium">{timezone.split('/').pop()}</span>
                     </div>
-                    <div ref={calendarBodyRef} className="flex min-h-0 flex-1 gap-2">
+                    <div ref={calendarBodyRef} className="flex min-h-0 flex-1 gap-1.5 overflow-hidden sm:gap-2">
                          {checkedInvitees.length > 0 && (
                               <div
                                    className="relative shrink-0 overflow-hidden rounded-xl border border-[#eadde1] bg-[#faf7f8]"
-                                   style={{ width: `${checkedInvitees.length * 4.25}rem` }}
+                                   style={{ width: `${checkedInvitees.length * (isMobile ? 3.35 : 4.25)}rem` }}
                               >
                                    <div
                                         className="absolute left-0 right-0 z-10 grid border-b border-[#eadde1] bg-white shadow-[0_4px_10px_rgba(89,55,65,0.05)]"
@@ -254,7 +268,7 @@ export default function NewMeetingCalendar({ checkedInvitees = [], meetingTitle 
                          selectable={true}
                          select={handleSelect}
                          plugins={[timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
-                         initialView="timeGridWeek"
+                         initialView={isMobile ? "timeGridDay" : "timeGridWeek"}
                          slotDuration={slotDuration}
                          slotMinTime="09:00:00"
                          slotMaxTime="22:00:00"

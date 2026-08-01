@@ -13,7 +13,7 @@ function NewMeeting(){
      const [slotDuration, setSlotDuration] = useState("00:30:00")
 
      return(
-          <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-auto bg-[#fbf7f8] md:h-screen md:flex-row md:overflow-hidden">
+          <div className="flex min-h-screen w-full min-w-0 flex-col overflow-x-hidden bg-[#fbf7f8] md:h-screen md:flex-row md:overflow-hidden">
                 <NewMeetingLeftSideBar
                     value={slotDuration} 
                     onChange={setSlotDuration}
