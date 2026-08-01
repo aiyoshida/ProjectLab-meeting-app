@@ -5,41 +5,35 @@ import no from '../images/no.svg';
 import calendar from '../images/calendar.svg';
 import check from '../images/check.svg';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from "react"
-import axios from "axios"
-import { API } from "../lib/api" //using this accesable by Render
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { API } from "../lib/api";
 
-
-//TODO: 
-// 1) meeting tableに、display booleanを足す
-// 2) discardのボタンでは、displayを0にする
-// 3) display 1の時のみhomepageに出すようにする。 
+function durationInMinutes(duration) {
+     const [hours, minutes] = duration.split(':').map(Number);
+     return (hours * 60) + minutes;
+}
 
 function Homepage() {
-     const [cards, setCards] = useState([])
+     const [cards, setCards] = useState([]);
      const userId = localStorage.getItem('userId');
      const navigate = useNavigate();
 
      const handleDelete = async (cardId) => {
           try {
-               await axios.delete(`${API}/homepage/${cardId}`)
-               setCards(prev => prev.filter(card => card.id !== cardId))
-          } catch (err) {
-               console.error("error", err)
+               await axios.delete(`${API}/homepage/${cardId}`);
+               setCards(previous => previous.filter(card => card.id !== cardId));
+          } catch (error) {
+               console.error("Failed to delete meeting", error);
           }
-     }
+     };
 
      useEffect(() => {
           axios
                .get(`${API}/homepage/${userId}`)
-               .then((res) => {
-                    setCards(res.data.cards)
-                    console.log("Hoepage.jsx The cards!!!: : ", res.data.cards);
-               })
-               .catch((err) => {
-                    console.error("fetch error", err)
-               })
-     }, [])
+               .then((response) => setCards(response.data.cards))
+               .catch((error) => console.error("Failed to load meetings", error));
+     }, [userId]);
 
      return (
           <div className="app-shell">
@@ -51,65 +45,52 @@ function Homepage() {
                          <p className="page-subtitle">Your upcoming meeting polls and their voting status.</p>
                     </header>
 
-                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                          {cards.map((meeting) => (
-                              <section key={meeting.id} className="surface-card group p-6">
-                                   <div>
-                                        <div className="sm:flex sm:justify-between sm:gap-4 lg:gap-6">
-                                             {/* navigate to voting screen by click */}
-                                             <div onClick={() => navigate(`/meetinglink/${meeting.id}`)} className="cursor-pointer">
-                                                  <h3 className="text-xl font-semibold text-pretty text-[#30282b] group-hover:text-[#913c57]">{meeting.title}</h3>
-                                                  <p className="mt-2 text-sm text-gray-700">Created By : {meeting.creator}</p>
-                                                  {/*https://v4.daisyui.com/components/avatar/    avatar-group*/}
-                                                  {/* <p className="mt-2 line-clamp-2 text-sm text-pretty text-gray-700">Participants : {meeting.participants}</p> */}
-                                                  {/* Participants */}
-                                                  <div className="mt-2">
-                                                       <p className="text-sm text-gray-700 font-medium">Participants:</p>
-
-                                                       <div className="avatar-group -space-x-6 rtl:space-x-reverse mt-1">
-                                                            {meeting.pictures.map((pic, index) => (
-                                                                 <div className="avatar" key={`${meeting.id}-${index}`}>
-                                                                      <div className="w-10 rounded-full border">
-                                                                           <img src={pic} alt="Participant" />
-                                                                      </div>
-                                                                 </div>
-                                                            ))}
-                                                       </div>
-                                                  </div>
+                              <section key={meeting.id} className="surface-card group overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:border-[#dcbfc8] hover:shadow-[0_18px_45px_rgba(89,55,65,0.1)]">
+                                   <div onClick={() => navigate(`/meetinglink/${meeting.id}`)} className="cursor-pointer p-5 sm:p-6">
+                                        <div className="flex items-start justify-between gap-4">
+                                             <div className="min-w-0">
+                                                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#a94765]">Meeting poll</p>
+                                                  <h3 className="mt-1.5 truncate text-xl font-semibold tracking-[-0.02em] text-[#30282b] group-hover:text-[#913c57]">{meeting.title}</h3>
+                                                  <p className="mt-1.5 text-sm text-[#776b70]">Created by <span className="font-medium text-[#4b3f43]">{meeting.creator}</span></p>
                                              </div>
+                                             <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${meeting.all_voted ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                                                  <span className={`h-2 w-2 rounded-full ${meeting.all_voted ? "bg-emerald-500" : "bg-amber-400"}`} />
+                                                  {meeting.all_voted ? "Complete" : "In progress"}
+                                             </span>
                                         </div>
 
-                                        <dl className="mt-6 flex flex-wrap items-center gap-5 border-t border-[#f0e7e9] pt-4">
-
-                                             <div className="flex flex-col">
-                                                  {/*  Date */}
-                                                  <div className="flex items-center gap-2">
-                                                       <img src={calendar} alt="calendar" className="w-4 h-4" />
-                                                       <dd className="text-xs text-gray-700">{meeting.date}</dd>
-                                                  </div>
-                                                  {/* Time */}
-                                                  <div className="flex items-center gap-2 mt-2">
-                                                       <img src={time} alt="time" className="w-4 h-4" />
-                                                       <dd className="text-xs text-gray-700">{meeting.slot_duration} min</dd>
-                                                  </div>
+                                        <div className="mt-6">
+                                             <p className="text-xs font-medium text-[#94878c]">Participants</p>
+                                             <div className="avatar-group -space-x-3 rtl:space-x-reverse mt-2">
+                                                  {meeting.pictures.map((picture, index) => (
+                                                       <div className="avatar" key={`${meeting.id}-${index}`}>
+                                                            <div className="w-10 rounded-full border-2 border-white ring-1 ring-[#eadde1]">
+                                                                 <img src={picture} alt="Participant" />
+                                                            </div>
+                                                       </div>
+                                                  ))}
                                              </div>
+                                        </div>
+                                   </div>
 
-                                             {/* voted? */}
-                                             <div className="flex items-center gap-2 mt-2">
-                                                  {/* icon of check
-                                                   https://icon-rainbow.com/%e3%82%b7%e3%83%b3%e3%83%97%e3%83%ab%e3%81%aa%e3%83%81%e3%82%a7%e3%83%83%e3%82%af%e3%83%9e%e3%83%bc%e3%82%af%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3-2/ */}
-                                                  {/* icon of x
-                                                   https://icon-rainbow.com/%e7%a6%81%e6%ad%a2%e3%80%81%e9%96%89%e3%81%98%e3%82%8b%e3%81%ae%e3%82%a2%e3%82%a4%e3%82%b3%e3%83%b3%e7%b4%a0%e6%9d%90-3/ */}
-                                                  <img src={meeting.all_voted ? check : no} alt={meeting.all_voted ? "check" : "no"} className="w-5 h-5" />
-                                                  <dd className="text-xs text-gray-700">Everyone voted?</dd>
-                                             </div>
-
-
-                                             {/* bin */}
-                                             <button className="icon-button ml-auto" onClick={() => { handleDelete(meeting.id) }} aria-label="Delete meeting">
-                                                  <img src={bin} alt="" className="w-5 h-5" />
+                                   <div className="flex flex-wrap items-center gap-2 border-t border-[#f0e7e9] bg-[#fdfafb] px-5 py-3.5 sm:px-6">
+                                        <div className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-medium text-[#5f4d53] ring-1 ring-[#eee4e7]">
+                                             <img src={calendar} alt="" className="h-4 w-4 opacity-70" />
+                                             <span>{meeting.date}</span>
+                                        </div>
+                                        <div className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-medium text-[#5f4d53] ring-1 ring-[#eee4e7]">
+                                             <img src={time} alt="" className="h-4 w-4 opacity-70" />
+                                             <span>{durationInMinutes(meeting.slot_duration)} min</span>
+                                        </div>
+                                        <div className="ml-auto flex items-center gap-2">
+                                             <img src={meeting.all_voted ? check : no} alt="" className="h-4 w-4 opacity-70" />
+                                             <span className="hidden text-xs font-medium text-[#776b70] sm:inline">{meeting.all_voted ? "Everyone voted" : "Waiting for votes"}</span>
+                                             <button className="icon-button ml-1" onClick={() => handleDelete(meeting.id)} aria-label="Delete meeting">
+                                                  <img src={bin} alt="" className="h-5 w-5 opacity-70" />
                                              </button>
-                                        </dl>
+                                        </div>
                                    </div>
                               </section>
                          ))}
@@ -118,4 +99,5 @@ function Homepage() {
           </div>
      );
 }
+
 export default Homepage;
