@@ -15,15 +15,44 @@ function decodeJwtPayload(token) {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+function getCachedIdentity() {
+  const token = localStorage.getItem('googleIdToken');
+  const userId = localStorage.getItem('userId');
+  if (!token || !userId) return null;
+
+  try {
+    const payload = decodeJwtPayload(token);
+    const expiresAt = Number(payload.exp) * 1000;
+    if (payload.sub !== userId || !expiresAt || expiresAt <= Date.now() + 30_000) {
+      return null;
+    }
+    return { token, userId };
+  } catch {
+    return null;
+  }
+}
+
 export default function Register() {
   const { setUserId } = useUser();
   const navigate = useNavigate();
   const buttonRef = useRef(null);
   const rendered = useRef(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
   const [googleError, setGoogleError] = useState(false);
 
   useEffect(() => {
+    const cachedIdentity = getCachedIdentity();
+    if (cachedIdentity) {
+      setUserId(cachedIdentity.userId);
+      navigate('/homepage', { replace: true });
+      return undefined;
+    }
+
+    localStorage.removeItem('googleIdToken');
+    localStorage.removeItem('userId');
+    setCheckingSession(false);
+
     let cancelled = false;
     let script = document.getElementById(GOOGLE_SCRIPT_ID);
 
@@ -97,6 +126,14 @@ export default function Register() {
       script?.removeEventListener('error', handleScriptError);
     };
   }, [navigate, setUserId]);
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fbf7f8]">
+        <span className="loading loading-spinner text-[#a94765]" aria-label="Checking login" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fbf7f8] px-5 py-12">
