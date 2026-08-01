@@ -5,6 +5,8 @@ import { useUser } from '../contexts/UserContext';
 import { API } from '../lib/api';
 
 const GOOGLE_SCRIPT_ID = 'google-identity-services';
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID
+  || '1075678670548-1i330iun823bu7pgl1q45fng69ic91eu.apps.googleusercontent.com';
 
 function decodeJwtPayload(token) {
   const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -38,7 +40,7 @@ export default function Register() {
       buttonRef.current.replaceChildren();
 
       googleIdentity.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        client_id: GOOGLE_CLIENT_ID,
         callback: async ({ credential }) => {
           try {
             const payload = decodeJwtPayload(credential);
